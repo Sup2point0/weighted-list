@@ -117,6 +117,8 @@ Any feedback, suggestions or improvements are definitely welcome!
 
 ## Upcoming
 - support for slice indexing
+- item rarity
+- standard deviation
 
 ## Notes
 Yep, I know I break loads of Python conventions, but that’s just how I like to code. Anyway, most of them can probably changed with a simple `change all occurrences`. Apologies for any inconvenience.
