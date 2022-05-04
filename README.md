@@ -1,4 +1,4 @@
-# `WeightedList`
+# <h1 align="center"> `WeightedList` </h1>
 
 Convenient creation and manipulation of weighted lists.
 
