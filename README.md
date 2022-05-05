@@ -1,6 +1,6 @@
 # <h1 align="center"> `WeightedList` </h1>
 
-Convenient creation and manipulation of weighted lists.
+A subclass of the inbuilt Python `list` class, with weighted items for weighted selection and randomization.
 
 ## Contents
 - [Purposes](#Purposes)
@@ -12,8 +12,8 @@ Convenient creation and manipulation of weighted lists.
   - [Compatibility](#Compatibility)
   - [Dependencies](#Dependencies)
 - [License](#License)
-- [Upcoming](#Upcoming)
 - [Contribute](#Contribute)
+- [Upcoming](#Upcoming)
 - [Notes](#Notes)
 
 ## Purposes
