@@ -2,6 +2,7 @@
 
 A subclass of the inbuilt Python `list` class, with weighted items for weighted selection and randomization.
 
+
 ## Contents
 - [Purposes](#Purposes)
   - [Features](#Features)
@@ -15,6 +16,7 @@ A subclass of the inbuilt Python `list` class, with weighted items for weighted 
 - [Contribute](#Contribute)
 - [Upcoming](#Upcoming)
 - [Notes](#Notes)
+
 
 ## Purposes
 Mainly intended for weighted randomization, but could also come in useful for:
@@ -97,10 +99,11 @@ An [alternative](variants/unannotated) version with reduced type hinting can be 
 ### Dependencies
 Type hinting
 - `__future__.annotations`
-- `typing.Any`, `typing.Iterable`
+- `typing.Any`
 
 Functionality
 - `typing.NamedTuple`
+- `typing.Iterable`
 - `copy.deepcopy`
 
 Randomization
