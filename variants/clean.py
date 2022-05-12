@@ -488,39 +488,39 @@ class WeightedList(list):
   def average(self, /):
     '''Return average (arithemetic mean) of item weights.'''
 
-    return float(sum(i.weight for i in self) / len(self))
+    return float(len(self) / super.__len__())
 
 
 
-  @ property
+  @property
   def values(self, /):
     '''Extract a `list` of stored values.'''
 
     return [i.value for i in self]
 
 
-  @ property
+  @property
   def weights(self, /):
     '''Extract a `list` of stored weights.'''
 
     return [i.weight for i in self]
 
 
-  @ property
+  @property
   def items(self, /):
     '''Extract contents as a raw `list` of value-weight `NamedTuple`s.'''
 
     return [WeightedList.Item(i.value, i.weight) for i in self]
 
 
-  @ property
+  @property
   def list(self, /):
     '''Extract a `list` of stored value-weight pairs.'''
 
     return [[i.value, i.weight] for i in self]
 
 
-  @ property
+  @property
   def dict(self, /):
     '''Extract a `dict` of stored value-weight pairs.'''
 
@@ -535,7 +535,7 @@ class WeightedList(list):
     return data
 
 
-  @ property
+  @property
   def raw(self, /):
     '''Extract contents as a raw `list` of each `value` repeated `weight` times.'''
 
