@@ -99,7 +99,7 @@ This selects items *with replacement*, which means the ‘same’ item can be se
 
 ```py
 >>> wl.select(20, replace = False)
-# 7 items
+['nova', 'nova', 'sup', 'nova', 'nova', 'nova', 'nova', 'sup', 'nova']
 ```
 
 ## Modification

@@ -11,6 +11,7 @@ def display(wl: WeightedList, /, *, rarity = True) -> str:
 
   return "\n".join(f"x{i.weight} {repr(i.value)}{f'  ({round(100 * i.weight / len(wl), 2)}%)' * rarity}" for i in wl)
 
+
 def rarity(wl: WeightedList, /, *, dp = 4) -> str:
   '''Print the rarities (selection probabilities) of each item in a `WeightedList`.'''
   

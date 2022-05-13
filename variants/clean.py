@@ -12,15 +12,15 @@ class WeightedList(list):
   '''A list of weighted items.'''
 
   class WeightedItem:
-    def __init__(self, value, weight = 1, /):
+    def __init__(self, value, weight = 1):
       self.value = value
       self.weight = round(weight)
 
-    def __repr__(self, /):
+    def __repr__(self):
       return "WeightedItem(" + f"{repr(self.value)}, {self.weight}" + ")"
 
     @ property
-    def raw(self, /):
+    def raw(self):
       return WeightedList.Item(self.value, self.weight)
 
 
@@ -29,7 +29,7 @@ class WeightedList(list):
     weight = 1
 
 
-  def _convert_(self, item, /):
+  def _convert_(self, item):
     lt = lambda cls: isinstance(item, cls)
     if lt(WeightedList.WeightedItem):
       return item
@@ -54,7 +54,7 @@ class WeightedList(list):
     return WeightedList.WeightedItem(item[1], item[0])
 
 
-  def _index_(self, index, /, *, depth = False):
+  def _index_(self, index, *, depth = False):
     if isinstance(index, slice):
       raise NotImplementedError("support for index slicing will be added in a future version")
     
@@ -81,112 +81,112 @@ class WeightedList(list):
     raise IndexError("index out of range")
 
 
-  def _clear_(self, /):
+  def _clear_(self):
     self.__init__(*filter(lambda i: i.weight >= 1, self))
     return self
 
 
 
-  def __init__(self, /, *items, **ktems):
+  def __init__(self, *items, **ktems):
     '''Create a weighted list.'''
 
     super().__init__([self._convert_(i) for i in items] + [self._convert_(i[::-1]) for i in ktems.items()])
 
 
-  def __repr__(self, /):
+  def __repr__(self):
     return "WeightedList(" + ", ".join(f"({repr(i.value)}, {i.weight})" for i in self) + ")"
 
 
-  def __str__(self, /):
+  def __str__(self):
     return "[" + ", ".join(f"{i.value} = {i.weight}" for i in self) + "]"
 
 
-  def __getitem__(self, index, /):
+  def __getitem__(self, index):
     return self._index_(index, depth = True)
 
 
-  def __setitem__(self, index, value, /):
+  def __setitem__(self, index, value):
     super().__setitem__(self._index_(index), self._convert_(value))
 
 
-  def __delitem__(self, index, /):
+  def __delitem__(self, index):
     super().__delitem__(self._index_(index))
 
 
-  def __contains__(self, value, /):
+  def __contains__(self, value):
     return value in (v for i in self for v in (i.value, i.weight))
 
 
-  def __len__(self, /):
+  def __len__(self):
     return sum(i.weight for i in self)
 
 
-  def __add__(self, value, /):
+  def __add__(self, value):
     return deepcopy(self).extend(value)
 
-  def __radd__(self, value, /):
+  def __radd__(self, value):
     return self.__add__(value)
 
-  def __iadd__(self, value, /):
+  def __iadd__(self, value):
     return self.extend(value)
 
 
-  def __mul__(self, value, /):
+  def __mul__(self, value):
     self = deepcopy(self)
     super().__imul__(value)
     return self
 
-  def __rmul__(self, value, /):
+  def __rmul__(self, value):
     return self.__mul__(value)
 
-  def __imul__(self, value, /):
+  def __imul__(self, value):
     super().__imul__(value)
     return self
 
 
-  def __truediv__(self, value, /):
+  def __truediv__(self, value):
     for i in (self := deepcopy(self)):
       i.weight = round(i.weight / value)
     return self._clear_()
 
 
-  def __floordiv__(self, value, /):
+  def __floordiv__(self, value):
     for i in (self := deepcopy(self)):
       i.weight = int(i.weight // value)
     return self._clear_()
 
 
-  def __mod__(self, value, /):
+  def __mod__(self, value):
     for i in (self := deepcopy(self)):
       i.weight = round(i.weight % value)
     return self._clear_()
 
 
-  def __pow__(self, value, /):
+  def __pow__(self, value):
     for i in (self := deepcopy(self)):
       i.weight = round(i.weight ** value)
     return self._clear_()
 
 
-  def __eq__(self, value, /):
+  def __eq__(self, value):
     if not isinstance(value, WeightedList) or len(self) != len(value):
       return False
     return [(i.value, i.weight) for i in self] == [(i.value, i.weight) for i in value]
 
-  def __ne__(self, value, /):
+  def __ne__(self, value):
     return not self == value
 
 
-  def __or__(self, value, /):
+  def __or__(self, value):
     return self.merge(value)
 
-  def __ior__(self, value, /):
+  def __ior__(self, value):
     self = self.merge(value)
     return self
 
 
 
-  def append(self, weight, value = None, /):
+  def append(self, weight, value = None):
     '''Append an item with `value` and `weight`.'''
 
     if value:
@@ -196,7 +196,7 @@ class WeightedList(list):
     return self
 
 
-  def extend(self, /, *items):
+  def extend(self, *items):
     '''Extend list by each iterable in `items`.'''
 
     if isinstance(items, dict):
@@ -206,14 +206,14 @@ class WeightedList(list):
     return self
 
 
-  def insert(self, index, value, /):
+  def insert(self, index, value):
     '''Insert `value` before `index` (considering weights).'''
 
     super().insert(self._index_(index), self._convert_(value))
     return self
 
 
-  def remove(self, value, count = 1, /):
+  def remove(self, value, count = 1):
     '''Remove occurrence `count` of an item with `value`.'''
 
     i = 0
@@ -227,7 +227,7 @@ class WeightedList(list):
     return self
 
 
-  def pop(self, index = -1, /, *, drop = False):
+  def pop(self, index = -1, *, drop = False):
     '''Pop and return item at `index`.'''
 
     if drop and self[index].weight > 1:
@@ -237,20 +237,20 @@ class WeightedList(list):
       return super().pop(self._index_(index))
 
 
-  def clear(self, /):
+  def clear(self):
     '''Clear list contents.'''
 
     super().clear()
     return self
   
   
-  def sort(self, /):
+  def sort(self):
     '''Return a copy with items sorted by weight in ascending order.'''
 
     return sorted(self, key = lambda i: i.weight)
 
 
-  def select(self, /, *count, replace = True, depth = False):
+  def select(self, *count, replace = True, depth = False):
     '''Return a random item(s), considering weights.'''
 
     if count:
@@ -291,7 +291,7 @@ class WeightedList(list):
     return item if depth else item.value
 
 
-  def merge(self, /, *items):
+  def merge(self, *items):
     '''Merge contents with each iterable in `items`, increasing an item’s weight if it already exists, else appending it.'''
 
     for item in items:
@@ -306,7 +306,7 @@ class WeightedList(list):
     return self
 
 
-  def index(self, value, /, count = 1, *, depth = False):
+  def index(self, value, count = 1, *, depth = False):
     '''Return index (considering weights) of occurrence `count` of `value`.'''
 
     i, idx = 0, 0
@@ -318,7 +318,7 @@ class WeightedList(list):
       i += item.weight
 
 
-  def identify(self, weight, /, count = 1, *, depth = False):
+  def identify(self, weight, count = 1, *, depth = False):
     '''Return index (considering weights) of occurrence `count` of an item with `weight`.'''
 
     i, idx = 0, 0
@@ -330,25 +330,25 @@ class WeightedList(list):
       i += item.weight
 
 
-  def count(self, value, /):
+  def count(self, value):
     '''Return number of occurrences of `value`.'''
 
     return sum(i.value == value for i in self)
 
 
-  def frequency(self, weight, /):
+  def frequency(self, weight):
     '''Return number of occurrences of items with `weight`.'''
 
     return sum(i.weight == weight for i in self)
 
 
-  def total(self, value, /):
+  def total(self, value):
     '''Return total weight of all occurrences of `value`.'''
 
     return sum(i.weight * (i.value == value) for i in self)
 
 
-  def shift(self, dist = 1, /):
+  def shift(self, dist = 1):
     '''Return a copy with all value-weight pairings shifted by `dist` (right). Values remain in place, while weights move.'''
 
     self = deepcopy(self)
@@ -357,7 +357,7 @@ class WeightedList(list):
     return self
 
 
-  def shuffle(self, /):
+  def shuffle(self):
     '''Return a copy with all value-weight pairings shuffled. Values remain in place, while weights move.'''
 
     self = deepcopy(self)
@@ -365,7 +365,7 @@ class WeightedList(list):
     return self
 
 
-  def increment(self, value = 1, /):
+  def increment(self, value = 1):
     '''Return a copy with all weights increased by `value`.
     
     Note that `value` can be negative.
@@ -376,7 +376,7 @@ class WeightedList(list):
     return self._clear_()
 
 
-  def augment(self, value, /):
+  def augment(self, value):
     '''Return a copy with all weights multiplied by `value`.'''
 
     for i in (self := deepcopy(self)):
@@ -384,7 +384,7 @@ class WeightedList(list):
     return self._clear_()
 
 
-  def deviate(self, factor, /):
+  def deviate(self, factor):
     '''Raise all weights to the power of `factor`. Non-integer weights will be rounded.'''
 
     # reciprocal checking (otherwise all weights would be rounded to 0)
@@ -396,7 +396,7 @@ class WeightedList(list):
     return self._clear_()
 
 
-  def replace(self, value, new, /):
+  def replace(self, value, new):
     '''Return a copy with all occurrences of `value` replaced with `new`.'''
 
     for i in (self := deepcopy(self)):
@@ -405,7 +405,7 @@ class WeightedList(list):
     return self
 
 
-  def variate(self, weight = None, new = None, /):
+  def variate(self, weight = None, new = None):
     '''Return a copy with all occurrences of `weight` replaced with `new`.'''
 
     # test convert to check if weight is valid
@@ -418,13 +418,13 @@ class WeightedList(list):
     return self
 
 
-  def extrapolate(self, /):
+  def extrapolate(self):
     '''Extract contents as a raw `list` of each `value` repeated `weight` times.'''
 
     return [v for i in self for v in [i.value] * i.weight]
 
 
-  def cluster(self, /, size = None):
+  def cluster(self, size = None):
     '''Return a copy with contents clustered such that each item’s weight does not exceed `size`. If size is not passed, all duplicate items will be merged.'''
 
     if size:
@@ -447,7 +447,7 @@ class WeightedList(list):
 
 
 
-  def min(self, /):
+  def min(self):
     '''Return item(s) with lowest weight. If multiple tie, a list with each is returned.'''
 
     i = self[0].weight
@@ -463,7 +463,7 @@ class WeightedList(list):
     return log if len(log) > 1 else log[0]
 
 
-  def max(self, /):
+  def max(self):
     '''Return item(s) with highest weight. If multiple tie, a list with each is returned.'''
 
     i = 0
@@ -479,13 +479,13 @@ class WeightedList(list):
     return log if len(log) > 1 else log[0]
 
 
-  def median(self, /):
+  def median(self):
     '''Return median item, considering weights. If there are 2, the former is returned.'''
 
     return self[len(self) // 2 - 1]
 
 
-  def average(self, /):
+  def average(self):
     '''Return average (arithemetic mean) of item weights.'''
 
     return float(len(self) / super.__len__())
@@ -493,35 +493,35 @@ class WeightedList(list):
 
 
   @property
-  def values(self, /):
+  def values(self):
     '''Extract a `list` of stored values.'''
 
     return [i.value for i in self]
 
 
   @property
-  def weights(self, /):
+  def weights(self):
     '''Extract a `list` of stored weights.'''
 
     return [i.weight for i in self]
 
 
   @property
-  def items(self, /):
+  def items(self):
     '''Extract contents as a raw `list` of value-weight `NamedTuple`s.'''
 
     return [WeightedList.Item(i.value, i.weight) for i in self]
 
 
   @property
-  def list(self, /):
+  def list(self):
     '''Extract a `list` of stored value-weight pairs.'''
 
     return [[i.value, i.weight] for i in self]
 
 
   @property
-  def dict(self, /):
+  def dict(self):
     '''Extract a `dict` of stored value-weight pairs.'''
 
     data = {}
@@ -536,7 +536,7 @@ class WeightedList(list):
 
 
   @property
-  def raw(self, /):
+  def raw(self):
     '''Extract contents as a raw `list` of each `value` repeated `weight` times.'''
 
     return [v for i in self for v in [i.value] * i.weight]
