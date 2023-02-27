@@ -94,7 +94,7 @@ More examples and a full [walkthrough](examples/walkthrough.md) can be found in 
 ### Compatibility
 Made in and for Python 3.10.
 
-An [alternative](variants/unannotated) version with reduced type hinting can be found in [variants](variants), which resolves all of the compatibility issues.
+An [alternative](variants/unannotated.py) version with reduced type hinting can be found in [variants](variants), which resolves all of the compatibility issues.
 
 ### Dependencies
 Type hinting
