@@ -1,4 +1,4 @@
-<h1 align="center"> `WeightedList` </h1>
+<h1 align="center"> <code>WeightedList</code> </h1>
 
 A subclass of the inbuilt Python `list` class, with weighted items for weighted selection and randomization.
 
