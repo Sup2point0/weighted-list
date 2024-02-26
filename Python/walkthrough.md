@@ -1,6 +1,6 @@
 # Walkthrough
 
-> This acts as a guided overview of how to utilize `WeightedList`s.
+> This acts as a guided overview of how to utilize `WeightedList` in Python.
 
 ## Instantiation
 Creating a `WeightedList` is similar to creating a list, except each item should be a weight-value pair, such as a `tuple`:

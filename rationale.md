@@ -1,7 +1,8 @@
 # Rationale
+
 > This document acts as an explanation behind the purpose of this module, and a few implementation choices whose reasons may not seem apparent at first.
 
-Too many projects have called for weighted randomization (where each item within a collection has a different chance of being chosen).
+Too many projects have called for weighted randomisation (where each item within a collection has a different chance of being chosen).
 
 A quick way of replicating this would be having duplicate items:
 
