@@ -63,6 +63,9 @@ The prime example of this is lootbox or reward systems in games, where items hav
 [^slice]: Difficult in Python, and even more difficult in C# with non-integer weights.
 
 
+<br>
+
+
 ## Usage
 
 The project is not available as a package.[^package] Instead, just download the relevant files, or copy and paste the code directly.
@@ -116,6 +119,9 @@ print(f"{greetings.select()} {name}. {responses.select()}!")
 
 More examples and a full [walkthrough](examples/walkthrough.md) can be found in [examples](examples).
 -->
+
+
+<br>
 
 
 ## Compatibility
