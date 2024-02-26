@@ -72,8 +72,15 @@ The project is not available as a package.[^package] Instead, just download the 
 
 [^package]: I don't think it’s a large enough project to warrant an entire package, when you could just copy and paste the code directly.
 
+> [!Tip]
+> Walkthroughs and specimens for each language can be found in their respective folders.
+
 ### Python
 All you need is the [`weightedlist.py`](Python/weightedlist.py) file, which contains the `WeightedList` class with all the functionality. Simply import it, and you’re ready to go!
+
+```py
+from weightedlist import WeightedList
+```
 
 <!--
 ### Implementation
@@ -116,8 +123,6 @@ responses = WeightedList()
 name = input(f"{greetings.select()}! What’s your name?")
 print(f"{greetings.select()} {name}. {responses.select()}!")
 ```
-
-More examples and a full [walkthrough](examples/walkthrough.md) can be found in [examples](examples).
 -->
 
 
@@ -133,7 +138,7 @@ More examples and a full [walkthrough](examples/walkthrough.md) can be found in 
 
 ### C#
 - Made in C# 12.0
-  - Uses `System.Linq`
+- Uses `System.Linq`
 
 
 <br>
@@ -174,3 +179,9 @@ I have my own particular preferences when it comes to coding in Python, which I 
 ## Contribute
 
 Any feedback, suggestions or improvements are definitely welcome!
+
+
+<br>
+
+
+<!-- what you lookin at? -->
