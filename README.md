@@ -1,50 +1,78 @@
 <h1 align="center"> <code>WeightedList</code> </h1>
 
-A subclass of the inbuilt Python `list` class, with weighted items for weighted selection and randomization.
+A class representing a list of weighted items, available in both Python and C#.
 
 
-## Contents
-- [Purposes](#Purposes)
-  - [Features](#Features)
-- [Utilization](#Utilization)
-  - [Installation](#Installation)
-  - [Implementation](#Implementation)
-- [Requirements](#Requirements)
-  - [Compatibility](#Compatibility)
-  - [Dependencies](#Dependencies)
-- [License](#License)
-- [Contribute](#Contribute)
-- [Upcoming](#Upcoming)
-- [Notes](#Notes)
+```py
+# Python
+greetings = WeightedList(
+  (20, "sup"),
+  (2, "salutations"),
+)
+
+print(greetings.select())
+# sup
+```
+
+```cs
+// C#
+WeightedList<string, int> greetings = new(
+    (2, "sup"), (20, "salutations")
+);
+
+Console.WriteLine(greetings.GetRandomValue());
+// salutations
+```
+
+
+<br>
 
 
 ## Purposes
-Mainly intended for weighted randomization, but could also come in useful for:
-- frequency distributions
-- inventories and loot generation
-- months and dates
 
-### Features
-- all the functionality of a regular `list`
-- compact storage of weighted items
-- various convenience functions to manipulate weights
-- methods without side effects for flexibility
-- inbuilt conversion to other data types
+> [!Tip]
+> For the full rationale behind this project, see <rationale.md>.
+
+Mainly intended for *weighted randomisation*, where each element can have a different chance of being selected (its weight).
+
+The prime example of this is lootbox or reward systems in games, where items have different rarities.
 
 
-## Utilization
+<br>
 
-### Installation
-The module is not installable as a package; instead, just download the `weightedlist.py` file and upload it to your project, or copy and paste the code directly.
 
-All of the functionality is within the single `WeightedItem` class, so you can simply import it, and you’re ready to go!
+## Features
 
-```py
-from weightedlist import WeightedList
-```
+- Compact storage of weighted items
+- Randomised selection with optional constraints
+- Separate methods with and without side effects for flexibility
+- Convenience methods to manipulate values and weights
+- Conversions from and to a wide range of other data types
 
-It may be uploaded to PyPI in future.
+### Python
+- Subclass of `list` with all its regular functionality
 
+### C#
+- Generic class with type parameters for the values and their weights
+- Supports non-integer weights
+- Supports LINQ querying
+
+### Future
+- Slice indexing[^slice]
+
+[^slice]: Difficult in Python, and even more difficult in C# with non-integer weights.
+
+
+## Usage
+
+The project is not available as a package.[^package] Instead, just download the relevant files, or copy and paste the code directly.
+
+[^package]: I don't think it’s a large enough project to warrant an entire package, when you could just copy and paste the code directly.
+
+### Python
+All you need is the [`weightedlist.py`](Python/weightedlist.py) file, which contains the `WeightedList` class with all the functionality. Simply import it, and you’re ready to go!
+
+<!--
 ### Implementation
 A `WeightedList` works just like how a `list` does, except rather than storing the values themselves, it stores `WeightedItem` objects. The value and weight of each item can be accessed through the `value` and `weight` attributes, respectively. These are passed in as pairs when instantiating the list:
 
@@ -87,41 +115,56 @@ print(f"{greetings.select()} {name}. {responses.select()}!")
 ```
 
 More examples and a full [walkthrough](examples/walkthrough.md) can be found in [examples](examples).
+-->
 
 
-## Requirements
+## Compatibility
 
-### Compatibility
-Made in and for Python 3.10.
+### Python
+- Made in Python 3.10
+- Uses `match`
+- All imports are from the standard library, so there are no external dependencies
 
-An [alternative](variants/unannotated.py) version with reduced type hinting can be found in [variants](variants), which resolves all of the compatibility issues.
+### C#
+- Made in C# 12.0
+  - Uses `System.Linq`
 
-### Dependencies
-Type hinting
-- `__future__.annotations`
-- `typing.Any`
 
-Functionality
-- `typing.NamedTuple`
-- `typing.Iterable`
-- `copy.deepcopy`
+<br>
 
-Randomization
-- `random.randint`
-- `random.choice`
-- `random.sample`
+
+## Notes
+
+- While the Python and C# implementations are extremely similar, they may differ very slightly in certain places. In the unlikely case that someone (other than me) uses both of them, just be aware of that.
+- Due to the nature of weighted indexing, random access has a time complexity of $O(n)$, where $n$ is the number of elements in the list.
+  - However, optimising this further without significant sacrifices in space complexity (which is already decently hefty) appears unviable.
+
+
+<br>
 
 
 ## License
-This project is licensed under the MIT license. You’re free to use it however you wish (although some credit would be cool).
+This project is licensed under the MIT license, so feel free to use it however you wish (although some credit would be cool!).
+
+
+<br>
+
+
+## Questions
+
+### Why are the source files several hundred lines long?
+1, documentation; 2, line breaks; 3, extra functionality. Particularly documentation. That stuff just *eats* the line count. Also, subclassing something as complex as an enumerable container requires a lot of methods to be implemented, both in Python and C#. And in C# you've even got overloading as well.
+
+### Is the code that optimised?
+I have tried to ensure everything is implemented as efficiently as possible, but I cannot guarantee every single part is perfectly optimised.
+
+### Why is your Python code not compliant to PEP 8?
+I have my own particular preferences when it comes to coding in Python, which I explain fully [here](https://github.com/Sup2point0/Assort/blob/origin/~writing/Python%20Syntax.md).
+
+
+<br>
+
 
 ## Contribute
+
 Any feedback, suggestions or improvements are definitely welcome!
-
-## Upcoming
-- support for slice indexing
-- item rarity
-- standard deviation
-
-## Notes
-Yep, I know I break loads of Python conventions, but that’s just how I like to code. Anyway, most of them can probably changed with a quick ‘change all occurrences’. Apologies for any inconvenience.
