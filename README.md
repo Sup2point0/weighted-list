@@ -31,7 +31,7 @@ Console.WriteLine(greetings.GetRandomValue());
 ## Purposes
 
 > [!Tip]
-> For the full rationale behind this project, see <rationale.md>.
+> For the full rationale behind this project, see [rationale.md](rationale.md).
 
 Mainly intended for *weighted randomisation*, where each element can have a different chance of being selected (its weight).
 
@@ -146,7 +146,7 @@ print(f"{greetings.select()} {name}. {responses.select()}!")
 
 ## Notes
 
-- While the Python and C# implementations are extremely similar, they may differ very slightly in certain places. In the unlikely case that someone (other than me) uses both of them, just be aware of that.
+- While the Python and C# implementations are extremely similar, they may differ very slightly in certain places. In the unlikely case that someone (other than me) uses both of them, be aware of that.
 - Due to the nature of weighted indexing, random access has a time complexity of $O(n)$, where $n$ is the number of elements in the list.
   - However, optimising this further without significant sacrifices in space complexity (which is already decently hefty) appears unviable.
 
