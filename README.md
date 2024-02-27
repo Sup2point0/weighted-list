@@ -31,7 +31,7 @@ Console.WriteLine(greetings.GetRandomValue());
 ## Purposes
 
 > [!Tip]
-> For the full rationale behind this project, see [rationale.md](rationale.md).
+> For the full rationale behind this project, see [rationale](rationale.md).
 
 Mainly intended for *weighted randomisation*, where each element can have a different chance of being selected (its weight).
 
@@ -82,6 +82,8 @@ All you need is the [`weightedlist.py`](Python/weightedlist.py) file, which cont
 from weightedlist import WeightedList
 ```
 
+See [walkthrough](Python/walkthrough.md) for a tutorial, or [examples](Python/examples.md) for examples.
+
 <!--
 ### Implementation
 A `WeightedList` works just like how a `list` does, except rather than storing the values themselves, it stores `WeightedItem` objects. The value and weight of each item can be accessed through the `value` and `weight` attributes, respectively. These are passed in as pairs when instantiating the list:
@@ -113,17 +115,14 @@ The `weight` of each item can be thought of as how many duplicates are stored (w
 ['nova', 'sup', 'nova', 'nova', 'sup', 'nova', 'nova']
 # 'nova' has a higher change of being selected
 ```
-
-Here’s a quick example of how a `WeightedList` could be used for weighted randomization:
-
-```py
-greetings = WeightedList()
-responses = WeightedList()
-
-name = input(f"{greetings.select()}! What’s your name?")
-print(f"{greetings.select()} {name}. {responses.select()}!")
-```
 -->
+
+### C#
+All the code is contained within the [`WeightedList.cs`](C-sharp/WeightedList/WeightedList.cs) file. You might also need the [`WeightedList.csproj`](C-sharp/WeightedList/WeightedList.csproj) file.
+
+If you want the entire solution, you can download the repo and extract the [`C-sharp/`](C-sharp/) folder. This also contains tests to verify that everything is working.
+
+For a tutorial and examples, see [resources](C-sharp/resources/).
 
 
 <br>
