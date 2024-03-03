@@ -175,7 +175,7 @@ A couple years later, I’ve come back to do the same in C#, this time also addi
 ### Is this even useful?
 I mean yeah, a whole several-hundred-lines class to handle one thing might be a bit overkill. But it’s far more convenient to have it all packaged this way into a single portable file that can easily be slotted into other projects. Regardless, I’ve used my own code[^surprise] in at least 2 major projects ([PENGUIN](https://github.com/Sup2point0/PENGUIN) and [Algorhythm](https://Sup2point0/Algorhythm)), so I can definitely say it’s been useful to me!
 
-[^surprise] To my own surprise, somewhat.
+[^surprise]: To my own surprise, somewhat.
 
 ### Why are the source files several hundred lines long?
 1, documentation; 2, line breaks; 3, extra functionality. Particularly documentation. That stuff just *eats* the line count. Also, implementing something as complex as an enumerable container requires a lot of methods, operators and interfaces, both in Python and C#. And in C# you've even got overloading to account for as well.
