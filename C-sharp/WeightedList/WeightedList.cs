@@ -1,5 +1,5 @@
 /// WeightedList
-/// v1.0.0
+/// v1.0.1
 /// by Sup#2.0 (@Sup2point0)
 /// Last updated: 4 March 2024
 /// Available on GitHub: <https://github.com/Sup2point0/weightedlist>
@@ -21,6 +21,7 @@ public class WeightedItem<V,W> where W : INumber<W>
     public W Weight;
 
     #endregion
+
     #region CONSTRUCTORS
 
     public WeightedItem(V value)
@@ -48,6 +49,7 @@ public class WeightedItem<V,W> where W : INumber<W>
     }
 
     #endregion
+
     #region INTERFACES
 
     public void Deconstruct(out V value, out W weight)
@@ -66,6 +68,7 @@ public class WeightedItem<V,W> where W : INumber<W>
         => base.GetHashCode();
 
     #endregion
+
     #region OPERATORS
 
     public static bool operator ==(WeightedItem<V,W> item1, WeightedItem<V,W> item2)
@@ -81,12 +84,14 @@ public class WeightedItem<V,W> where W : INumber<W>
         => this.Value.Equals(item.Value) && this.Weight == item.Weight;
 
     #endregion
+
     #region DATA METHODS
 
     public (W, V) ToTuple()
         => (Weight, Value);
     
     #endregion
+
 }
 
 
@@ -106,6 +111,7 @@ public class WeightedList<V,W> :
     private List<WeightedItem<V,W>> _data;
 
     #endregion
+
     #region CONSTRUCTORS
 
     public WeightedList()
@@ -133,6 +139,7 @@ public class WeightedList<V,W> :
     }
 
     #endregion
+
     #region PROPERTIES
 
     public int TotalValues
@@ -152,6 +159,7 @@ public class WeightedList<V,W> :
     }
 
     #endregion
+
     #region INTERNAL
 
     protected int _UnweightIndex(W index)
@@ -203,6 +211,7 @@ public class WeightedList<V,W> :
     }
 
     #endregion
+
     #region INTERFACES
 
     public WeightedItem<V,W> this[W index]
@@ -246,6 +255,9 @@ public class WeightedList<V,W> :
     public IEnumerator<WeightedItem<V,W>> GetEnumerator()
         => _data.GetEnumerator();
 
+    // IEnumerator<WeightedItem<V,W>> IEnumerable<WeightedItem<V,W>>.GetEnumerator()
+    //     => GetEnumerator();
+
     IEnumerator IEnumerable.GetEnumerator()
         => GetEnumerator();
 
@@ -262,6 +274,7 @@ public class WeightedList<V,W> :
         );
     
     #endregion
+
     #region OPERATORS
 
     public static bool operator ==(WeightedList<V,W> list1, WeightedList<V,W> list2)
@@ -277,6 +290,7 @@ public class WeightedList<V,W> :
         => _data.SequenceEqual(obj._data);
 
     #endregion
+
     #region LIST METHODS
 
     public WeightedList<V,W> AddValue(V item)
@@ -443,6 +457,7 @@ public class WeightedList<V,W> :
     //     => Array.Sort<List<WeightedItem<V,W>>>(_data, _UnweightIndex(index), count, comparer);
 
     #endregion
+
     #region SEARCHES
 
     public bool Exists(Predicate<WeightedItem<V,W>> match)
@@ -643,10 +658,11 @@ public class WeightedList<V,W> :
         );
     }
 
-    public void GetNormalized<T>() where T : INumber<T>
+    public WeightedList<V,T> GetNormalized<T>() where T : INumber<T>
         => GetNormalised<T>();
 
     #endregion
+
     #region DATA METHODS
 
     public V[] GetRaw()
@@ -685,4 +701,5 @@ public class WeightedList<V,W> :
         );
 
     #endregion
+
 }
