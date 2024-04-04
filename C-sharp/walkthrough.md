@@ -11,7 +11,7 @@ This article guides you through how to use the `WeightedList` class in C#.
 
 ## Overview
 
-In C#, `WeightedList` is implemented as a generic class `WeightedList<V, W>`. `V` represents the types of values the list will store, and as such can be any type. `W` represents the types of weights the items will have, and must be a number-like type (specifically, one that implements `INumber`).
+In C#, `WeightedList` is implemented as a generic class `WeightedList<V, W>`. `V` represents the types of values the list will store, and as such can be any type. `W` represents the types of weights the items will have, and must be a number-like type (specifically, one that implements `INumber<>`).
 
 The list stores items as generic `WeightedItem<V, W>` objects with the same type parameters. Each item has `Value` and `Weight` fields storing its information.
 
@@ -41,12 +41,21 @@ WeightedList<string, int> wl = new(
 The same thing can be achieved with any `IEnumerable` of tuples:
 
 ```cs
-List<string, int> data = [
+List<Tuple<int, string>> data = [
     (2, "sup"),
     (3, "nova")
 ];
 
 WeightedList<string, int> wl = new(data);
+```
+
+```cs
+WeightedList<string, int> wl = new(
+    new List<Tuple<int, string>(
+        (2, "sup"),
+        (3, "nova")
+    )
+);
 ```
 
 The constructor also accepts `WeightedItem`s instead of tuples:
@@ -60,8 +69,8 @@ WeightedList<string, int> wl = new(
 
 ```cs
 List<WeightedItem<string, int>> data = [
-    new WeightedItem<string, int>("sup", 2);
-    new WeightedItem<string, int>("nova", 3);
+    new WeightedItem<string, int>("sup", 2),
+    new WeightedItem<string, int>("nova", 3)
 ];
 
 WeightedList<string, int> wl = new(data);
@@ -88,27 +97,46 @@ The table below summarises the different ways to pass in data.
     <th> format </th>
     <td> <code>params</code> </td>
     <td> <code>IEnumerable</code> </td>
-    <td> <code>Dictionary</code> </td>
   </tr>
   <tr>
     <td> <code>WeightedItem</code> </td>
     <td> <pre lang="csharp">WeightedList<string, int> wl = new(
-    new WeightedItem<string, int>("sup", 2),
-    new WeightedItem<string, int>("nova", 3)
-) </pre>
+    new WeightedItem&lt;string, int>("sup", 2),
+    new WeightedItem&lt;string, int>("nova", 3)
+); </pre>
+    </td>
+    <td> <pre lang="csharp">WeightedList<string, int> wl = new(
+    new List&lt;WeightedItem&lt;string, int>>(
+        new WeightedItem&lt;string, int>("sup", 2),
+        new WeightedItem&lt;string, int>("nova", 3)
+    )
+); </pre>
     </td>
   </tr>
   <tr>
-    <td> tuple </td>
-    <td> <pre lang="csharp"><code>WeightedList<string, int> wl = new(
+    <td> <code>Tuple</code> </td>
+    <td> <pre lang="csharp"><code>WeightedList&lt;string, int> wl = new(
     (2, "sup"),
     (3, "nova")
-) </code></pre>
+); </code></pre>
+    </td>
+    <td> <pre lang="csharp">WeightedList&lt;string, int> wl = new(
+    new List&lt;Tuple&lt;int, string>>(
+        ("sup", 2),
+        ("nova", 3)
+    )
+); </pre>
     </td>
   </tr>
   <tr>
-    <td> <code>KeyValuePair</code> </td>
-    <td> – </td>
+    <td> <code>Dictionary</code> </td>
+    <td colspan="2"> <pre lang="csharp">WeightedList&lt;string, int> wl = new(
+    new Dictionary&lt;string, int>(
+        ["sup"] = 2,
+        ["nova"] = 3
+    )
+); </pre>
+    </td>
   </tr>
 </table>		
 
