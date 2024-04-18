@@ -1,4 +1,4 @@
-<h1 align="center"> <code> WeightedList </code> </h1>
+<h1 align="center"> <code> weighted-list </code> </h1>
 
 A class representing a list of weighted items, available in both Python and C#.
 
@@ -30,7 +30,7 @@ Console.WriteLine(greetings.GetRandomValue());
 
 ## Purposes
 
-> [!Tip]
+> [!TIP]
 > For the full rationale behind this project, see [rationale](rationale.md).
 
 Mainly intended for *weighted randomisation*, where each element can have a different chance of being selected (its weight).
@@ -74,7 +74,7 @@ The project is not available as a package.[^package] Instead, just download the 
 
 [^package]: I don't think it’s a large enough project to warrant an entire package, when you could just copy and paste the code directly.
 
-> [!Tip]
+> [!TIP]
 > Walkthroughs and specimens for each language can be found in their respective folders.
 
 ### Python
