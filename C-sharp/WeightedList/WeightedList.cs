@@ -1,7 +1,7 @@
 /// WeightedList
-/// v1.0.2
+/// v1.0.3
 /// by Sup#2.0 (@Sup2point0)
-/// Last updated: 4 March 2024
+/// Last updated: 18 April 2024
 /// Available on GitHub: <https://github.com/Sup2point0/weightedlist>
 
 using System.Collections;
@@ -124,12 +124,20 @@ public class WeightedList<V,W> :
         => _data = new List<WeightedItem<V,W>>(
             from each in items select new WeightedItem<V,W>(each));
 
+    public WeightedList(params V[] values)
+        => _data = new List<WeightedItem<V,W>>(
+            from each in values select new WeightedItem<V,W>(each));
+
     public WeightedList(IEnumerable<WeightedItem<V,W>> items)
         => _data = new List<WeightedItem<V,W>>(items);
 
     public WeightedList(IEnumerable<(W weight, V value)> items)
         => _data = new List<WeightedItem<V,W>>(
             from each in items select new WeightedItem<V,W>(each));
+
+    public WeightedList(IEnumerable<V> values)
+        => _data = new List<WeightedItem<V,W>>(
+            from each in values select new WeightedItem<V,W>(each));
 
     public WeightedList(Dictionary<V,W> items)
     {
