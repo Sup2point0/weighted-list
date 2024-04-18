@@ -1,5 +1,5 @@
 /// WeightedList
-/// v1.0.1
+/// v1.0.2
 /// by Sup#2.0 (@Sup2point0)
 /// Last updated: 4 March 2024
 /// Available on GitHub: <https://github.com/Sup2point0/weightedlist>
@@ -142,13 +142,10 @@ public class WeightedList<V,W> :
 
     #region PROPERTIES
 
-    public int TotalValues
-    {
-        get => _data.Count;
-    }
+    public int TotalValues {
+        get => _data.Count; }
 
-    public W TotalWeights
-    {
+    public W TotalWeights {
         get {
             W t = W.Zero;
             foreach (var item in _data) {
@@ -308,6 +305,12 @@ public class WeightedList<V,W> :
     public WeightedList<V,W> AddItem(WeightedItem<V,W> item)
     {
         _data.Add(item);
+        return this;
+    }
+
+    public WeightedList<V,W> AddItem((V value, W weight) item)
+    {
+        _data.Add(new WeightedItem<V,W>(value, weight);
         return this;
     }
 
@@ -682,9 +685,9 @@ public class WeightedList<V,W> :
     {
         V[] data = (from each in _data select each.Value).ToArray();
         if (unique) {
-            return data;
-        } else {
             return new HashSet<V>(data).ToArray();
+        } else {
+            return data;
         }
     }
 
