@@ -1,6 +1,7 @@
+*.env
+
 # Python
 __pycache__/
-*.env
 
 # C-sharp
 bin/
