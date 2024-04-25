@@ -10,12 +10,10 @@ from typing import Self, NoReturn
 from warnings import warn
 
 
-__all__ = ["WeightedItem", "WeightedList"]
-
-Value = Any
+__all__ = ["WeightedItem", "WeightedList", "LikeWeightedList"]
 
 
-class WeightedItem:
+class WeightedItem[Value]:
   '''An item within a `WeightedList` with a `value` and `weight`.'''
 
   def __init__(self, value: Value, weight: Number = 1):
@@ -47,7 +45,7 @@ class WeightedItem:
     )
 
 
-class WeightedList:
+class WeightedList[Value](list):
   '''A list of weighted items.
 
   All methods that modify the list return the modified instance for fluent chaining, unless they return an otherwise specified object. Hence this is allowed:
@@ -63,6 +61,8 @@ class WeightedList:
   - in-place: *present tense* (`merge` `normalise`)
   - out-of-place: *present perfect* (`merged` `normalised`)
   '''
+
+  type LikeWeightedList = Iterable[WeightedItem | tuple[Number, Value]]
 
   def __init__(self, *items, **ktems):
     '''Create a weighted list.
@@ -101,7 +101,7 @@ class WeightedList:
 
     return WeightedItem(item[1], item[0])
 
-  def _index_(self, index, *, depth = False) -> Number:
+  def _index_(self, index: Number, *, depth = False) -> Number | WeightedItem:
     '''Find the unweighted index corresponding to a weighted index. If `depth`, return the item instead of the index.'''
 
     if index < 0:
@@ -143,21 +143,27 @@ class WeightedList:
       not isinstance(other, WeightedList) or
       any(left != right for left, right in zip(self, other))
     )
+  
+  def __bool__(self):
+    return any(self.weights)
 
   ## ITERABLE METHODS ##
-  def __getitem__(self, index) -> WeightedItem:
+  def __getitem__(self, index: Number | slice) -> WeightedItem:
+    if isinstance(index, slice):
+      raise NotImplementedError("Slice indexing is currently unsupported for WeightedLists")
+    
     return self._index_(index, depth = True)
   
-  def __setitem__(self, index, item: WeightedItem):
+  def __setitem__(self, index, item: WeightedItem) -> NoReturn:
     self[index] = self._sanitise_(item)
 
-  def __delitem__(self, index):
+  def __delitem__(self, index) -> NoReturn:
     super().__delitem__(self._index_(index))
 
-  def __len__(self):
+  def __len__(self) -> Number:
     return sum(self.weights)
 
-  def __contains__(self, item: WeightedItem):
+  def __contains__(self, item: WeightedItem) -> bool:
     return any(each == item for each in self)
   
   ## OPERATORS ##
@@ -216,7 +222,7 @@ class WeightedList:
   def pop(self, index: Number = -1) -> WeightedItem:
     '''Remove and return (entire) item at (weighted) `index`.'''
 
-    return super().pop(self_index_(index))
+    return super().pop(self._index_(index))
   
   def clear(self) -> Self:
     '''Clear contents of the list.'''
@@ -224,21 +230,22 @@ class WeightedList:
     super().clear()
     return self
 
-  def reverse(self) -> Self:
-    '''Reverse contents of the list.'''
+  def copy(self) -> WeightedList:
+    '''Return a shallow copy of the list.'''
 
-    raise NotImplementedError()
+    return super().copy()
+  
+  def deepcopy(self) -> WeightedList:
+    '''Return a deep copy of the list.'''
+
+    return deepcopy(self)
 
   ## SPECIALIST METHODS ##
-  def select(self) -> WeightedItem:
+  def select(self, entire = False) -> Value | WeightedItem:
     '''...
     '''
 
-  def selectval(self) -> Value:
-    '''...
-    '''
-
-  def selects(self, replace = False, unique = False):
+  def selects(self, replace = False, unique = False) -> Generator[Value, None, None]:
     '''...
     '''
   
