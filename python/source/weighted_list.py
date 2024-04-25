@@ -49,6 +49,19 @@ class WeightedItem:
 
 class WeightedList:
   '''A list of weighted items.
+
+  All methods that modify the list return the modified instance for fluent chaining, unless they return an otherwise specified object. Hence this is allowed:
+
+  ```py
+  >>> wl = (WeightedList()
+        .append(WeightedItem("sup"))
+        .insert(0, WeightedItem("nova"))
+        .merge()
+  ```
+
+  Some methods that modify the list have 2 variants, one that acts in-place (on the original instance) or out-of-place (on a deep copy). In this case, their name reflects their nature:
+  - in-place: *present tense* (`merge` `normalise`)
+  - out-of-place: *present perfect* (`merged` `normalised`)
   '''
 
   def __init__(self, *items, **ktems):
@@ -148,6 +161,32 @@ class WeightedList:
     return any(each == item for each in self)
   
   ## OPERATORS ##
+  def __add__(self, other: WeightedList) -> Self:
+    return deepcopy(self).extend(other)
+
+  def __iadd__(self, other: WeightedList) -> Self:
+    return self.extend(other)
+
+  def __mul__(self, value: int) -> Self:
+    new = deepcopy(self)
+    super(new).__imul__(value)
+    return new
+
+  def __rmul__(self, value: int) -> Self:
+    return self.__mul__(value)
+
+  def __imul__(self, value: int) -> Self:
+    super().__imul__(value)
+    return self
+
+  def __or__(self, other: WeightedList) -> Self:
+    return self.merged(other)
+  
+  def __ror__(self, other: WeightedList) -> Self:
+    return self.merged(other)
+
+  def __ior__(self, other: WeightedList) -> Self:
+    return self.merge(other)
 
   ## LIST METHODS ##
   def append(self, item: WeightedItem | tuple[Number, Value]) -> Self:
@@ -185,6 +224,11 @@ class WeightedList:
     super().clear()
     return self
 
+  def reverse(self) -> Self:
+    '''Reverse contents of the list.'''
+
+    raise NotImplementedError()
+
   ## SPECIALIST METHODS ##
   def merge(self, other: WeightedList | LikeWeightedList = None) -> Self:
     '''Merge the list with another WeightedList-like iterable, increasing an item’s weight if it already exists, otherwise appending it.
@@ -203,7 +247,14 @@ class WeightedList:
           self.append(each)
 
     return self
-    
+
+  def find(self,
+    predicate: Callable[[WeightedItem], bool],
+  ) -> Generator[WeightedItem, None, None]:
+    '''Find all items in the list that fulfil `predicate`.'''
+
+    return (item for item in self if predicate(item))
+  
   def select(self) -> WeightedItem:
     '''...
     '''
