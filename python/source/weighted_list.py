@@ -230,6 +230,18 @@ class WeightedList:
     raise NotImplementedError()
 
   ## SPECIALIST METHODS ##
+  def select(self) -> WeightedItem:
+    '''...
+    '''
+
+  def selectval(self) -> Value:
+    '''...
+    '''
+
+  def selects(self, replace = False, unique = False):
+    '''...
+    '''
+  
   def merge(self, other: WeightedList | LikeWeightedList = None) -> Self:
     '''Merge the list with another WeightedList-like iterable, increasing an item’s weight if it already exists, otherwise appending it.
     
@@ -254,37 +266,16 @@ class WeightedList:
     '''Find all items in the list that fulfil `predicate`.'''
 
     return (item for item in self if predicate(item))
-  
-  def select(self) -> WeightedItem:
-    '''...
-    '''
-
-  def selectval(self) -> Value:
-    '''...
-    '''
-
-  def selects(self, replace = False, unique = False):
-    '''...
-    '''
-
-  def drop(self, index: Number = -1) -> WeightedItem:
-    '''Decrement the weight of item at (weighted) `index` by 1, and return the item with the decreased weight.'''
-
-    item = self[index]
-    item.weight -= 1
-    return item
 
   def count(self, item: WeightedItem) -> int:
     '''...'''
 
     return sum(each == item for each in self)
 
-  def clean(self) -> Self:
-    '''Remove all items with zero or negative weight.'''
+  def shuffle(self) -> Self:
+    '''Shuffle value-weight pairings in the list, with values remaining in place while the weights move.'''
 
-    for item in reversed(self):
-      if 0 >= item.weight:
-        self.remove(item)
+    self.__init__(zip(self.values, random.shuffle(self.weights)))
 
   def normalise(self, factor: Number = 1) -> WeightedList:
     '''Scale all item weights such that they sum to 1.'''
@@ -303,6 +294,29 @@ class WeightedList:
     copy.normalise()
     return copy
 
+  def remove(self,
+    predicate: Callable[[WeightedItem], bool],
+  ) -> Self:
+    '''Remove items from the list which fulfil `predicate`.'''
+
+    for item in reversed(self):
+      if predicate(item):
+        del item
+  
+  def drop(self, index: Number = -1) -> WeightedItem:
+    '''Decrement the weight of item at (weighted) `index` by 1, and return the item with the decreased weight.'''
+
+    item = self[index]
+    item.weight -= 1
+    return item
+
+  def clean(self) -> Self:
+    '''Remove all items with zero or negative weight.'''
+
+    for item in reversed(self):
+      if 0 >= item.weight:
+        self.remove(item)
+
   ## DATA METHODS
   def as_raw(self,
     loop: Callable[[Number], int] = round,
@@ -317,7 +331,12 @@ class WeightedList:
       for i in range(loop(item.weight))
     )
 
-  def as_dict(self) -> dict[Any, Number]:
+  def as_list(self) -> list[tuple[Number, Value]]:
+    '''Get a `list` representation of the weighted list.'''
+
+    return [(item.weight, item.value) for item in self]
+
+  def as_dict(self) -> dict[Value, Number]:
     '''Get a `dict` representation of the weighted list.
 
     Note that duplicate keys are collapsed with their weights added.
