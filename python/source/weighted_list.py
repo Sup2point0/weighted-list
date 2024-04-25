@@ -12,8 +12,10 @@ from warnings import warn
 
 __all__ = ["WeightedItem", "WeightedList"]
 
+Value = Any
 
-class WeightedItem[Value]:
+
+class WeightedItem:
   '''An item within a `WeightedList` with a `value` and `weight`.'''
 
   def __init__(self, value: Value, weight: Number = 1):
@@ -45,7 +47,7 @@ class WeightedItem[Value]:
     )
 
 
-class WeightedList[Value](list):
+class WeightedList(list):
   '''A list of weighted items.
 
   All methods that modify the list return the modified instance for fluent chaining, unless they return an otherwise specified object. Hence this is allowed:
@@ -62,7 +64,7 @@ class WeightedList[Value](list):
   - out-of-place: *present perfect* (`merged` `normalised`)
   '''
 
-  type LikeWeightedList = Iterable[WeightedItem | tuple[Number, Value]]
+  LikeWeightedList = Iterable[WeightedItem | tuple[Number, Value]]
 
   def __init__(self, *items, **ktems):
     '''Create a weighted list.
@@ -135,13 +137,13 @@ class WeightedList[Value](list):
   def __eq__(self, other: Any):
     return (
       isinstance(other, WeightedList) and
-      all(left == right for left, right in zip(self, other))
+      list(self) == list(other)
     )
   
-  def __ne__(self, other: Any):
+  def __ne__(self, other: Any): ### TODO comparison between different lengths
     return (
       not isinstance(other, WeightedList) or
-      any(left != right for left, right in zip(self, other))
+      list(self) != list(other)
     )
   
   def __bool__(self):
