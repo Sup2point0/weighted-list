@@ -10,7 +10,7 @@ from typing import Self, NoReturn
 from warnings import warn
 
 
-__all__ = ["WeightedItem", "WeightedList", "LikeWeightedList"]
+__all__ = ["WeightedItem", "WeightedList"]
 
 
 class WeightedItem[Value]:
