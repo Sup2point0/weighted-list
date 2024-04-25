@@ -1,0 +1,7 @@
+{
+  "python.testing.pytestArgs": [
+    "python/tests/weighted-list.py"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
+}
