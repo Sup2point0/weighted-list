@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include = "..\weighted-list\weighted-list.csproj" />
+    <ProjectReference Include = "..\WeightedList\WeightedList.csproj" />
   </ItemGroup>
 
 </Project>
