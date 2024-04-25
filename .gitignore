@@ -1,2 +1,8 @@
-__pycache__/
 *.env
+
+# Python
+__pycache__/
+
+# C-sharp
+bin/
+obj/
