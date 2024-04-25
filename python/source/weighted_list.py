@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import itertools
 import random
+
 from copy import deepcopy
 from numbers import Number
 from typing import Any, Iterable, Generator, Callable
@@ -155,17 +156,28 @@ class WeightedList:
     super().append(self._sanitise_(item))
     return self
 
-  def extend():
+  def extend(self, items: Iterable | dict) -> Self:
     '''...'''
+
+    if isinstance(items, dict):
+      super().extend(self._sanitise_(each[::-1]) for each in items.items())
+    else:
+      super().extend(self._sanitise_(each) for each in items)
+    return self
 
   def insert(self,
     index: Number,
     item: WeightedItem | tuple[Number, Value],
   ) -> Self:
-    '''...'''
+    '''Insert `item` before the (entire) item at `index` (weighted).'''
 
     super().insert(self._index_(index), self._sanitise_(item))
     return self
+
+  def pop(self, index: Number = -1) -> WeightedItem:
+    '''Remove and return (entire) item at (weighted) `index`.'''
+
+    return super().pop(self_index_(index))
   
   def clear(self) -> Self:
     '''Clear contents of the list.'''
@@ -174,6 +186,24 @@ class WeightedList:
     return self
 
   ## SPECIALIST METHODS ##
+  def merge(self, other: WeightedList | LikeWeightedList = None) -> Self:
+    '''Merge the list with another WeightedList-like iterable, increasing an item’s weight if it already exists, otherwise appending it.
+    
+    If nothing is provided, the list will instead merge items in itself so that there are no duplicate values.
+    '''
+
+    if other is None:
+      self = WeightedList().merge(self)
+    else:
+      for each in other:
+        found = self.find(lambda item: item.value == each.value)
+        if found:
+          found.weight += each.weight
+        else:
+          self.append(each)
+
+    return self
+    
   def select(self) -> WeightedItem:
     '''...
     '''
@@ -186,7 +216,19 @@ class WeightedList:
     '''...
     '''
 
-  def clean(self) -> WeightedList:
+  def drop(self, index: Number = -1) -> WeightedItem:
+    '''Decrement the weight of item at (weighted) `index` by 1, and return the item with the decreased weight.'''
+
+    item = self[index]
+    item.weight -= 1
+    return item
+
+  def count(self, item: WeightedItem) -> int:
+    '''...'''
+
+    return sum(each == item for each in self)
+
+  def clean(self) -> Self:
     '''Remove all items with zero or negative weight.'''
 
     for item in reversed(self):
@@ -216,7 +258,8 @@ class WeightedList:
   ) -> Generator[Any, None, None]:
     '''Return an iterator which iterates over each item in the weighted list a number of times equal to its weight.
 
-    If item weights are not integers, they will be rounded using the inbuilt `round()`. Alternatively, a different function `loop` can be provided to specify how they should be handled.'''
+    If item weights are not integers, they will be rounded using the inbuilt `round()`. Alternatively, a different function `loop` can be provided to specify how they should be handled.
+    '''
 
     return (
       item for item in self
@@ -226,7 +269,8 @@ class WeightedList:
   def as_dict(self) -> dict[Any, Number]:
     '''Get a `dict` representation of the weighted list.
 
-    Note that duplicate keys are collapsed with their weights added.'''
+    Note that duplicate keys are collapsed with their weights added.
+    '''
 
     out = {}
 
