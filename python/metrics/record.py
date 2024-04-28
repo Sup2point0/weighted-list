@@ -9,12 +9,8 @@ from textwrap import dedent
 def record(data: dict):
   '''Record metrics results to a Markdown file.'''
 
-  start = data["_meta"]["start"]
-  stop = data["_meta"]["stop"]
-  runtime = stop - start
-
   path = pathlib.Path().absolute().parent
-  name = start.strftime("%y-%m-%d.%H-%M-%S")
+  time = data["_meta"]["start"].strftime("%y-%m-%d.%H-%M-%S")
 
   content = _generate_record_(data)
 
@@ -32,15 +28,15 @@ def _generate_record_(data: dict) -> str:
       <table>
         <tr>
           <td> test started </td>
-          <td> {start.strftime("%H:%M.%S")} </td>
+          <td> {data["_meta"]["start"].strftime("%H:%M.%S")} </td>
         </tr>
         <tr>
           <td> test finished </td>
-          <td> {start.strftime("%H:%M.%S")} </td>
+          <td> {data["_meta"]["stop"].strftime("%H:%M.%S")} </td>
         </tr>
         <tr>
           <td> total runtime </td>
-          <td> {runtime.strftime("%H:%M.%S")} </td>
+          <td> {(data["_meta"]["stop"] - data["_meta"]["start"]).strftime("%H:%M.%S")} </td>
         </tr>
       </table>
     ''').strip()

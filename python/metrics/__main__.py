@@ -2,8 +2,8 @@
 Tests performance metrics.
 '''
 
-from .speedtests import SpeedTests
-from .record import record
+from python.metrics.speedtests import SpeedTest
+from python.metrics.record import record
 
 
 # Unfortunately since this project is a submodule within suptools, and intended to require no dependencies, it can’t use all the utility functions from there
@@ -11,11 +11,11 @@ from .record import record
 
 def test_all():
   results = {}
-  tests = SpeedTests.tests
+  tests = SpeedTest()
 
-  for each in tests:
-    print(f">> {each}()")
-    results[each] = tests[each]()
+  for test, func in tests._load_():
+    print(f">> {tests}()")
+    results[test] = func()
 
   return results
 
