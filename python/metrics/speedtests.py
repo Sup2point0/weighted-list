@@ -1,6 +1,12 @@
+from dataclasses import dataclass
 from timeit import timeit
 
 from .._aliases_ import *
+
+
+class TestMetrics:
+  meta: dict = {"start": 0, "stop": 0, "delta": 0}
+  tests: dict[str, dict[str, float]] = {}
 
 
 class SpeedTest:
@@ -21,6 +27,9 @@ class SpeedTest:
     test = {"l": [], "wl": WL()}
 
     return {
-      "list": timeit("l.append('sup')", globals = test),
-      "wl": timeit("wl.append('sup')", globals = test),
+      "_metric": "count",
+      10 ** 6: {
+        "list": timeit("l.append('sup')", globals = test),
+        "wl": timeit("wl.append('sup')", globals = test),
+      }
     }
