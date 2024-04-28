@@ -24,12 +24,15 @@ class SpeedTest:
     )
 
   def test_append(self):
-    test = {"l": [], "wl": WL()}
+    test = {"l": [], "wl": WL(), "wi": WI("sup", 1)}
 
     return {
       "_metric": "count",
-      10 ** 6: {
-        "list": timeit("l.append('sup')", globals = test),
-        "wl": timeit("wl.append('sup')", globals = test),
+      **{
+        10**i: {
+          "list": timeit("l.append(wi)", globals = test, number = 10**i),
+          "wl": timeit("wl.append(wi)", globals = test, number = 10**i),
+        }
+        for i in range(3, 8)
       }
     }

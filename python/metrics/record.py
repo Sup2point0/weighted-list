@@ -52,9 +52,9 @@ def _generate_record_(data: TestMetrics) -> str:
     
         | {results["_metric"]} | `list` | `WeightedList` | `FrozenWeightedList` |
         | :{"-" * (len(results["_metric"]) - 1)} | :----- | :------------- | :------------------- |
-        {"\n".join(
+{"\n".join(
           (
-            f"| `{test}` | `{round(result['list'], 5)}` "
+            f"        | `{test}` | `{round(result['list'], 5)}` "
             f"| `{round(result.get('wl', 0), 5)}` "
             f"| `{round(result.get('fwl', 0), 5)}` |"
           )
