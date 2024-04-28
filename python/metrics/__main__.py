@@ -2,6 +2,8 @@
 Tests performance metrics.
 '''
 
+from datetime import datetime
+
 from python.metrics.speedtests import SpeedTest
 from python.metrics.record import record
 
@@ -10,12 +12,16 @@ from python.metrics.record import record
 
 
 def test_all():
-  results = {}
-  tests = SpeedTest()
+  results = {"_meta": {"start": datetime.now()}}
 
+  tests = SpeedTest()
   for test, func in tests._load_():
     print(f">> {tests}()")
     results[test] = func()
+
+  results["_meta"]["stop"] = datetime.now()
+  delta = results["_meta"]["stop"] - results["_meta"]["start"]
+  results["_meta"]["runtime"] = datetime.fromtimestamp(delta.seconds)
 
   return results
 

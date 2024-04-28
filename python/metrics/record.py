@@ -36,7 +36,7 @@ def _generate_record_(data: dict) -> str:
         </tr>
         <tr>
           <td> total runtime </td>
-          <td> {(data["_meta"]["stop"] - data["_meta"]["start"]).strftime("%H:%M.%S")} </td>
+          <td> {data["_meta"]["runtime"].strftime("%H:%M.%S")} </td>
         </tr>
       </table>
     ''').strip()
@@ -48,7 +48,7 @@ def _generate_record_(data: dict) -> str:
       | results["metric"] | `list` | `WeightedList` | `FrozenWeightedList` |
       | :---------------- | :----- | :------------- | :------------------- |
       {"\n".join(
-        f"| `{test}` | `{test['list']}` " +
+        f"| `{test}` | `{results[test]['list']}` " +
         f"| `{test.get('wl')}` | `{test.get('fwl', '–')}` |"
       for test in results)}
       ''').strip()
