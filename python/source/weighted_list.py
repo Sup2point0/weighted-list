@@ -19,7 +19,6 @@ class WeightedItem:
   '''An item within a `WeightedList` with a `value` and `weight`.'''
 
   def __init__(self, value: Value, weight: Number = 1):
-
     if not isinstance(weight, Number):
       if isinstance(value, Number):
         raise TypeError(f"Item weights must be numerical but {type(weight)} was provided. Perhaps you passed the value and weight in the wrong way round?")
@@ -38,7 +37,7 @@ class WeightedItem:
     return f"WeightedItem(value = {self.value}, weight = {self.weight})"
 
   def __iter__(self):
-    return iter([self.value, self.weight])
+    return iter((self.value, self.weight))
   
   def __eq__(self, item):
     return (
@@ -131,8 +130,11 @@ class WeightedList(list):
     raise IndexError("WeightedList index out of range")
 
   ## CORE ##
+  def __repr__(self):
+    return f"WeightedList(" + ", ".join(f"({item.weight}, {repr(item.value)})" for item in self) + ")"
+  
   def __str__(self):
-    return f"WeightedList(" + ", ".join(f"{item.value}: {item.weight}" for item in self) + ")"
+    return f"WeightedList(" + ", ".join(f"{repr(item.value)}: {item.weight}" for item in self) + ")"
   
   def __eq__(self, other: Any):
     return (
