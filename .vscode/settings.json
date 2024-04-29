@@ -3,5 +3,5 @@
     "python/tests/weighted-list.py"
   ],
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true
+  "python.testing.pytestEnabled": true,
 }
