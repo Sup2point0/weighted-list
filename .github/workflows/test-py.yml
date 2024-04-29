@@ -1,0 +1,32 @@
+name: Test Python
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: '20 4 * * 2,6'
+  
+  push:
+    paths: '*.py'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'Git – checkout'
+        uses: actions/checkout@v4
+
+      - name: 'Python – setup'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 'Python – install'
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+
+      - name: 'Pytest – run'
+        run: |
+          pytest python/tests/weighted-list.py
