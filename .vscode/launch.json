@@ -1,11 +1,11 @@
 {
   "configurations": [
-    {
-      "name": "C#: weighted-list Debug",
-      "type": "dotnet",
-      "request": "launch",
-      "projectPath": "${workspaceFolder}/csharp/weighted-list/weighted-list.csproj"
-    },
+    // {
+    //   "name": "C#: weighted-list Debug",
+    //   "type": "dotnet",
+    //   "request": "launch",
+    //   "projectPath": "${workspaceFolder}/csharp/weighted-list/weighted-list.csproj"
+    // },
     {
       "name": "Python Debugger: Current File",
       "type": "debugpy",

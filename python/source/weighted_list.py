@@ -105,6 +105,8 @@ class WeightedList(list):
   def _index_(self, index: Number, *, depth = False) -> Number | WeightedItem:
     '''Find the unweighted index corresponding to a weighted index. If `depth`, return the item instead of the index.'''
 
+    i, idx = 0, 0
+
     if index < 0:
       for item in reversed(self):
         if not item.weight > 0:
