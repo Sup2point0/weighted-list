@@ -318,7 +318,7 @@ public class WeightedList<V,W> :
 
     public WeightedList<V,W> AddItem((V value, W weight) item)
     {
-        _data.Add(new WeightedItem<V,W>(value, weight);
+        _data.Add(new WeightedItem<V,W>(item.value, item.weight));
         return this;
     }
 
