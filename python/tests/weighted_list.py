@@ -1,9 +1,9 @@
 import itertools as it
 
-import sys
-sys.path[0] = "/".join(sys.path[0].split("/")[:-1])
+# import sys
+# sys.path[0] = "/".join(sys.path[0].split("/")[:-1])
 
-from python import WeightedList as WL, WeightedItem as WI
+from .. import WeightedList as WL, WeightedItem as WI
 
 
 t = "test"
