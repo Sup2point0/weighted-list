@@ -29,4 +29,4 @@ jobs:
 
       - name: 'Pytest – run'
         run: |
-          pytest python/tests/weighted-list.py
+          pytest python/tests/weighted_list.py
