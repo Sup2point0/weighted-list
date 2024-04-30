@@ -82,9 +82,77 @@ def test_bool():
   assert t
 
 
+def test_iter():
+  t = _default_()
+  e = [WI("sup", 2), WI("nova", 3), WI("shard", 5)]
+  assert [item for item in t] == e
+  assert list(t) == e
+
+  assert WL(*e) == _default_()
+
+
+def test_properties():
+  t = _default_()
+
+  assert t.values) == ["sup", "nova", "shard"]
+  assert len(t.values) == 3
+
+  assert t.weights == [2, 3, 5]
+  assert sum(t.weights) == 10
+
+
+def test_add():
+  t = _default_()
+  e = WL(*_default_(), *_default_())
+  assert t + WL() == t
+  assert t + t == e
+
+
+def test_multiply():
+  t = _default_()
+  e = WL(*_default_(), *_default_())
+  assert t * 1 == t
+  assert t * 2 == e
+  assert t * 4 == e * 2
+
+
 def test_append():
   t = WL()
   assert t.append("sup") == WL("sup")
   assert t.append("sup") == WL("sup", "sup")
   assert t.append((3, "nova")) == WL("sup", "sup", nova = 3)
   assert t.append(WI("shard", 7)) == WL("sup", "sup", nova = 3, shard = 7)
+
+
+def test_extend():
+  t = WL()
+  e = _default_()
+  assert t.extend(e) == e
+
+
+def test_merge():
+  t = WL("sup")
+  tt = WL("nova")
+  e = WL("sup", "nova")
+  assert t.merge(tt) == e
+  assert t | tt == e
+  assert tt.merge(t) != e
+  assert tt | t != e
+
+  t = WL("sup")
+  e = WL(sup = 2)
+  assert t.merge(t) == e
+  assert t | t == e
+  assert t.merge(t).merge(t) != e
+  assert t | t | t != e
+  assert t.merge(e) == e.merge(t)
+  assert t | e == e | t
+
+
+def test_norm():
+  t = WL(sup = 2, nova = 3)
+  e = WL(sup = 2/5, nova = 3/5)
+  assert t.normalise() == e
+
+  e = WP(sup = 4/5, nova = 6/5)
+  assert t.normalise(2) == e
