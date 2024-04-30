@@ -94,7 +94,7 @@ def test_iter():
 def test_properties():
   t = _default_()
 
-  assert t.values) == ["sup", "nova", "shard"]
+  assert t.values == ["sup", "nova", "shard"]
   assert len(t.values) == 3
 
   assert t.weights == [2, 3, 5]
