@@ -75,7 +75,8 @@ class FrozenWeightedList:
 
   ## INTERNAL ##
   def _sanitise_(self, item):
-    raise NotImplementedError()
+    self.total_weights += item[1]
+    return FrozenWeightedItem(item[1], item[0], self.total_weights)
 
   ## CORE ##
   def __str__(self):
