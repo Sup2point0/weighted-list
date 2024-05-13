@@ -280,9 +280,9 @@ class WeightedList(list):
       self = WeightedList().merge(self)
     else:
       for each in other:
-        found = self.find(lambda item: item.value == each.value)
+        found = list(self.find(lambda item: item.value == each.value))
         if found:
-          next(found).weight += each.weight
+          found[0].weight += each.weight
         else:
           self.append(each)
 
