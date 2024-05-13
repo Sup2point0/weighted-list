@@ -1,4 +1,4 @@
-name: Test Python
+name: 'Test Python'
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ on:
     paths: '**.py'
 
 jobs:
-  test:
+  'test-3_11':
     runs-on: ubuntu-latest
 
     steps:
@@ -28,5 +28,24 @@ jobs:
           pip install pytest
 
       - name: 'Pytest – run'
+        run: pytest
+
+  'test-3_12':
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'Git – checkout'
+        uses: actions/checkout@v4
+
+      - name: 'Python – setup'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 'Python – install'
         run: |
-          pytest python/tests/weighted-list.py
+          python -m pip install --upgrade pip
+          pip install pytest
+
+      - name: 'Pytest – run'
+        run: pytest
