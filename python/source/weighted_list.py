@@ -78,16 +78,16 @@ class WeightedList(list):
 
   ## PROPERTIES ##
   @ property
-  def values(self) -> Generator[Value, None, None]:
+  def values(self) -> list[Value]:
     '''...'''
 
-    return (item.value for item in self)
+    return [item.value for item in self]
 
   @ property
-  def weights(self) -> Generator[Number, None, None]:
+  def weights(self) -> list[Number]:
     '''...'''
 
-    return (item.weight for item in self)
+    return [item.weight for item in self]
 
   ## INTERNAL ##
   def _sanitise_(self, item) -> WeightedItem:
