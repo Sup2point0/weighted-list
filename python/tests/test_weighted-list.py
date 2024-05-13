@@ -1,7 +1,6 @@
 import itertools as it
 
-# import sys
-# sys.path[0] = "/".join(sys.path[0].split("/")[:-1])
+import math
 
 from python import WeightedList as WL, WeightedItem as WI
 
@@ -150,7 +149,21 @@ def test_merge():
 def test_norm():
   t = WL(sup = 2, nova = 3)
   e = WL(sup = 2/5, nova = 3/5)
-  assert t.normalised() == e
+  t.normalise()
+  assert t.values == e.values
+  assert all(math.isclose(t.weights[i], e.weights[i]) for i in range(2))
 
   e = WL(sup = 4/5, nova = 6/5)
-  assert t.normalised(2) == e
+  t.normalise(2)
+  assert t.values == e.values
+  assert all(math.isclose(t.weights[i], e.weights[i]) for i in range(2))
+
+
+def test_drop():
+  t = WL(sup = 2)
+  e = WL(sup = 1)
+
+  t.drop(0)
+  assert t == e
+  t.drop(0)
+  assert t == WL()

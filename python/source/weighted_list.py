@@ -270,14 +270,11 @@ class WeightedList(list):
     '''
 
     idx = floor(sum(self.iweights) * random())
-    item = self[idx]
-    
-    if drop is True:
-      self.pop(idx)
-    elif isinstance(drop, Number):
-      item.weight -= 1
-
-    return item
+    return (
+      self.pop(idx) if drop is True else
+      self.drop(idx) if drop == 1 else
+      self[idx]
+    )
 
   def selects(self, count, *, replace = False, unique = False) -> list[Value]:
     '''Randomly select `count` values from the list.
@@ -361,10 +358,18 @@ class WeightedList(list):
         del item
   
   def drop(self, index: Number = -1) -> WeightedItem:
-    '''Decrement the weight of item at (weighted) `index` by 1, and return the item with the decreased weight.'''
+    '''Decrement the weight of item at (weighted) `index` by 1, and return the item with the decreased weight.
+    
+    If the weight of item isn't greater than 1, the item will be removed and returned with a weight of 0.'''
 
     item = self[index]
-    item.weight -= 1
+    
+    if item.weight > 1:
+      item.weight -= 1
+    else:
+      self.pop(index)
+      item.weight = 0
+    
     return item
 
   def clean(self) -> Self:
