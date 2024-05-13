@@ -32,7 +32,7 @@ def test_init():
   t = it.product(seqs, vals)
 
   for seq, val in t:
-    assert WL(*seq(list(val))) == e
+    assert WL(*seq([val])) == e
 
   assert e == WL(**{"sup": 2, "nova": 1})
 
@@ -41,7 +41,7 @@ def test_getitem():
   t = _default_()
 
   for i in range(0, 2):
-    assert t[0] == "sup"
+    assert t[i] == "sup"
   for i in range(2, 5):
     assert t[i] == "nova"
   for i in range(5, 10):
