@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import itertools
+from math import floor
 from random import random, choices, shuffle
 
 from copy import deepcopy
@@ -268,7 +269,15 @@ class WeightedList(list):
     If `drop` is `1`, the item’s weight will be decremented by 1. If `drop` is `True`, the entire item will be removed from the list.
     '''
 
-    raise NotImplementedError()
+    idx = floor(sum(self.iweights) * random())
+    item = self[idx]
+    
+    if drop is True:
+      self.pop(idx)
+    elif isinstance(drop, Number):
+      item.weight -= 1
+
+    return item
 
   def selects(self, count, *, replace = False, unique = False) -> Generator[Value, None, None]:
     '''Randomly select `count` values from the list.
@@ -279,12 +288,7 @@ class WeightedList(list):
       drop = True if unique else 1 if not replace else 0
 
     for i in range(count):
-      target = self.select(entire = True, drop = drop)
-      if not replace:
-        target.weight -= 1
-      if unique:
-        del target
-      yield target.value
+      yield self.select(entire = True, drop = drop).value
   
   def merge(self, other: WeightedList | LikeWeightedList = None) -> Self:
     '''Merge the list with another WeightedList-like iterable, increasing an item’s weight if it already exists, otherwise appending it.
