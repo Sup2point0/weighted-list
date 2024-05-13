@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-import random
+from random import random, choices, shuffle
 
 from copy import deepcopy
 from numbers import Number
@@ -262,13 +262,29 @@ class WeightedList(list):
     return deepcopy(self)
 
   ## SPECIALIST METHODS ##
-  def select(self, entire = False) -> Value | WeightedItem:
-    '''...
+  def select(self, *, entire = False, drop = False) -> Value | WeightedItem:
+    '''Randomly select a random item from the list. If `entire`, return the `WeightedItem` itself.
+
+    If `drop` is `1`, the item’s weight will be decremented by 1. If `drop` is `True`, the entire item will be removed from the list.
     '''
 
-  def selects(self, replace = False, unique = False) -> Generator[Value, None, None]:
-    '''...
+    raise NotImplementedError()
+
+  def selects(self, count, *, replace = False, unique = False) -> Generator[Value, None, None]:
+    '''Randomly select `count` values from the list.
     '''
+
+    if unique or not replace:
+      self = deepcopy(self)  # NOTE this does not mutate self
+      drop = True if unique else 1 if not replace else 0
+
+    for i in range(count):
+      target = self.select(entire = True, drop = drop)
+      if not replace:
+        target.weight -= 1
+      if unique:
+        del target
+      yield target.value
   
   def merge(self, other: WeightedList | LikeWeightedList = None) -> Self:
     '''Merge the list with another WeightedList-like iterable, increasing an item’s weight if it already exists, otherwise appending it.
@@ -288,6 +304,11 @@ class WeightedList(list):
 
     return self
 
+  def merged(self, other: WeightedList | LikeWeightedList = None) -> WeightedList:
+    '''Return a copy of the list with `self.merge()` applied.'''
+
+    return deepcopy(self).merge(other)
+
   def find(self,
     predicate: Callable[[WeightedItem], bool],
   ) -> Generator[WeightedItem, None, None]:
@@ -303,9 +324,9 @@ class WeightedList(list):
   def shuffle(self) -> Self:
     '''Shuffle value-weight pairings in the list, with values remaining in place while the weights move.'''
 
-    self.__init__(zip(self.values, random.shuffle(self.iweights)))
+    self.__init__(zip(self.values, shuffle(self.iweights)))
 
-  def normalise(self, factor: Number = 1) -> WeightedList:
+  def normalise(self, factor: Number = 1) -> Self:
     '''Scale all item weights such that they sum to 1.'''
 
     t = sum(self.iweights)
@@ -318,9 +339,7 @@ class WeightedList(list):
   def normalised(self) -> WeightedList:
     '''Return a copy of the list with `self.normalise()` applied.'''
 
-    new = deepcopy(self)
-    new.normalise()
-    return new
+    return deepcopy(self).normalise()
 
   def remove(self,
     predicate: Callable[[WeightedItem], bool],

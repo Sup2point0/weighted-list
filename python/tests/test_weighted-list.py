@@ -1,12 +1,10 @@
 import itertools as it
 
-import sys
-sys.path[0] = "/".join(sys.path[0].split("/")[:-1])
+# import sys
+# sys.path[0] = "/".join(sys.path[0].split("/")[:-1])
 
 from python import WeightedList as WL, WeightedItem as WI
 
-
-# t = test, e = expected
 
 def _default_():
   return WL(sup = 2, nova = 3, shard = 5)
@@ -47,11 +45,11 @@ def test_getitem():
   for i in range(5, 10):
     assert t[i].value == "shard"
 
-  for i in range(-10, -5):
+  for i in range(-10, -8):
     assert t[i].value == "sup"
-  for i in range(-5, -2):
+  for i in range(-8, -5):
     assert t[i].value == "nova"
-  for i in range(-2, 0):
+  for i in range(-5, 0):
     assert t[i].value == "shard"
 
 
@@ -154,5 +152,5 @@ def test_norm():
   e = WL(sup = 2/5, nova = 3/5)
   assert t.normalise() == e
 
-  e = WP(sup = 4/5, nova = 6/5)
+  e = WL(sup = 4/5, nova = 6/5)
   assert t.normalise(2) == e
