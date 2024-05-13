@@ -81,13 +81,25 @@ class WeightedList(list):
   def values(self) -> list[Value]:
     '''...'''
 
-    return [item.value for item in self]
+    return list(self.ivalues)
+
+  @ property
+  def ivalues(self) -> Generator[Value, None, None]:
+    '''...'''
+
+    return (item.value for item in self)
 
   @ property
   def weights(self) -> list[Number]:
     '''...'''
 
-    return [item.weight for item in self]
+    return list(self.iweights)
+
+  @ property
+  def iweights(self) -> Generator[Number, None, None]:
+    '''...'''
+
+    return (item.weight for item in self)
 
   ## INTERNAL ##
   def _sanitise_(self, item) -> WeightedItem:
@@ -151,7 +163,7 @@ class WeightedList(list):
     )
   
   def __bool__(self):
-    return any(self.weights)
+    return any(self.iweights)
 
   ## ITERABLE METHODS ##
   def __getitem__(self, index: Number | slice) -> WeightedItem:
@@ -167,7 +179,7 @@ class WeightedList(list):
     super().__delitem__(self._index_(index))
 
   def __len__(self) -> Number:
-    return sum(self.weights)
+    return sum(self.iweights)
 
   def __contains__(self, item: WeightedItem) -> bool:
     return any(each == item for each in self)
@@ -288,12 +300,12 @@ class WeightedList(list):
   def shuffle(self) -> Self:
     '''Shuffle value-weight pairings in the list, with values remaining in place while the weights move.'''
 
-    self.__init__(zip(self.values, random.shuffle(self.weights)))
+    self.__init__(zip(self.values, random.shuffle(self.iweights)))
 
   def normalise(self, factor: Number = 1) -> WeightedList:
     '''Scale all item weights such that they sum to 1.'''
 
-    t = self.total_weights()
+    t = sum(self.iweights)
 
     for item in self:
       item.weight *= factor / t
@@ -303,9 +315,9 @@ class WeightedList(list):
   def normalised(self) -> WeightedList:
     '''Return a copy of the list with `self.normalise()` applied.'''
 
-    copy = deepcopy(self)
-    copy.normalise()
-    return copy
+    new = deepcopy(self)
+    new.normalise()
+    return new
 
   def remove(self,
     predicate: Callable[[WeightedItem], bool],
