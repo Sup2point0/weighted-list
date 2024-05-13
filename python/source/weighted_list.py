@@ -83,25 +83,25 @@ class WeightedList(list):
   ## PROPERTIES ##
   @ property
   def values(self) -> list[Value]:
-    '''...'''
+    '''Return values of each item in the list.'''
 
     return list(self.ivalues)
 
   @ property
   def ivalues(self) -> Generator[Value, None, None]:
-    '''...'''
+    '''Return `self.values` as a generator.'''
 
     return (item.value for item in self)
 
   @ property
   def weights(self) -> list[Number]:
-    '''...'''
+    '''Return weights of each item in the list.'''
 
     return list(self.iweights)
 
   @ property
   def iweights(self) -> Generator[Number, None, None]:
-    '''...'''
+    '''Return `self.weights` as a generator.'''
 
     return (item.weight for item in self)
 
@@ -279,12 +279,18 @@ class WeightedList(list):
 
     return item
 
-  def selects(self, count, *, replace = False, unique = False) -> Generator[Value, None, None]:
+  def selects(self, count, *, replace = False, unique = False) -> list[Value]:
     '''Randomly select `count` values from the list.
     '''
 
+    return list(self.iselects(count, replace = replace, unique = unique))
+
+  def iselects(self, count, *, replace = False, unique = False) -> Generator[Value, None, None]:
+    '''Return `self.selects()` as a generator.'''
+
     if unique or not replace:
-      self = deepcopy(self)  # NOTE this does not mutate self
+      # NOTE this does not mutate the original list
+      self = deepcopy(self).merge()
       drop = True if unique else 1 if not replace else 0
 
     for i in range(count):
