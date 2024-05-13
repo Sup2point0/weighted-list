@@ -132,25 +132,25 @@ def test_merge():
   t = WL("sup")
   tt = WL("nova")
   e = WL("sup", "nova")
-  assert t.merge(tt) == e
+  assert t.merged(tt) == e
   assert t | tt == e
-  assert tt.merge(t) != e
+  assert tt.merged(t) != e
   assert tt | t != e
 
   t = WL("sup")
   e = WL(sup = 2)
-  assert t.merge(t) == e
+  assert t.merged(t) == e
   assert t | t == e
-  assert t.merge(t).merge(t) != e
+  assert t.merged(t).merged(t) != e
   assert t | t | t != e
-  assert t.merge(e) == e.merge(t)
+  assert t.merged(e) == e.merged(t)
   assert t | e == e | t
 
 
 def test_norm():
   t = WL(sup = 2, nova = 3)
   e = WL(sup = 2/5, nova = 3/5)
-  assert t.normalise() == e
+  assert t.normalised() == e
 
   e = WL(sup = 4/5, nova = 6/5)
-  assert t.normalise(2) == e
+  assert t.normalised(2) == e
