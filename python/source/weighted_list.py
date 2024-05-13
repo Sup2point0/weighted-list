@@ -45,6 +45,9 @@ class WeightedItem:
       self.weight == item.weight
     )
 
+  def __hash__(self):
+    return hash(repr(self))
+
 
 class WeightedList(list):
   '''A list of weighted items.
@@ -193,7 +196,7 @@ class WeightedList(list):
 
   def __mul__(self, value: int) -> Self:
     new = deepcopy(self)
-    super(new).__imul__(value)
+    new *= value
     return new
 
   def __rmul__(self, value: int) -> Self:
@@ -279,7 +282,7 @@ class WeightedList(list):
       for each in other:
         found = self.find(lambda item: item.value == each.value)
         if found:
-          found.weight += each.weight
+          next(found).weight += each.weight
         else:
           self.append(each)
 
