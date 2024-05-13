@@ -25,7 +25,7 @@ def test_item():
 def test_init():
   t = WL()
 
-  e = WL(WI("sup", 2), WI("nova", 1))
+  e = WL(WI("sup", 1))
 
   seqs = [tuple, list, set]
   vals = ["sup", (1, "sup"), WI("sup")]
@@ -34,25 +34,25 @@ def test_init():
   for seq, val in t:
     assert WL(*seq([val])) == e
 
-  assert e == WL(**{"sup": 2, "nova": 1})
+  assert e == WL(**{"sup": 1})
 
 
 def test_getitem():
   t = _default_()
 
   for i in range(0, 2):
-    assert t[i] == "sup"
+    assert t[i].value == "sup"
   for i in range(2, 5):
-    assert t[i] == "nova"
+    assert t[i].value == "nova"
   for i in range(5, 10):
-    assert t[i] == "shard"
+    assert t[i].value == "shard"
 
   for i in range(-10, -5):
-    assert t[i] == "sup"
+    assert t[i].value == "sup"
   for i in range(-5, -2):
-    assert t[i] == "nova"
+    assert t[i].value == "nova"
   for i in range(-2, 0):
-    assert t[i] == "shard"
+    assert t[i].value == "shard"
 
 
 def test_eq():
