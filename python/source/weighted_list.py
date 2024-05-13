@@ -40,7 +40,7 @@ class WeightedItem:
     return iter((self.value, self.weight))
   
   def __eq__(self, item):
-    return (
+    return isinstance(item, WeightedItem) and (
       self.value == item.value and 
       self.weight == item.weight
     )
