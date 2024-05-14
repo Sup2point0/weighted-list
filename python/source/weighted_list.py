@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import itertools
+from copy import deepcopy
 from math import floor
 from random import random, choices, shuffle
 
-from copy import deepcopy
+from collections.abc import Mapping
 from numbers import Number
 from typing import Any, Iterable, Generator, Callable
 from typing import Self, NoReturn
@@ -67,7 +68,8 @@ class WeightedList(list):
   - out-of-place: *present perfect* (`merged` `normalised`)
   '''
 
-  LikeWeightedList = Iterable[WeightedItem | tuple[Number, Value]]
+  LikeWeightedItem = tuple[Number, Value]
+  LikeWeightedList = Iterable[WeightedItem | LikeWeightedItem] | Mapping[Value, Number]
 
   def __init__(self, *items, **ktems):
     '''Create a weighted list.
