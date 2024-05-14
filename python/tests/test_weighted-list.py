@@ -1,8 +1,10 @@
 import itertools as it
-
 import math
 
 from python import WeightedList as WL, WeightedItem as WI
+
+
+ITERS = 10 ** 2
 
 
 def _default_():
@@ -184,6 +186,21 @@ def test_insert():
   t.insert(2, WI("nova", 3))
   e = _default_()
   assert t == e
+
+
+def test_select():
+  t = _default_()
+  e = t.values
+  for i in range(ITERS):
+    assert t.select() in e
+
+
+def test_selects():
+  t = _default_()
+  e = list(t.as_raw())
+  assert e == t.selects(7, replace = False)
+  e == t.values()
+  assert e == t.selects(7, replace = False, unique = True)
 
 
 def test_merge():
