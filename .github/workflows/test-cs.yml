@@ -27,10 +27,8 @@ jobs:
           cd c-sharp
           dotnet restore
 
-      - name: '.NET - build'
+      - name: '.NET - test'
         run: |
           cd c-sharp/weighted-list
           dotnet build --no-restore
-
-      - name: '.NET - test'
-        run: dotnet test --no-build --verbosity normal
+          dotnet test --no-build --verbosity normal
