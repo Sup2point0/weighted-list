@@ -28,7 +28,9 @@ jobs:
           dotnet restore
 
       - name: '.NET - build'
-        run: dotnet build --no-restore
+        run: |
+          cd weighted-list
+          dotnet build --no-restore
 
       - name: '.NET - test'
         run: dotnet test --no-build --verbosity normal
