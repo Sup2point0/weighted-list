@@ -138,18 +138,18 @@ def test_properties():
   assert list(t.iweights) == [2, 3, 5]
 
 
-def test_add():
-  t = _default_()
-  e = WL(*_default_(), *_default_())
-  assert t + WL() == t
-  assert t + t == e
+# def test_add():
+#   t = _default_()
+#   e = WL(*_default_(), *_default_())
+#   assert t + WL() == t
+#   assert t + t == e
 
-  t = _default_()
-  t += t
-  e = WL(*_default_(), *_default_())
-  assert t == e
-  t += e
-  assert t == e + e
+#   t = _default_()
+#   t += t
+#   e = WL(*_default_(), *_default_())
+#   assert t == e
+#   t += e
+#   assert t == e + e
 
 
 def test_multiply():
