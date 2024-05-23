@@ -103,14 +103,6 @@ def test_delitem():
   assert t == e
 
 
-def test_len():
-  t = _default_()
-  assert len(t) == 10
-
-  t = WL()
-  assert len(t) == 0
-
-
 def test_contains():
   t = _default_()
 
@@ -128,14 +120,22 @@ def test_iter():
   assert WL(*e) == _default_()
 
 
+def test_total():
+  t = _default_()
+  assert t.total == 10
+
+  t = WL()
+  assert t.total == 0
+
+
 def test_properties():
   t = _default_()
 
   assert t.values == ["sup", "nova", "shard"]
-  assert list(t.ivalues) == ["sup", "nova", "shard"]
+  assert list(t.ivalues()) == ["sup", "nova", "shard"]
 
   assert t.weights == [2, 3, 5]
-  assert list(t.iweights) == [2, 3, 5]
+  assert list(t.iweights()) == [2, 3, 5]
 
 
 # def test_add():
@@ -198,9 +198,9 @@ def test_select():
 def test_selects():
   t = _default_()
   e = list(t.as_raw())
-  assert e == t.selects(7, replace = False)
-  e == t.values()
-  assert e == t.selects(7, replace = False, unique = True)
+  assert sorted(e) == sorted(t.selects(10, replace = False))
+  e = t.values
+  assert sorted(e) == sorted(t.selects(3, replace = False, unique = True))
 
 
 def test_merge():
