@@ -29,7 +29,7 @@ jobs:
 
       - name: '.NET - build'
         run: |
-          cd weighted-list
+          cd c-sharp/weighted-list
           dotnet build --no-restore
 
       - name: '.NET - test'
