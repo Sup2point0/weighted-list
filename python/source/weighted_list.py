@@ -84,12 +84,17 @@ class WeightedList(list):
 
   ## PROPERTIES ##
   @ property
+  def total(self) -> Number:
+    '''Total weight of all items in the list.'''
+
+    return sum(self.iweights())
+
+  @ property
   def values(self) -> list[Value]:
     '''Return values of each item in the list.'''
 
-    return list(self.ivalues)
+    return list(self.ivalues())
 
-  @ property
   def ivalues(self) -> Generator[Value, None, None]:
     '''Return `self.values` as a generator.'''
 
@@ -99,14 +104,13 @@ class WeightedList(list):
   def weights(self) -> list[Number]:
     '''Return weights of each item in the list.'''
 
-    return list(self.iweights)
+    return list(self.iweights())
 
-  @ property
   def iweights(self) -> Generator[Number, None, None]:
     '''Return `self.weights` as a generator.'''
 
     return (item.weight for item in self)
-
+  
   ## INTERNAL ##
   def _sanitise_(self, item) -> WeightedItem:
     '''Convert an input `item` to a suitable `WeightedItem`.'''
@@ -150,7 +154,7 @@ class WeightedList(list):
           return item if depth else idx
         idx += 1
     
-    raise IndexError(f"WeightedList index out of range (tried accessing {index} but list is length {len(self)})")
+    raise IndexError(f"WeightedList index out of range (tried accessing {index} but list is length {self.total})")
 
   ## CORE ##
   def __repr__(self):
@@ -172,7 +176,7 @@ class WeightedList(list):
     )
   
   def __bool__(self):
-    return any(self.iweights)
+    return any(self.iweights())
 
   ## ITERABLE METHODS ##
   def __getitem__(self, index: Number | slice) -> WeightedItem:
@@ -186,9 +190,6 @@ class WeightedList(list):
 
   def __delitem__(self, index) -> NoReturn:
     super().__delitem__(self._index_(index))
-
-  def __len__(self) -> Number:
-    return sum(self.iweights)
 
   def __contains__(self, item: WeightedItem) -> bool:
     return any(each == item for each in self)
@@ -274,12 +275,13 @@ class WeightedList(list):
     If `drop` is `1`, the item’s weight will be decremented by 1. If `drop` is `True`, the entire item will be removed from the list.
     '''
 
-    idx = floor(sum(self.iweights) * random())
-    return (
+    idx = floor(self.total * random())
+    out = (
       self.pop(idx) if drop is True else
       self.drop(idx) if drop == 1 else
       self[idx]
     )
+    return out if entire else out.value
 
   def selects(self, count, *, replace = False, unique = False) -> list[Value]:
     '''Randomly select `count` values from the list.
@@ -296,7 +298,7 @@ class WeightedList(list):
       drop = True if unique else 1 if not replace else 0
 
     for i in range(count):
-      yield self.select(entire = True, drop = drop).value
+      yield self.select(drop = drop)
   
   def merge(self, other: WeightedList | LikeWeightedList = None) -> Self:
     '''Merge the list with another WeightedList-like iterable, increasing an item’s weight if it already exists, otherwise appending it.
@@ -329,19 +331,22 @@ class WeightedList(list):
     return (item for item in self if predicate(item))
 
   def count(self, item: WeightedItem) -> int:
-    '''...'''
+    '''Calculate total weight of all occurrences of an item in the list.'''
 
-    return sum(each == item for each in self)
+    return sum(each.weight for each in self if each == item)
 
   def shuffle(self) -> Self:
     '''Shuffle value-weight pairings in the list, with values remaining in place while the weights move.'''
 
-    self.__init__(zip(self.values, shuffle(self.iweights)))
+    self.__init__(zip(
+      self.values,
+      shuffle(self.iweights())
+    ))
 
   def normalise(self, factor: Number = 1) -> Self:
     '''Scale all item weights such that they sum to 1.'''
 
-    t = sum(self.iweights)
+    t = self.total
 
     for item in self:
       item.weight *= factor / t
@@ -394,7 +399,7 @@ class WeightedList(list):
     '''
 
     return (
-      item for item in self
+      item.value for item in self
       for i in range(loop(item.weight))
     )
 
