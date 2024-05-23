@@ -1,7 +1,7 @@
 <doc[head]>
-weighted-list
-A hypothetical supcode implementation
-v2.0
+  weighted-list
+  A hypothetical supcode implementation
+  v2.0
 </>
 
 < spec
@@ -41,7 +41,7 @@ create struct[list] 'Weighted-List' [
       Creates a weighted list.
 
       `items~` should be 2-item `list`s with the weight followed by the value.
-      </doc>
+      </>
 
       super.create(items~)
    }
@@ -52,10 +52,11 @@ create struct[list] 'Weighted-List' [
      | .flags slots[lazy] = none
      | 'lazy' [bool, flag] = false
    ] ~ sequence[self.type-value] {
-      \{ Values of each item in the list.
+      <doc>
+      Values of each item in the list.
 
-         If `lazy`, returns a lazily-evaluated sequence instead of a list.
-      }\
+      If `lazy`, returns a lazily-evaluated sequence instead of a list.
+      </>
 
       set 'values' = { for item in self | item.value }
       out {
@@ -91,19 +92,12 @@ create struct[list] 'Weighted-List' [
       out self.select().value
    }
 
-   define self.selects() ~ self.value-type(s) [
-     | 'count' int
-     <pars[set]>
-     | 
-     </>
-   ] {
-      
-   }
-
    <sec 'internal'>
 
-   define self.'.unweight-index'(int 'index') ~ int {
-      \{ Converts a weighted index to a non-weighted index in the internal list. }\
+   define self..unweight-index(int 'index') ~ int {
+      <doc>
+      Converts a weighted index to a non-weighted index in the internal list.
+      </>
 
       set 'weight' = 0
       set 'back' = (index < 0)
@@ -116,5 +110,5 @@ create struct[list] 'Weighted-List' [
       }
    }
 
-   </sec/>
+   <//>
 }
