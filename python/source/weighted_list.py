@@ -179,7 +179,7 @@ class WeightedList(list):
     return self._index_(index, depth = True)
   
   def __setitem__(self, index, item: WeightedItem) -> NoReturn:
-    self[index] = self._sanitise_(item)
+    super().__setitem__(self._index_(index), self._sanitise_(item))
 
   def __delitem__(self, index) -> NoReturn:
     super().__delitem__(self._index_(index))
