@@ -125,6 +125,9 @@ class WeightedList(list):
 
     i, idx = 0, 0
 
+    if not self:
+      return 0
+
     if index < 0:
       for item in reversed(self):
         if not item.weight > 0:
@@ -147,7 +150,7 @@ class WeightedList(list):
           return item if depth else idx
         idx += 1
     
-    raise IndexError("WeightedList index out of range")
+    raise IndexError(f"WeightedList index out of range (tried accessing {index} but list is length {len(self)})")
 
   ## CORE ##
   def __repr__(self):
