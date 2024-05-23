@@ -23,7 +23,9 @@ jobs:
           dotnet-version: 8.0.x
         
       - name: '.NET - restore'
-        run: dotnet restore
+        run: |
+          cd c-sharp
+          dotnet restore
 
       - name: '.NET - build'
         run: dotnet build --no-restore
