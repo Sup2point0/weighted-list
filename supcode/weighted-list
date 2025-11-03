@@ -1,0 +1,114 @@
+<doc[head]>
+  weighted-list
+  A hypothetical supcode implementation
+  v2.0
+</>
+
+< spec
+| ver = 6.0
+| sty = utinax.neo
+>
+
+activate random
+
+
+create struct 'Weighted-Item' {
+   <doc>
+   An item within a `Weighted-List` with a `value` and `weight`.
+   </>
+
+   var 'value'
+   numeric 'weight' = 1
+
+   auto evolve create self() [self..vars~]
+
+   evolve .unpack self() {
+      out self.value, self.weight
+   }
+}
+
+
+create struct[list] 'Weighted-List' [
+  | 'type-value' struct
+  | 'type-weight' struct[numeric]
+] {
+   <doc>
+   A list of weighted items.
+   </>
+
+   evolve create self('items'~ list[type-weight, type-value]) {
+      <doc>
+      Creates a weighted list.
+
+      `items~` should be 2-item `list`s with the weight followed by the value.
+      </>
+
+      super.create(items~)
+   }
+
+   <sec 'properties'>
+
+   define self.'values'[
+     | .flags slots[lazy] = none
+     | 'lazy' [bool, flag] = false
+   ] ~ sequence[self.type-value] {
+      <doc>
+      Values of each item in the list.
+
+      If `lazy`, returns a lazily-evaluated sequence instead of a list.
+      </>
+
+      set 'values' = { for item in self | item.value }
+      out {
+         if lazy or lazy in .flags then
+         values else list(values)
+      }
+   }
+
+   <sec 'interfaces'>
+
+   evolve self#(index) ~ Weighted-Item {
+      set 'idx' = self..unweight-index(index)
+      out super#idx
+   }
+
+   evolve length(self) ~ self.type-weight {
+      out sum(self.weights[lazy])
+   }
+
+   evolve self.last-index {
+      out length(self) - 1
+   }
+
+   <sec 'methods'>
+
+   define self.select()  {
+      set 'rand' = { if self.type-weight is int then random.rand-int else random.rand-float }
+      set 'idx' = rand(self.last-index)
+      out self#idx
+   }
+
+   define self.select-value() ~ self.value-type {
+      out self.select().value
+   }
+
+   <sec 'internal'>
+
+   define self..unweight-index(int 'index') ~ int {
+      <doc>
+      Converts a weighted index to a non-weighted index in the internal list.
+      </>
+
+      set 'weight' = 0
+      set 'back' = (index < 0)
+
+      loop for item in self {
+         alt weight + item.weight * sign(back)
+         if { if back then (weight < index) else (weight > index) } {
+            out loop.count
+         }
+      }
+   }
+
+   <//>
+}

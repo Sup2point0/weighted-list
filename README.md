@@ -5,7 +5,7 @@
   <img src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-cs.yml/badge.svg">
 </div>
 
-A class representing a list of weighted items, available in both Python and C#.
+A class representing a list of weighted items, implemented (eventually) in every language I’ve learnt.
 
 
 ```py
@@ -66,7 +66,7 @@ The prime example of this is lootbox or reward systems in games, where items hav
 
 The project is not available as a package.[^package] Instead, just download the relevant files, or copy and paste the code directly.
 
-[^package]: I don't think it’s a large enough project to warrant an entire package, when you could just copy and paste the code directly.
+[^package]: I don’t think it’s a large enough project to warrant an entire package, when you could just copy and paste the code directly.
 
 > [!TIP]
 > Walkthroughs and specimens for each language can be found in their respective folders.

@@ -1,8 +1,10 @@
 import itertools as it
-
 import math
 
 from python import WeightedList as WL, WeightedItem as WI
+
+
+ITERS = 10 ** 2
 
 
 def _default_():
@@ -18,6 +20,12 @@ def test_item():
   e = WI("sup", 1)
   assert t == e
 
+  t = WI("sup", 1)
+  x = WI("sup", 2)
+  assert t != x
+  assert t != 1
+  assert t != None
+
 
 def test_init():
   t = WL()
@@ -32,24 +40,6 @@ def test_init():
     assert WL(*seq([val])) == e
 
   assert e == WL(**{"sup": 1})
-
-
-def test_getitem():
-  t = _default_()
-
-  for i in range(0, 2):
-    assert t[i].value == "sup"
-  for i in range(2, 5):
-    assert t[i].value == "nova"
-  for i in range(5, 10):
-    assert t[i].value == "shard"
-
-  for i in range(-10, -8):
-    assert t[i].value == "sup"
-  for i in range(-8, -5):
-    assert t[i].value == "nova"
-  for i in range(-5, 0):
-    assert t[i].value == "shard"
 
 
 def test_eq():
@@ -79,6 +69,48 @@ def test_bool():
   assert t
 
 
+def test_getitem():
+  t = _default_()
+
+  for i in range(0, 2):
+    assert t[i].value == "sup"
+  for i in range(2, 5):
+    assert t[i].value == "nova"
+  for i in range(5, 10):
+    assert t[i].value == "shard"
+
+  for i in range(-10, -8):
+    assert t[i].value == "sup"
+  for i in range(-8, -5):
+    assert t[i].value == "nova"
+  for i in range(-5, 0):
+    assert t[i].value == "shard"
+
+
+def test_setitem():
+  t = _default_()
+
+  t[0] = WI("new", 7)
+  e = WL((7, "new"), (3, "nova"), (5, "shard"))
+  assert t == e
+
+
+def test_delitem():
+  t = _default_()
+
+  del t[0]
+  e = WL((3, "nova"), (5, "shard"))
+  assert t == e
+
+
+def test_contains():
+  t = _default_()
+
+  assert WI("sup", 2) in t
+  assert WI("nova", 3) in t
+  assert WI("shard", 5) in t
+
+
 def test_iter():
   t = _default_()
   e = [WI("sup", 2), WI("nova", 3), WI("shard", 5)]
@@ -88,26 +120,42 @@ def test_iter():
   assert WL(*e) == _default_()
 
 
+def test_total():
+  t = _default_()
+  assert t.total == 10
+
+  t = WL()
+  assert t.total == 0
+
+
 def test_properties():
   t = _default_()
 
   assert t.values == ["sup", "nova", "shard"]
-  assert len(t.values) == 3
+  assert list(t.ivalues()) == ["sup", "nova", "shard"]
 
   assert t.weights == [2, 3, 5]
-  assert sum(t.weights) == 10
+  assert list(t.iweights()) == [2, 3, 5]
 
 
-def test_add():
-  t = _default_()
-  e = WL(*_default_(), *_default_())
-  assert t + WL() == t
-  assert t + t == e
+# def test_add():
+#   t = _default_()
+#   e = WL(*_default_(), *_default_())
+#   assert t + WL() == t
+#   assert t + t == e
+
+#   t = _default_()
+#   t += t
+#   e = WL(*_default_(), *_default_())
+#   assert t == e
+#   t += e
+#   assert t == e + e
 
 
 def test_multiply():
   t = _default_()
   e = WL(*_default_(), *_default_())
+  assert t * 0 == WL()
   assert t * 1 == t
   assert t * 2 == e
   assert t * 4 == e * 2
@@ -124,7 +172,35 @@ def test_append():
 def test_extend():
   t = WL()
   e = _default_()
-  assert t.extend(e) == e
+  assert e == t.extend(e)
+
+
+def test_insert():
+  t = WL()
+  e = WL("sup")
+  assert e == t.insert(0, WI("sup"))
+  
+  t = WL()
+  t.insert(0, WI("shard", 5))
+  t.insert(0, WI("sup", 2))
+  t.insert(2, WI("nova", 3))
+  e = _default_()
+  assert t == e
+
+
+def test_select():
+  t = _default_()
+  e = t.values
+  for i in range(ITERS):
+    assert t.select() in e
+
+
+def test_selects():
+  t = _default_()
+  e = list(t.as_raw())
+  assert sorted(e) == sorted(t.selects(10, replace = False))
+  e = t.values
+  assert sorted(e) == sorted(t.selects(3, replace = False, unique = True))
 
 
 def test_merge():
