@@ -3,6 +3,9 @@
 # Python
 __pycache__/
 
-# C-sharp
+# C#
 bin/
 obj/
+
+# Haskell
+dist-newstyle/
