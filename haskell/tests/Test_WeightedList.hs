@@ -9,11 +9,12 @@ import Syntax
 import WeightedList
 
 
+test_weighted_list :: TestTree
 test_weighted_list = testGroup "WeightedList"
   [ test_collection "constructor" test_constructor
   , test_collection "properties" test_properties
   , test_collection "indexing" test_indexing
-  ] :: TestTree
+  ]
 
 
 l  = [(2, "sup"), (3, "nova"), (7, "shard")]
@@ -21,18 +22,18 @@ wl = newWeightedList l
   :: WeightedList String Int
 
 
+test_constructor :: [Assertion]
 test_constructor =
   [
     newWeightedList @String @Int [] === []
 
-  , wl === [ WeightedItem { value = "sup", weight = 2 }
-           , WeightedItem { value = "nova", weight = 3 }
-           , WeightedItem { value = "shard", weight = 7 }
+  , wl === [ WeightedItem { value = "sup", weight = 2, c_weight = 2 }
+           , WeightedItem { value = "nova", weight = 3, c_weight = 5 }
+           , WeightedItem { value = "shard", weight = 7, c_weight = 12 }
            ]
-  
-  ] :: [Assertion]
+  ]
 
-
+test_properties :: [Assertion]
 test_properties =
   [
     total_values wl === 3
@@ -43,7 +44,7 @@ test_properties =
   , raw' wl === map swap l
   ]
 
-
+test_indexing :: [Assertion]
 test_indexing =
   [
     value (get wl 0)  === "sup"
@@ -58,5 +59,4 @@ test_indexing =
   , value (get wl 9)  === "shard"
   , value (get wl 10) === "shard"
   , value (get wl 11) === "shard"
-  
-  ] :: [Assertion]
+  ]
