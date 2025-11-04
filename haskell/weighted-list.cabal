@@ -6,26 +6,23 @@ license:            MIT
 author:             Sup#2.0
 build-type:         Simple
 
-common warnings
-    ghc-options: -Wall
-
 library
-    import:           warnings
     exposed-modules:  WeightedList
     -- other-modules:
     -- other-extensions:
     build-depends:    base ^>=4.18.3.0
     hs-source-dirs:   source
-    default-language: Haskell2010
+    default-language: GHC2021
 
 test-suite weighted-list-test
-    import:           warnings
-    default-language: Haskell2010
-    -- other-modules:
+    default-language: GHC2021
+    other-modules:    Syntax, Test_WeightedList
     -- other-extensions:
     type:             exitcode-stdio-1.0
     hs-source-dirs:   tests
     main-is:          tests.hs
     build-depends:
         base ^>=4.18.3.0,
-        weighted-list
+        weighted-list,
+        tasty,
+        tasty-hunit >=0.9
