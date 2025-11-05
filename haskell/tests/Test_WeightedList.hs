@@ -59,4 +59,17 @@ test_indexing =
   , value (get wl 9)  === "shard"
   , value (get wl 10) === "shard"
   , value (get wl 11) === "shard"
+
+  , value (get wl (-1))  === "shard"
+  , value (get wl (-2))  === "shard"
+  , value (get wl (-3))  === "shard"
+  , value (get wl (-4))  === "shard"
+  , value (get wl (-5))  === "shard"
+  , value (get wl (-6))  === "shard"
+  , value (get wl (-7))  === "shard"
+  , value (get wl (-8))  === "nova"
+  , value (get wl (-9))  === "nova"
+  , value (get wl (-10)) === "nova"
+  , value (get wl (-11)) === "sup"
+  , value (get wl (-12)) === "sup"
   ]
