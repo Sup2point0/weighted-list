@@ -1,0 +1,26 @@
+name: 'Test Haskell'
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: '30 4 * * 2,6'
+  
+  push:
+    paths: '**.hs'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'Git - checkout'
+        uses: actions/checkout@v4
+
+      - name: Setup Haskell
+        uses: haskell-actions/setup@v2.8.2
+
+      - name: 'cabal - test'
+        run: |
+          cd haskell
+          cabal test
