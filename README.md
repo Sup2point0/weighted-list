@@ -3,15 +3,13 @@
 <div align="center">
   <img alt="Python Tests Status"
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-py.yml/badge.svg" />
-  
   <img alt="C# Tests Status"
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-cs.yml/badge.svg" />
-  
   <img alt="Haskell Tests Status"
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-hs.yml/badge.svg" />
 </div>
 
-A class representing a list of weighted items, implemented (eventually) in every language I’ve learnt.
+A wrapper for weighted randomisation, implemented (eventually) in every language I’ve learnt.
 
 
 ```py
@@ -47,6 +45,7 @@ main :: IO ()
 main = print(
     select greetings
   )
+-- salutations
 ```
 
 
@@ -55,7 +54,7 @@ main = print(
 
 ## Purposes
 
-> [!TIP]
+> [!Tip]
 > For the full rationale behind this project, see [rationale](rationale.md).
 
 Mainly intended for *weighted randomisation*, where each element can have a different chance of being selected (its weight).
