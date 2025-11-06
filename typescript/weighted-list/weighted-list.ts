@@ -21,7 +21,6 @@ export class WeightedList<Value>
   constructor(...items: LikeWeightedItem<Value>[])
   {
     this.#data = items.map(WeightedList.#sanitise);
-    console.log("this.#data =", this.#data);
   }
 
   /**
@@ -140,6 +139,23 @@ export class WeightedList<Value>
   }
 
 
+  // == CORE == //
+
+  /**
+   * Create a clone of the `WeightedList` and the `WeightedItem`s it contains. Values stored in the `WeightedItem`s are not cloned.
+   */
+  clone(): WeightedList<Value>
+  {
+    /* @ts-ignore */
+    return [
+      ...this.#data.map(
+        /* @ts-ignore */
+        ({ weight, value }) => ({ weight, value })
+      )
+    ];
+  }
+
+
   // == ARRAY METHODS == //
 
   at(weighted_index: number): WeightedItem<Value> | undefined
@@ -166,6 +182,65 @@ export class WeightedList<Value>
 
     return this;
   }
+
+
+  // == SPECIALIST METHODS == //
+
+  /**
+   * Randomly select a single `WeightedItem` from the list using weighted randomisation.
+   * 
+   * @returns A randomly selected `WeightedItem`. Use `.value` to access its value.
+   */
+  select_single(): WeightedItem<Value>
+  {
+    let idx = Math.floor(Math.random() * this.length);
+    let out = this.at(idx)!;
+
+    return out;
+  }
+
+  *select_random(
+    count: number = 1,
+    options?: WeightedSelectionOptions
+  ): Generator<WeightedItem<Value>>
+  {
+    const DEFAULTS = {
+      replace: true,
+      entire: false,
+      unique: false,
+    };
+
+    options = Object.assign(DEFAULTS, options);
+
+    let out: WeightedItem<Value>;
+    let list = this.clone();
+
+    for (let i = 0; i < count; i++)
+    {
+      if (list.length < 1) {
+        break;
+      }
+
+      let idx = Math.floor(Math.random() * this.length);
+      out = this.at(idx)!;
+
+      if (options.unique) {
+        throw new Error("Not implemented yet!");
+      }
+      else if (!options.replace) {
+        out.weight -= 1;
+      }
+
+      yield out;
+    }
+  }
+}
+
+
+interface WeightedSelectionOptions {
+  entire?: boolean;
+  replace?: boolean;
+  unique?: boolean
 }
 
 

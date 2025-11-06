@@ -1,0 +1,17 @@
+{
+  "name": "weighted-list",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "main": "weighted-list/weighted-list.ts",
+  "scripts": {
+    "test": "vitest",
+    "testx": "vitest --ui",
+    "test-run": "vitest run"
+  },
+  "devDependencies": {
+    "@vitest/ui": "latest",
+    "vite": "latest",
+    "vitest": "^4.0.7"
+  }
+}
