@@ -85,24 +85,28 @@ export class WeightedList<Value>
   {
     let out: WeightedItem<Value>;
 
-    if ("value" in item && "weight" in item) {
+    if (typeof item === "object" && "value" in item && "weight" in item) {
       out = {
         weight: item.weight,
         value: item.value
       };
     }
-    else {
-      if (typeof item[Symbol.iterator] !== "function") {
-        throw new TypeError("Invalid object format for WeightedItem");
-      }
-
+    else if (typeof item[Symbol.iterator] === "function" && typeof item !== "string") {
       if (item.length < 2) {
         throw new TypeError(
           `Expected 2 values in WeightedItem, but received ${item.length}`
         );
       }
 
-      out = { weight: item[0], value: item[1] };
+      try {
+        out = { weight: item[0], value: item[1] };
+      }
+      catch {
+        throw new TypeError("Invalid object format for WeightedItem");
+      }
+    }
+    else {
+      out = { weight: 1, value: item as Value };
     }
 
     return WeightedList.#check(out);
@@ -147,12 +151,12 @@ export class WeightedList<Value>
   clone(): WeightedList<Value>
   {
     /* @ts-ignore */
-    return [
+    return new WeightedList(
       ...this.#data.map(
         /* @ts-ignore */
         ({ weight, value }) => ({ weight, value })
       )
-    ];
+    );
   }
 
 
@@ -180,6 +184,14 @@ export class WeightedList<Value>
       this.#data.push({ weight, value: value as Value });
     }
 
+    console.log("this =", this);
+
+    return this;
+  }
+
+  clear(): WeightedList<Value>
+  {
+    this.#data = [];
     return this;
   }
 

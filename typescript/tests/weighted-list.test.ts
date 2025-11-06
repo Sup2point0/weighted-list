@@ -15,40 +15,66 @@ test("constructors", () => {
     shard: 7,
   });
 
-  expect( test ).toStrictEqual( wl );
+  assert.deepEqual( test, wl );
 });
 
 test("properties", () => {
-  expect( wl.length ).toBe( 12 );
-  expect( wl.total_weights ).toBe( 12 );
-  expect( wl.total_values ).toBe( 3 );
+  assert( wl.length        === 12 );
+  assert( wl.total_weights === 12 );
+  assert( wl.total_values  === 3 );
 
-  expect( wl.weights() ).toStrictEqual( [2, 3, 7] );
-  expect( wl.values() ).toStrictEqual( ["sup", "nova", "shard"] );
-  expect( wl.entries().toArray() ).toStrictEqual([
+  assert.deepEqual( wl.weights(), [2, 3, 7] );
+  assert.deepEqual( wl.values(), ["sup", "nova", "shard"] );
+  assert.deepEqual( wl.entries().toArray(), [
     [0, { weight: 2, value: "sup" }],
     [1, { weight: 3, value: "nova" }],
     [2, { weight: 7, value: "shard" }],
   ]);
-  expect( wl.raw() ).toStrictEqual([
+  assert.deepEqual( wl.raw(), [
     [2, "sup"],
     [3, "nova"],
     [7, "shard"],
   ]);
 });
 
+test("clone", () => {
+  let t = wl.clone().clear();
+  assert(t !== wl);
+});
+
 test("at", () => {
-  expect( wl.at(0)!.value ).toBe( "sup" );
-  expect( wl.at(1)!.value ).toBe( "sup" );
-  expect( wl.at(2)!.value ).toBe( "nova" );
-  expect( wl.at(3)!.value ).toBe( "nova" );
-  expect( wl.at(4)!.value ).toBe( "nova" );
-  expect( wl.at(5)!.value ).toBe( "shard" );
-  expect( wl.at(6)!.value ).toBe( "shard" );
-  expect( wl.at(7)!.value ).toBe( "shard" );
-  expect( wl.at(8)!.value ).toBe( "shard" );
-  expect( wl.at(9)!.value ).toBe( "shard" );
-  expect( wl.at(10)!.value ).toBe( "shard" );
-  expect( wl.at(11)!.value ).toBe( "shard" );
-  expect( wl.at(12) ).toBe( undefined );
+  assert( wl.at(0)!.value === "sup" );
+  assert( wl.at(1)!.value === "sup" );
+  assert( wl.at(2)!.value === "nova" );
+  assert( wl.at(3)!.value === "nova" );
+  assert( wl.at(4)!.value === "nova" );
+  assert( wl.at(5)!.value === "shard" );
+  assert( wl.at(6)!.value === "shard" );
+  assert( wl.at(7)!.value === "shard" );
+  assert( wl.at(8)!.value === "shard" );
+  assert( wl.at(9)!.value === "shard" );
+  assert( wl.at(10)!.value === "shard" );
+  assert( wl.at(11)!.value === "shard" );
+  assert( wl.at(12)        === undefined );
+});
+
+test("push", () => {
+  assert.deepEqual(
+    wl.clone().push({ weight: 13, value: "cortex" }).raw(),
+    [
+      [2, "sup"],
+      [3, "nova"],
+      [7, "shard"],
+      [13, "cortex"],
+    ]
+  );
+
+  assert.deepEqual( wl.clone().push("unit").raw(),
+    [
+      [2, "sup"],
+      [3, "nova"],
+      [7, "shard"],
+      [1, "unit"],
+    ]
+  );
 });
