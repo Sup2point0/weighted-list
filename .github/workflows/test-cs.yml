@@ -16,20 +16,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 'Git - checkout'
+      - name: 'git / checkout'
         uses: actions/checkout@v4
 
-      - name: '.NET - setup'
+      - name: '.NET / setup'
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
         
-      - name: '.NET - restore'
+      - name: '.NET / restore'
         run: |
           cd c-sharp
           dotnet restore
 
-      - name: '.NET - test'
+      - name: '.NET / test'
         run: |
           cd c-sharp/weighted-list
           dotnet build --no-restore

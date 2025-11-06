@@ -1,8 +1,14 @@
 <h1 align="center"> <code> weighted-list </code> </h1>
 
 <div align="center">
-  <img src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-py.yml/badge.svg">
-  <img src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-cs.yml/badge.svg">
+  <img alt="Python Tests Status"
+    src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-py.yml/badge.svg" />
+  
+  <img alt="C# Tests Status"
+    src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-cs.yml/badge.svg" />
+  
+  <img alt="Haskell Tests Status"
+    src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-hs.yml/badge.svg" />
 </div>
 
 A class representing a list of weighted items, implemented (eventually) in every language I’ve learnt.
@@ -27,6 +33,20 @@ WeightedList<string, int> greetings = new(
 
 Console.WriteLine(greetings.GetRandomValue());
 // salutations
+```
+
+```hs
+-- Haskell
+greetings :: WeightedList String Int
+greetings = newWeightedList
+  [ (2, "sup")
+  , (20, "salutations")
+  ]
+
+main :: IO ()
+main = print(
+    select greetings
+  )
 ```
 
 
