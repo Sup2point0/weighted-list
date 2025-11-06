@@ -1,6 +1,6 @@
 type LikeWeightedItem<Value> = (
     WeightedItem<Value>
-  | [Value, any]
+  | [number, any]
 );
 
 
@@ -20,15 +20,25 @@ export class WeightedList<Value>
 
   constructor(...items: LikeWeightedItem<Value>[])
   {
-    this.#data = items.map(this.#sanitise);
+    this.#data = items.map(WeightedList.#sanitise);
+    console.log("this.#data =", this.#data);
   }
 
+  /**
+   * Construct a `WeightedList` from a provided object, where `key: value` pairs become `{ value: key, weight: value }` objects.
+   * 
+   * ```ts
+   * >>> WeightedList.from_object({ sup: 2, nova: 3 })
+   * WeightedList [ { value: "sup", weight: 2 },
+   *                { value: "nova", weight: 3 } ]
+   * ```
+   */
   static from_object(list: object)
   {
     let out = new WeightedList();
     
     out.#data = Object.entries(list).map(
-      ([value, weight]) => out.#check({ weight, value })
+      ([value, weight]) => WeightedList.#check({ weight, value })
     );
 
     return out;
@@ -39,6 +49,14 @@ export class WeightedList<Value>
 
   get length() {
     return this.#data.reduce((acc, item) => acc + item.weight, 0);
+  }
+
+  get total_values() {
+    return this.#data.length;
+  }
+
+  get total_length() {
+    return this.length;
   }
 
   values(): Value[]
@@ -64,7 +82,7 @@ export class WeightedList<Value>
 
   // == INTERNAL == //
 
-  #sanitise(item): WeightedItem<Value>
+  static #sanitise<Value>(item: LikeWeightedItem<Value>): WeightedItem<Value>
   {
     let out: WeightedItem<Value>;
 
@@ -88,10 +106,10 @@ export class WeightedList<Value>
       out = { weight: item[0], value: item[1] };
     }
 
-    return this.#check(out);
+    return WeightedList.#check(out);
   }
 
-  #check(item: WeightedItem<Value>): WeightedItem<Value>
+  static #check<Value>(item: WeightedItem<Value>): WeightedItem<Value>
   {
     if (typeof item.weight !== "number") {
       throw new TypeError(
@@ -122,14 +140,6 @@ export class WeightedList<Value>
   }
 
 
-  // == CORE == //
-
-  toString()
-  {
-    return `WeightedList(${this.#data.toString()})`;
-  }
-
-
   // == ARRAY METHODS == //
 
   at(weighted_index: number): WeightedItem<Value> | undefined
@@ -148,7 +158,7 @@ export class WeightedList<Value>
   ): WeightedList<Value>
   {
     if (weight === undefined) {
-      this.#data.push(this.#sanitise(value));
+      this.#data.push(WeightedList.#sanitise(value as WeightedItem<Value>));
     }
     else {
       this.#data.push({ weight, value: value as Value });
