@@ -142,3 +142,40 @@ get list i
         | otherwise  = Left t'
       where
         t' = acc + weight item
+
+{-|
+Reduce the weight of the item at a given index by 1. If it becomes 0 as a result, remove the item.
+-}
+drop :: WeightedList v w
+     -> w
+     -> WeightedList v w
+
+drop [] _ = []
+
+drop list i
+  = undefined
+
+
+{-|
+Merge 2 `WeightedList`s.
+-}
+merge :: forall v w. (Eq v, Num w)
+      => WeightedList v w
+      -> WeightedList v w
+      -> WeightedList v w
+
+merge [] list' = list'
+merge list [] = list
+
+merge list list'
+    = foldl' insert list list'
+  where
+    insert :: WeightedList v w
+           -> WeightedItem v w
+           -> WeightedList v w
+    insert [] item = [item]
+    insert (cand:rest) item
+        | value cand == value item = cand' : rest
+        | otherwise                = cand : insert rest item
+      where
+        cand' = cand { weight = weight cand + weight item }

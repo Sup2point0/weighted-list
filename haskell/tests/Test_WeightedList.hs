@@ -10,11 +10,14 @@ import Syntax
 import WeightedList
 
 
+---------------------------------------------------------------------
+
 test_weighted_list :: TestTree
 test_weighted_list = testGroup "WeightedList"
   [ test_collection "constructor" test_constructor
   , test_collection "properties" test_properties
   , test_collection "indexing" test_indexing
+  , test_collection "merging" test_merging
   ]
 
 test_weighted_list_errors :: TestTree
@@ -23,19 +26,26 @@ test_weighted_list_errors = expectFail $ testGroup "WeightedList Errors"
   ]
 
 
-l  = [(2, "sup"), (3, "nova"), (7, "shard")]
-wl = newWeightedList l
-  :: WeightedList String Int
+---------------------------------------------------------------------
 
+__ = newWeightedList @String @Int []
+
+l  = [(2, "sup"), (3, "nova"), (7, "shard")]
+
+wl :: WeightedList String Int
+wl = newWeightedList l
+
+
+---------------------------------------------------------------------
 
 test_constructor :: [Assertion]
 test_constructor =
   [
-    newWeightedList @String @Int [] === []
+    __ === []
 
-  , wl === [ WeightedItem { value = "sup", weight = 2, c_weight = 2 }
-           , WeightedItem { value = "nova", weight = 3, c_weight = 5 }
-           , WeightedItem { value = "shard", weight = 7, c_weight = 12 }
+  , wl === [ WeightedItem { value = "sup", weight = 2, c_weight = 0 }
+           , WeightedItem { value = "nova", weight = 3, c_weight = 0 }
+           , WeightedItem { value = "shard", weight = 7, c_weight = 0 }
            ]
   ]
 
@@ -84,4 +94,31 @@ test_indexing_errors :: [Assertion]
 test_indexing_errors =
   [ Just (get wl (12)) === Nothing
   , Just (get wl (-13)) === Nothing
+  ]
+
+test_merging :: [Assertion]
+test_merging =
+  [
+    merge __ __ === []
+  , merge wl __ === wl
+  , merge __ wl === wl
+
+    -- merge 1
+  , merge wl (newWeightedList [ (1, "sup") ])
+          === newWeightedList [ (3, "sup"), (3, "nova"), (7, "shard") ]
+
+    -- merge 3
+  , merge wl wl === newWeightedList [ (4, "sup"), (6, "nova"), (14, "shard") ]
+  
+    -- append 1
+  , merge wl (newWeightedList [ (13, "cortex") ])
+          === newWeightedList [ (2, "sup"), (3, "nova"), (7, "shard"), (13, "cortex") ]
+  
+    -- append 2
+  , merge wl (newWeightedList [ (13, "cortex"), (20, "origin") ])
+          === wl ++ newWeightedList [ (13, "cortex"), (20, "origin") ]
+  
+    -- append 3
+  , merge wl (newWeightedList [ (13, "cortex"), (20, "origin"), (42, "vision") ])
+          === wl ++ newWeightedList [ (13, "cortex"), (20, "origin"), (42, "vision") ]
   ]
