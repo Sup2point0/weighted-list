@@ -35,6 +35,7 @@ instance (Eq v, Eq w) => Eq (WeightedItem v w) where
     )
 
 
+{-| CONSTRUCTOR -}
 ---------------------------------------------------------------------
 
 {-|
@@ -62,6 +63,9 @@ newWeightedList ((fst_weight, fst_value):items)
           c_weight = weight' + c_weight acc
         }
 
+
+{-| ACCESSORS -}
+---------------------------------------------------------------------
 
 {- |
 Count the total number of items in a `WeightedList`.
@@ -105,6 +109,9 @@ raw' :: WeightedList v w -> [(v, w)]
 raw' = map (\item -> (value item, weight item))
 
 
+{-| SINGLE METHODS -}
+---------------------------------------------------------------------
+
 {- |
 Get the item of a `WeightedList` at a weighted index.
 
@@ -124,14 +131,15 @@ get list i
                             (foldr get_r (Left (fromIntegral 0)) list)
     | otherwise = get' list 0
   where
-    get' :: [WeightedItem v w]
+    get' :: WeightedList v w
          -> w
          -> WeightedItem v w
+    get' [] _ = error "Index exceeded length of WeightedList"
     get' (item:items) t
         | t' > i    = item
         | otherwise = get' items t'
       where
-        t' = t + (weight item)
+        t' = t + weight item
     
     get_r :: WeightedItem v w
           -> Either w (WeightedItem v w)
@@ -144,20 +152,46 @@ get list i
         t' = acc + weight item
 
 {-|
-Reduce the weight of the item at a given index by 1. If it becomes 0 as a result, remove the item.
+Reduce the weight of the item at a given index by 1. If it becomes 0 as a result, remove the item from the list.
 -}
-drop :: WeightedList v w
-     -> w
-     -> WeightedList v w
+pop :: forall v w. (Num w, Ord w)
+    => WeightedList v w
+    -> w
+    -> WeightedList v w 
 
-drop [] _ = []
-
-drop list i
-  = undefined
-
+pop list i = pop_by list i 1
 
 {-|
-Merge 2 `WeightedList`s.
+Reduce the weight of the item at a given index by n. If it is no longer positive as a result, remove the item from the list.
+-}
+pop_by :: forall v w. (Num w, Ord w)
+    => WeightedList v w
+    -> w
+    -> w
+    -> WeightedList v w
+
+pop_by [] _ _ = error "Cannot access an empty WeightedList"
+
+pop_by list i n
+    = pop' list 0
+  where
+    pop' :: WeightedList v w
+          -> w
+          -> WeightedList v w
+    pop' [] t = error "Index exceeded length of WeightedList"
+    pop' (item:items) t
+        | t' > i    = if weight item' > 0 then item' : items else items
+        | otherwise = item : pop' items t'
+      where
+        t' = t + weight item
+        item' = item { weight = weight item - n }
+
+
+{-| MULTI METHODS -}
+---------------------------------------------------------------------
+
+{-|
+Merge 2 `WeightedList`s. Items from the right list are merged with items in the left list (if they share an equal value), otherwise they are appended in order.
 -}
 merge :: forall v w. (Eq v, Num w)
       => WeightedList v w

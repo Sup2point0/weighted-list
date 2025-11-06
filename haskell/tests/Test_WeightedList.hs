@@ -16,13 +16,15 @@ test_weighted_list :: TestTree
 test_weighted_list = testGroup "WeightedList"
   [ test_collection "constructor" test_constructor
   , test_collection "properties" test_properties
-  , test_collection "indexing" test_indexing
-  , test_collection "merging" test_merging
+  , test_collection "index" test_index
+  , test_collection "pop" test_pop
+  , test_collection "merge" test_merge
   ]
 
 test_weighted_list_errors :: TestTree
 test_weighted_list_errors = expectFail $ testGroup "WeightedList Errors"
-  [ test_collection "indexing" test_indexing_errors
+  [ test_collection "index" test_index_errors
+  , test_collection "pop" test_pop_errors
   ]
 
 
@@ -52,16 +54,18 @@ test_constructor =
 test_properties :: [Assertion]
 test_properties =
   [
-    total_values wl === 3
+    total_values wl  === 3
   , total_weights wl === 12
-  , values wl === ["sup", "nova", "shard"]
+
+  , values wl  === ["sup", "nova", "shard"]
   , weights wl === [2, 3, 7]
-  , raw wl === l
+
+  , raw wl  === l
   , raw' wl === map swap l
   ]
 
-test_indexing :: [Assertion]
-test_indexing =
+test_index :: [Assertion]
+test_index =
   [
     value (get wl 0)  === "sup"
   , value (get wl 1)  === "sup"
@@ -90,14 +94,55 @@ test_indexing =
   , value (get wl (-12)) === "sup"
   ]
 
-test_indexing_errors :: [Assertion]
-test_indexing_errors =
-  [ Just (get wl (12)) === Nothing
+test_index_errors :: [Assertion]
+test_index_errors =
+  [
+    Just (get wl (12)) === Nothing
   , Just (get wl (-13)) === Nothing
   ]
 
-test_merging :: [Assertion]
-test_merging =
+test_pop :: [Assertion]
+test_pop =
+  [
+    -- pop "sup"
+    pop wl 0 === newWeightedList [ (1, "sup"), (3, "nova"), (7, "shard") ]
+  , pop wl 1 === newWeightedList [ (1, "sup"), (3, "nova"), (7, "shard") ]
+
+    -- pop "nova"
+  , pop wl 2 === newWeightedList [ (2, "sup"), (2, "nova"), (7, "shard") ]
+  , pop wl 3 === newWeightedList [ (2, "sup"), (2, "nova"), (7, "shard") ]
+  , pop wl 4 === newWeightedList [ (2, "sup"), (2, "nova"), (7, "shard") ]
+
+    -- pop "shard"
+  , pop wl 5  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , pop wl 6  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , pop wl 7  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , pop wl 8  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , pop wl 9  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , pop wl 10 === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , pop wl 11 === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
+
+    -- pop entirely
+  , pop_by wl 0 2 === newWeightedList [             (3, "nova"), (7, "shard") ]
+  , pop_by wl 2 3 === newWeightedList [ (2, "sup"),              (7, "shard") ]
+  , pop_by wl 5 7 === newWeightedList [ (2, "sup"), (3, "nova")               ]
+
+    -- pop negative
+  , pop_by wl 0 3 === newWeightedList [             (3, "nova"), (7, "shard") ]
+  , pop_by wl 2 4 === newWeightedList [ (2, "sup"),              (7, "shard") ]
+  , pop_by wl 5 8 === newWeightedList [ (2, "sup"), (3, "nova")               ]
+  ]
+
+test_pop_errors :: [Assertion]
+test_pop_errors =
+  [
+    Just (pop __ 0) === Nothing
+  , Just (pop wl 12) === Nothing
+  , Just (pop_by wl 12 1) === Nothing
+  ]
+
+test_merge :: [Assertion]
+test_merge =
   [
     merge __ __ === []
   , merge wl __ === wl
