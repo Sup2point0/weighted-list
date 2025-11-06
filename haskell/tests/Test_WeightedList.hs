@@ -2,6 +2,7 @@ module Test_WeightedList where
 
 import Test.Tasty
 import Test.Tasty.HUnit
+import Test.Tasty.ExpectedFailure
 
 import Data.Tuple
 
@@ -14,6 +15,11 @@ test_weighted_list = testGroup "WeightedList"
   [ test_collection "constructor" test_constructor
   , test_collection "properties" test_properties
   , test_collection "indexing" test_indexing
+  ]
+
+test_weighted_list_errors :: TestTree
+test_weighted_list_errors = expectFail $ testGroup "WeightedList Errors"
+  [ test_collection "indexing" test_indexing_errors
   ]
 
 
@@ -72,4 +78,10 @@ test_indexing =
   , value (get wl (-10)) === "nova"
   , value (get wl (-11)) === "sup"
   , value (get wl (-12)) === "sup"
+  ]
+
+test_indexing_errors :: [Assertion]
+test_indexing_errors =
+  [ Just (get wl (12)) === Nothing
+  , Just (get wl (-13)) === Nothing
   ]
