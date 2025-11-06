@@ -50,22 +50,22 @@ export class WeightedList<Value>
     return this.#data.reduce((acc, item) => acc + item.weight, 0);
   }
 
-  get total_values() {
-    return this.#data.length;
-  }
-
-  get total_length() {
+  get total_weights() {
     return this.length;
   }
 
-  values(): Value[]
-  {
-    return this.#data.map(item => item.value);
+  get total_values() {
+    return this.#data.length;
   }
 
   weights(): number[]
   {
     return this.#data.map(item => item.weight);
+  }
+
+  values(): Value[]
+  {
+    return this.#data.map(item => item.value);
   }
 
   entries(): ArrayIterator<[number, WeightedItem<Value>]>
