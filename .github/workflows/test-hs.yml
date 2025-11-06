@@ -21,6 +21,9 @@ jobs:
 
       - name: Setup Haskell
         uses: haskell-actions/setup@v2.8.2
+        with:
+          ghc-version: 9.6.7
+          cabal-version: 3.12.1.0
 
       - name: 'cabal - test'
         run: |
