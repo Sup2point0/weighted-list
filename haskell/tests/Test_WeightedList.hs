@@ -4,6 +4,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.ExpectedFailure
 
+import Data.List
 import Data.Tuple
 
 import Syntax
@@ -19,6 +20,7 @@ test_weighted_list = testGroup "WeightedList"
   , test_collection "index" test_index
   , test_collection "pop" test_pop
   , test_collection "merge" test_merge
+  , test_collection "typeclasses" test_typeclasses
   ]
 
 test_weighted_list_errors :: TestTree
@@ -166,4 +168,11 @@ test_merge =
     -- append 3
   , merge wl (newWeightedList [ (13, "cortex"), (20, "origin"), (42, "vision") ])
           === wl ++ newWeightedList [ (13, "cortex"), (20, "origin"), (42, "vision") ]
+  ]
+
+test_typeclasses :: [Assertion]
+test_typeclasses =
+  [
+    sort wl === wl
+  , sort (reverse wl) === wl
   ]

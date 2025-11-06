@@ -34,6 +34,9 @@ instance (Eq v, Eq w) => Eq (WeightedItem v w) where
       && weight item == weight item'
     )
 
+instance (Eq v, Eq w, Ord w) => Ord (WeightedItem v w) where
+  item <= item' = weight item <= weight item'
+
 
 {-| CONSTRUCTOR -}
 ---------------------------------------------------------------------
