@@ -40,7 +40,7 @@ instance (Eq v, Eq w) => Eq (WeightedItem v w) where
 {-|
 Construct a list of `WeightedItem`s from the provided (weight, value) pairs.
 -}
-newWeightedList :: forall v w . Num w
+newWeightedList :: forall v w. Num w
                 => [(w, v)]
                 -> WeightedList v w
 
@@ -112,7 +112,7 @@ If a negative index is provided, access starts from the end of the list (where t
  
 Note that this has $O(n)$ time complexity.
 -}
-get :: forall v w . (Num w, Ord w, Show v, Show w)  -- FIXME
+get :: forall v w. (Num w, Ord w)
     => WeightedList v w
     -> w
     -> WeightedItem v w
@@ -127,24 +127,18 @@ get list i
     get' :: [WeightedItem v w]
          -> w
          -> WeightedItem v w
-    
     get' (item:items) t
         | t' > i    = item
         | otherwise = get' items t'
       where
         t' = t + (weight item)
-
-    empty :: WeightedItem v w
-    empty = WeightedItem { value = value (head list), weight = 0, c_weight = 0}
     
     get_r :: WeightedItem v w
           -> Either w (WeightedItem v w)
           -> Either w (WeightedItem v w)
-    
     get_r item (Right out) = Right out
-    
     get_r item (Left acc)
-        | trace ("t' == " ++ show t' ++ ", item = " ++ show item) t' >= (negate i) = Right item
+        | t' >= (-i) = Right item
         | otherwise  = Left t'
       where
         t' = acc + weight item
