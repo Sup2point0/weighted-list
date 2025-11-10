@@ -1,6 +1,11 @@
 use weighted_list::WeightedList;
 
 
+fn el() -> WeightedList<String, i32>
+{
+    WeightedList::empty()
+}
+
 fn wl() -> WeightedList<String, i32>
 {
     WeightedList::new(Vec::from([
@@ -30,8 +35,9 @@ fn test_constructors()
     ]);
 }
 
+#[test]
 fn test_equality()
 {
-    assert!( WeightedList::empty() == WeightedList::empty() );
+    assert!( el() == el() );
     assert!( wl() == wl() );
 }
