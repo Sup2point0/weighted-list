@@ -555,7 +555,10 @@ public class WeightedList<V,W> :
         return W.CreateChecked(-1);
     }
 
-    // SPECIALIST METHODS //
+    #endregion
+
+    #region SPECIALIST METHODS
+
     public WeightedList<V,W> Merge(WeightedList<V,W> list)
     {
         foreach (var item in list._data) {
