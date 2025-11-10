@@ -1,3 +1,5 @@
+import { test, assert } from "vitest";
+
 import { WeightedList } from "../weighted-list/weighted-list";
 
 
@@ -25,6 +27,7 @@ test("properties", () => {
 
   assert.deepEqual( wl.weights(), [2, 3, 7] );
   assert.deepEqual( wl.values(), ["sup", "nova", "shard"] );
+  
   assert.deepEqual( wl.entries().toArray(), [
     [0, { weight: 2, value: "sup" }],
     [1, { weight: 3, value: "nova" }],
