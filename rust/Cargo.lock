@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rust"
+name = "weighted-list"
 version = "0.1.0"
 dependencies = [
  "num-traits",
