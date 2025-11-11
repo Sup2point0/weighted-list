@@ -179,8 +179,8 @@ pop_by list i n
     = pop' list 0
   where
     pop' :: WeightedList v w
-          -> w
-          -> WeightedList v w
+         -> w
+         -> WeightedList v w
     pop' [] t = error "Index exceeded length of WeightedList"
     pop' (item:items) t
         | t' > i    = if weight item' > 0 then item' : items else items
