@@ -5,11 +5,17 @@
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-py.yml/badge.svg" />
   <img alt="C# Tests Status"
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-cs.yml/badge.svg" />
+  <img alt="TypeScript Tests Status"
+    src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-ts.yml/badge.svg" />
+  <!-- <img alt="Ruby Tests Status"
+    src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-rb.yml/badge.svg" /> -->
   <img alt="Haskell Tests Status"
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-hs.yml/badge.svg" />
+  <img alt="Rust Tests Status"
+    src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-rs.yml/badge.svg" />
 </div>
 
-A wrapper for weighted randomisation, implemented (eventually) in every language I’ve learnt.
+A wrapper class for weighted randomisation, implemented (eventually) in every language I’ve learnt.
 
 
 ```py
@@ -26,19 +32,30 @@ print(greetings.select())
 ```cs
 // C#
 WeightedList<string, int> greetings = new(
-    (2, "sup"), (20, "salutations")
+    (20, "sup"),
+    (2, "salutations"),
 );
 
 Console.WriteLine(greetings.GetRandomValue());
 // salutations
 ```
 
+```ts
+// TypeScript (under development)
+let greetings = new WeightedList(
+  [20, "sup"],
+  [2, "salutations"],
+);
+
+console.log(greetings.select_value());
+```
+
 ```hs
--- Haskell
+-- Haskell (under development)
 greetings :: WeightedList String Int
 greetings = newWeightedList
-  [ (2, "sup")
-  , (20, "salutations")
+  [ (20, "sup")
+  , (2, "salutations")
   ]
 
 main :: IO ()
@@ -46,6 +63,16 @@ main = print(
     select greetings
   )
 -- salutations
+```
+
+```rs
+// Rust (under development)
+let wl: WeightedList<String, i32> = WeightedList::from([
+    (20, "sup".to_string()),
+    (2, "salutations".to_string()),
+]);
+
+println!("{}", wl.get_random_value());
 ```
 
 
@@ -212,3 +239,4 @@ Any feedback, suggestions or improvements are definitely welcome!
 
 
 <!-- what you lookin at? -->
+
