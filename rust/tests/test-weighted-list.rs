@@ -22,7 +22,7 @@ fn wl() -> WeightedList<String, i32>
 
 
 #[test]
-fn testtconstructors()
+fn constructors()
 {
     let _: WeightedList<String, i32> = el();
 
@@ -35,7 +35,7 @@ fn testtconstructors()
 }
 
 #[test]
-fn testtequality()
+fn equality()
 {
     assert!( el() == el() );
     assert!( wl() == wl() );
@@ -45,7 +45,7 @@ fn testtequality()
 }
 
 #[test]
-fn testtproperties()
+fn properties()
 {
     assert!( el().len() == 0 );
     assert!( wl().len() == 10 );
