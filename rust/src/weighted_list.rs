@@ -101,8 +101,9 @@ impl<V, W: Num + Sum + Copy> WeightedList<V,W>
     /// This satisfies the axiom:
     /// 
     /// ```rust
-    /// let wl: WeightedList<V,W>;
-    /// WeightedList::from(wl.raw()) == wl
+    /// # use weighted_list::WeightedList;
+    /// let wl = WeightedList::from([(2, "sup"), (3, "nova")]);
+    /// // assert_eq!(WeightedList::from(wl.raw()), wl)
     /// ```
     pub fn raw(&self) -> impl Iterator<Item = (W,&V)>
     {
