@@ -1,3 +1,5 @@
+use std::iter::Sum;
+
 use num_traits::Num;
 
 
@@ -40,24 +42,26 @@ impl<V: PartialEq, W: Num> PartialEq for WeightedItem<V,W>
 
 pub struct WeightedList<V,W: Num>
 {
-    _data_: Vec<WeightedItem<V,W>>,
+    data: Vec<WeightedItem<V,W>>,
 }
 
-impl<V,W: Num> WeightedList<V,W>
+// == CONSTRUCTORS == //
+impl<V, W: Num> WeightedList<V,W>
 {
-    /// Initialise an empty `WeightedList`.
+    /// Construct an empty `WeightedList`.
     pub fn empty() -> Self
     {
         Self {
-            _data_: Vec::new()
+            data: Vec::new()
         }
     }
 
+    /// Construct a `WeightedList` from an iterable of (weight, value) pairs.
     pub fn from<I>(items: I) -> Self
     where I: IntoIterator<Item = (W, V)>
     {
         Self {
-            _data_: items.into_iter().map(
+            data: items.into_iter().map(
                 |(weight, value)|
                 WeightedItem::new(value, weight)
             ).collect::<Vec<WeightedItem<V,W>>>()
@@ -69,11 +73,46 @@ impl<V,W: Num> WeightedList<V,W>
     ) -> Self
     {
         Self {
-            _data_: items.into_iter().map(
+            data: items.into_iter().map(
                 |(weight, value)|
                 WeightedItem::new(value, weight)
             ).collect::<Vec<WeightedItem<V,W>>>()
         }
+    }
+}
+
+// == PROPERTIES == //
+impl<V, W: Num + Sum + Copy> WeightedList<V,W>
+{
+    /// Sum the weights of all items in the list.
+    pub fn len(&self) -> W
+    {
+        self.data.iter().map(|item| item.weight).sum()
+    }
+
+    /// Get an iterator over immutable references to the values of each item in the list.
+    pub fn values(&self) -> impl Iterator<Item = &V>
+    {
+        self.data.iter().map(|item| &item.value)
+    }
+
+    /// Get an iterator over copies of the weights of each item in the list.
+    pub fn weights(&self) -> impl Iterator<Item = W>
+    {
+        self.data.iter().map(|item| item.weight)
+    }
+
+    /// Get an iterator over (weight, value) tuples representing each item in the list.
+    /// 
+    /// This satisfies the axiom:
+    /// 
+    /// ```rs
+    /// let wl: WeightedList<V,W>;
+    /// WeightedList::from(wl.raw()) == wl
+    /// ```
+    pub fn raw(&self) -> impl Iterator<Item = (W,&V)>
+    {
+        self.data.iter().map(|item| (item.weight, &item.value))
     }
 }
 
@@ -83,6 +122,19 @@ impl<V: PartialEq, W: Num> PartialEq for WeightedList<V, W>
 {
     fn eq(&self, other: &Self) -> bool
     {
-        self._data_.len() == other._data_.len()
+        if self.data.len() != other.data.len() {
+            return false;
+        }
+
+        let pairs = self.data.iter()
+                    .zip(other.data.iter());
+
+        for (left, right) in pairs {
+            if left != right {
+                return false;
+            }
+        }
+
+        true
     }
 }
