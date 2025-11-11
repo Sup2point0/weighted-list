@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
   schedule:
-    - cron: '30 4 * * 2,6'
+    - cron: '35 4 * * 2,6'
   
   push:
     paths:
@@ -16,16 +16,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 'git - checkout'
+      - name: 'git / checkout'
         uses: actions/checkout@v4
 
-      - name: Setup Haskell
+      - name: 'haskell / setup'
         uses: haskell-actions/setup@v2.8.2
         with:
           ghc-version: 9.6.7
           cabal-version: 3.12.1.0
 
-      - name: 'cabal - test'
+      - name: 'cabal / test'
         run: |
           cd haskell
           cabal test
