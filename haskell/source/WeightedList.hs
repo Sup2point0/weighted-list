@@ -5,8 +5,6 @@ by Sup#2.0 (@Sup2point0)
 
 module WeightedList where
 
-import Debug.Trace
-
 import Data.List
 import Data.Either
 
@@ -71,12 +69,6 @@ newWeightedList ((fst_weight, fst_value):items)
 ---------------------------------------------------------------------
 
 {- |
-Count the total number of items in a `WeightedList`.
--}
-total_values :: WeightedList v w -> Int
-total_values = length
-
-{- |
 Sum the total weights of all items in a `WeightedList`.
 -}
 total_weights :: (Num w) => WeightedList v w -> w
@@ -86,16 +78,22 @@ total_weights' :: (Num w) => WeightedList v w -> w
 total_weights' = sum . map weight
 
 {- |
-Get a list of the values of all items in a `WeightedList`.
+Count the total number of items in a `WeightedList`.
 -}
-values :: WeightedList v w -> [v]
-values = map value
+total_values :: WeightedList v w -> Int
+total_values = length
 
 {- |
 Get a list of the weights of all items in a `WeightedList`.
 -}
 weights :: WeightedList v w -> [w]
 weights = map weight
+
+{- |
+Get a list of the values of all items in a `WeightedList`.
+-}
+values :: WeightedList v w -> [v]
+values = map value
 
 {- |
 Get the raw representation of a `WeightedList` in (weight, value) pairs.
@@ -190,8 +188,19 @@ pop_by list i n
         item' = item { weight = weight item - n }
 
 
-{-| MULTI METHODS -}
+{-| SPECIAL METHODS -}
 ---------------------------------------------------------------------
+
+{-|
+Remove all items with non-positive weight.
+-}
+prune :: (Num w, Ord w)
+      => WeightedList v w
+      -> WeightedList v w
+prune [] = []
+prune (item:rest)
+  | weight item > 0 = item : prune rest
+  | otherwise       = prune rest
 
 {-|
 Merge 2 `WeightedList`s. Items from the right list are merged with items in the left list (if they share an equal value), otherwise they are appended in order.

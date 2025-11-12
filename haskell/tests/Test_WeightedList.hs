@@ -143,6 +143,14 @@ test_pop_errors =
   , Just (pop_by wl 12 1) === Nothing
   ]
 
+test_prune :: [Assertion]
+test_prune =
+  [
+    prune __ === __
+  , prune wl === wl
+  , prune (newWeightedList [ (0, "sup") ]) === __
+  ]
+
 test_merge :: [Assertion]
 test_merge =
   [
