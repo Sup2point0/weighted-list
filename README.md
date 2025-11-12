@@ -13,9 +13,12 @@
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-hs.yml/badge.svg" />
   <img alt="Rust Tests Status"
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-rs.yml/badge.svg" />
+
+  [walkthrough](walkthrough.md) · [rationale](rationale.md) · [spec](SPEC.md)
+
 </div>
 
-A wrapper class for weighted randomisation, implemented (eventually) in every language I’ve learnt.
+A list class for weighted randomisation, implemented (eventually) in every language I’ve learnt.
 
 
 ```py
@@ -75,6 +78,24 @@ let wl: WeightedList<String, i32> = WeightedList::from([
 println!("{}", wl.get_random_value());
 ```
 
+An immutable optimised variant `FrozenWeightedList` is also implemented, which provides $O(\log{n})$ item access.
+
+
+<br>
+
+
+## Features
+
+- Weighted randomised selection with a variety of constraints
+- Utility methods to manipulate values and weights
+- In-place and pure variants of methods for flexibility
+- Conversions to and from a wide range of other data types
+
+### Future
+- Slice indexing[^slice]
+
+[^slice]: Really quite difficult with non-integer weights.
+
 
 <br>
 
@@ -87,22 +108,6 @@ println!("{}", wl.get_random_value());
 Mainly intended for *weighted randomisation*, where each element can have a different chance of being selected (its weight).
 
 The prime example of this is lootbox or reward systems in games, where items have different rarities.
-
-
-<br>
-
-
-## Features
-
-- Randomised selection with a variety constraints
-- Convenience methods to manipulate values and weights
-- Separate methods with and without side effects for flexibility
-- Conversions from and to a wide range of other data types
-
-### Future
-- Slice indexing[^slice]
-
-[^slice]: Really quite difficult with non-integer weights.
 
 
 <br>
@@ -180,14 +185,17 @@ For a tutorial, see [walkthrough](c-sharp/walkthrough.md).
 - Made in C# 12.0
 - Supports LINQ querying
 
+### TypeScript
+Under development!
 
-<br>
+### Ruby
+Under development!
 
+### Haskell
+Under development!
 
-## Notes
-
-- Due to the nature of weighted indexing, random access has a time complexity of $O(n)$, where $n$ is the number of elements in the list.
-  - However, optimising this further without significant sacrifices in space complexity (which is already decently hefty) appears unviable.
+### Rust
+Under development!
 
 
 <br>
@@ -239,4 +247,3 @@ Any feedback, suggestions or improvements are definitely welcome!
 
 
 <!-- what you lookin at? -->
-
