@@ -111,10 +111,10 @@ for item in WeightedList(...):
 ### Accessors
 | Field | Description | Options | Returns | In-Place | Time Complexity | Notes |
 | :---- | :---------- | :------ | :------ | :------- | :-------------- | :---- |
-| <table> <tr><td><strong>length</strong></td></tr> <tr><td>total weights</td></tr> </table> | Total weights of all items. | – | `Weight` | – | $O(n)$ |
+| **length** <br> (total weight) | Total weights of all items. | – | `Weight` | – | $O(n)$ |
 | total items | Total number of items. | – | `int` | – | $O(n)$ |
-| **get values** | Get the values of all items. | – | `iter[Value]` | – | lazy | Values are in order. |
 | **get weights** | Get the weights of all items. | – | `iter[Weight]` | – | lazy | Weights are in order. |
+| **get values** | Get the values of all items. | – | `iter[Value]` | – | lazy | Values are in order. |
 | **get raw** | Get the (weight, value) representations of all items. | – | `iter[(Weight, Value)]` | – | lazy | This usually satisifes the axiom that for any list `wl` we have `WeightedList(wl.raw()) == wl` |
 
 ### List Methods
@@ -131,11 +131,11 @@ These are usually inherited from the built-in array type of the language and ada
 | Field | Description | Options | Returns | In-Place | Time Complexity | Notes |
 | :---- | :---------- | :------ | :------ | :------- | :-------------- | :---- |
 | **append item** | Append an item. | The `WeightedItem` to append | default | yes | $O(1)$ | May require additional memory allocation. |
-| *append item* | Append an item with the given *value* and a weight of $1$. | The `Value` of the item to append | default | yes | $O(1)$ | Implementations may merge this into *append item* using overloading or type checks. |
+| *append value* | Append an item with the given *value* and a weight of $1$. | The `Value` of the item to append | default | yes | $O(1)$ | Implementations may merge this into *append item* using overloading or type checks. |
 | **insert item** | Insert an item at a given (weighted) index $i$. | The `WeightedItem` to insert | default | yes | $O(i)$ | May require additional memory allocation. |
 | *insert value* | Insert an item with the given *value* and a weight of $1$ at a given (weighted) index $i$. | The `Value` of the item to insert | default | yes | $O(i)$ | Implementations may merge this into *insert item* using overloading or type checks. |
 | **remove at index** | Remove an entire item. | The weighted index $i$ | the removed `WeightedItem` | yes | $O(i)$ |
-| **drop at index** | Decrement the weight of an item. | <table> <tr> <th>weighted-index</th> <td>The weighted index $i$</td> </tr> <tr> <th>by</th> <td>The amount by which to decrement the item’s weight.</td> </tr> </table> | the modified `WeightedItem` | yes | $O(i)$ | If the item’s weight becomes $0$ or negative as a result, it is removed. |
+| **pop at index** | Decrement the weight of an item. | <table> <tr> <th>weighted-index</th> <td>The weighted index $i$</td> </tr> <tr> <th>by</th> <td>The amount by which to decrement the item’s weight.</td> </tr> </table> | the modified `WeightedItem` | yes | $O(i)$ | If the item’s weight becomes $0$ or negative as a result, it is removed. |
 
 ### WeightedList Methods
 These are special for `WeightedList`?`FrozenWeightedList`.
@@ -153,6 +153,40 @@ These are special for `WeightedList`?`FrozenWeightedList`.
 | normalise | Normalise weights such that total weight becomes $1.0$. | – | default | both | $O(n)$ |
 | shuffle | Shuffle (weight, value) pairings. | – | default | both | $O(n)$ | Shuffling is performed on weights, such that values remain in their original order. |
 | **merge** | Merge list with another compatible iterable. | – | default | both | $O(mn)$ | For each item in the other iterable, if it exists in the current list, the weight of the first equal item is increased accordingly; otherwise, the item is appended to the current list. |
+
+
+## Implementation Checklist
+
+> [!Note]
+> This is for personal use when implementing `WeightedList` in a new language.
+
+- Accessors
+  - [ ] total weight
+  - [ ] total items
+  - [ ] get weights
+  - [ ] get values
+  - [ ] get raw
+- List Methods
+  - [ ] get item
+  - [ ] find item
+  - [ ] find index of item
+  - [ ] append item
+  - [ ] append value
+  - [ ] insert item
+  - [ ] insert value
+  - [ ] remove at index
+  - [ ] pop at index
+- WeightedList Methods
+  - [ ] select random value
+  - [ ] select random item
+  - [ ] select random values
+  - [ ] pop random item
+  - [ ] pop random values
+  - [ ] prune
+  - [ ] collapse
+  - [ ] normalise
+  - [ ] shuffle
+  - [ ] merge
 
 
 <br>
