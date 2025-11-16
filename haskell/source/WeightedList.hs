@@ -5,8 +5,6 @@ by Sup#2.0 (@Sup2point0)
 
 module WeightedList where
 
-import Debug.Trace
-
 import Data.List
 import Data.Either
 
@@ -71,31 +69,31 @@ newWeightedList ((fst_weight, fst_value):items)
 ---------------------------------------------------------------------
 
 {- |
-Count the total number of items in a `WeightedList`.
--}
-total_values :: WeightedList v w -> Int
-total_values = length
-
-{- |
 Sum the total weights of all items in a `WeightedList`.
 -}
-total_weights :: (Num w) => WeightedList v w -> w
-total_weights = foldl' (\t item -> t + weight item) 0
+totalWeights :: (Num w) => WeightedList v w -> w
+totalWeights = foldl' (\t item -> t + weight item) 0
 
-total_weights' :: (Num w) => WeightedList v w -> w
-total_weights' = sum . map weight
+totalWeights' :: (Num w) => WeightedList v w -> w
+totalWeights' = sum . map weight
 
 {- |
-Get a list of the values of all items in a `WeightedList`.
+Count the total number of items in a `WeightedList`.
 -}
-values :: WeightedList v w -> [v]
-values = map value
+totalValues :: WeightedList v w -> Int
+totalValues = length
 
 {- |
 Get a list of the weights of all items in a `WeightedList`.
 -}
 weights :: WeightedList v w -> [w]
 weights = map weight
+
+{- |
+Get a list of the values of all items in a `WeightedList`.
+-}
+values :: WeightedList v w -> [v]
+values = map value
 
 {- |
 Get the raw representation of a `WeightedList` in (weight, value) pairs.
@@ -162,20 +160,20 @@ pop :: forall v w. (Num w, Ord w)
     -> w
     -> WeightedList v w 
 
-pop list i = pop_by list i 1
+pop list i = popBy list i 1
 
 {-|
 Reduce the weight of the item at a given index by n. If it is no longer positive as a result, remove the item from the list.
 -}
-pop_by :: forall v w. (Num w, Ord w)
-    => WeightedList v w
-    -> w
-    -> w
-    -> WeightedList v w
+popBy :: forall v w. (Num w, Ord w)
+      => WeightedList v w
+      -> w
+      -> w
+      -> WeightedList v w
 
-pop_by [] _ _ = error "Cannot access an empty WeightedList"
+popBy [] _ _ = error "Cannot access an empty WeightedList"
 
-pop_by list i n
+popBy list i n
     = pop' list 0
   where
     pop' :: WeightedList v w
@@ -190,29 +188,49 @@ pop_by list i n
         item' = item { weight = weight item - n }
 
 
-{-| MULTI METHODS -}
+{-| SPECIAL METHODS -}
 ---------------------------------------------------------------------
+
+{-|
+Merge an item into the list. If an instance already exists, that instance’s weight is increased; otherwise, the item is appended to the end.
+-}
+merge :: (Eq v, Num w)
+      => WeightedList v w
+      -> WeightedItem v w
+      -> WeightedList v w
+merge [] item = [item]
+merge (cand:rest) item
+    | value cand == value item = cand' : rest
+    | otherwise                = cand : merge rest item
+  where
+    cand' = cand { weight = weight cand + weight item }
+
+{-|
+Remove all items with non-positive weight.
+-}
+prune :: (Num w, Ord w)
+      => WeightedList v w
+      -> WeightedList v w
+prune [] = []
+prune (item:rest)
+  | weight item > 0 = item : prune rest
+  | otherwise       = prune rest
+
+{-|
+-}
+collapse :: (Eq v, Num w)
+         => WeightedList v w
+         -> WeightedList v w
+collapse list = mergeWith [] list
 
 {-|
 Merge 2 `WeightedList`s. Items from the right list are merged with items in the left list (if they share an equal value), otherwise they are appended in order.
 -}
-merge :: forall v w. (Eq v, Num w)
-      => WeightedList v w
-      -> WeightedList v w
-      -> WeightedList v w
+mergeWith :: (Eq v, Num w)
+          => WeightedList v w
+          -> WeightedList v w
+          -> WeightedList v w
 
-merge [] list' = list'
-merge list [] = list
-
-merge list list'
-    = foldl' insert list list'
-  where
-    insert :: WeightedList v w
-           -> WeightedItem v w
-           -> WeightedList v w
-    insert [] item = [item]
-    insert (cand:rest) item
-        | value cand == value item = cand' : rest
-        | otherwise                = cand : insert rest item
-      where
-        cand' = cand { weight = weight cand + weight item }
+mergeWith []   list' = list'
+mergeWith list []    = list
+mergeWith list list' = foldl' merge list list'
