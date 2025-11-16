@@ -56,13 +56,19 @@ test_constructor =
 test_properties :: [Assertion]
 test_properties =
   [
-    total_values wl  === 3
-  , total_weights wl === 12
+    totalValues  __ === 0
+  , totalValues  wl === 3
+  , totalWeights __ === 0
+  , totalWeights wl === 12
 
-  , values wl  === ["sup", "nova", "shard"]
+  , values  __ === []
+  , values  wl === ["sup", "nova", "shard"]
+  , weights __ === []
   , weights wl === [2, 3, 7]
 
-  , raw wl  === l
+  , raw  __ === []
+  , raw  wl === l
+  , raw' __ === []
   , raw' wl === map swap l
   ]
 
@@ -125,14 +131,14 @@ test_pop =
   , pop wl 11 === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
 
     -- pop entirely
-  , pop_by wl 0 2 === newWeightedList [             (3, "nova"), (7, "shard") ]
-  , pop_by wl 2 3 === newWeightedList [ (2, "sup"),              (7, "shard") ]
-  , pop_by wl 5 7 === newWeightedList [ (2, "sup"), (3, "nova")               ]
+  , popBy wl 0 2 === newWeightedList [             (3, "nova"), (7, "shard") ]
+  , popBy wl 2 3 === newWeightedList [ (2, "sup"),              (7, "shard") ]
+  , popBy wl 5 7 === newWeightedList [ (2, "sup"), (3, "nova")               ]
 
     -- pop negative
-  , pop_by wl 0 3 === newWeightedList [             (3, "nova"), (7, "shard") ]
-  , pop_by wl 2 4 === newWeightedList [ (2, "sup"),              (7, "shard") ]
-  , pop_by wl 5 8 === newWeightedList [ (2, "sup"), (3, "nova")               ]
+  , popBy wl 0 3 === newWeightedList [             (3, "nova"), (7, "shard") ]
+  , popBy wl 2 4 === newWeightedList [ (2, "sup"),              (7, "shard") ]
+  , popBy wl 5 8 === newWeightedList [ (2, "sup"), (3, "nova")               ]
   ]
 
 test_pop_errors :: [Assertion]
@@ -140,7 +146,7 @@ test_pop_errors =
   [
     Just (pop __ 0) === Nothing
   , Just (pop wl 12) === Nothing
-  , Just (pop_by wl 12 1) === Nothing
+  , Just (popBy wl 12 1) === Nothing
   ]
 
 test_prune :: [Assertion]
@@ -151,31 +157,41 @@ test_prune =
   , prune (newWeightedList [ (0, "sup") ]) === __
   ]
 
+test_collapse :: [Assertion]
+test_collapse =
+  [
+    collapse __ === []
+  , collapse wl === wl
+  , collapse wl ++ wl === newWeightedList [ (4, "sup"), (6, "nova"), (14, "shard") ]
+  , collapse (newWeightedList [ (1, "sup"), (2, "sup"), (3, "sup") ])
+          === newWeightedList [ (3, "sup") ]
+  ]
+
 test_merge :: [Assertion]
 test_merge =
   [
-    merge __ __ === []
-  , merge wl __ === wl
-  , merge __ wl === wl
+    mergeWith __ __ === []
+  , mergeWith wl __ === wl
+  , mergeWith __ wl === wl
 
     -- merge 1
-  , merge wl (newWeightedList [ (1, "sup") ])
-          === newWeightedList [ (3, "sup"), (3, "nova"), (7, "shard") ]
+  , mergeWith wl (newWeightedList [ (1, "sup") ])
+              === newWeightedList [ (3, "sup"), (3, "nova"), (7, "shard") ]
 
     -- merge 3
-  , merge wl wl === newWeightedList [ (4, "sup"), (6, "nova"), (14, "shard") ]
+  , mergeWith wl wl === newWeightedList [ (4, "sup"), (6, "nova"), (14, "shard") ]
   
     -- append 1
-  , merge wl (newWeightedList [ (13, "cortex") ])
-          === newWeightedList [ (2, "sup"), (3, "nova"), (7, "shard"), (13, "cortex") ]
+  , mergeWith wl (newWeightedList [ (13, "cortex") ])
+              === newWeightedList [ (2, "sup"), (3, "nova"), (7, "shard"), (13, "cortex") ]
   
     -- append 2
-  , merge wl (newWeightedList [ (13, "cortex"), (20, "origin") ])
-          === wl ++ newWeightedList [ (13, "cortex"), (20, "origin") ]
+  , mergeWith wl (newWeightedList [ (13, "cortex"), (20, "origin") ])
+        === wl ++ newWeightedList [ (13, "cortex"), (20, "origin") ]
   
     -- append 3
-  , merge wl (newWeightedList [ (13, "cortex"), (20, "origin"), (42, "vision") ])
-          === wl ++ newWeightedList [ (13, "cortex"), (20, "origin"), (42, "vision") ]
+  , mergeWith wl (newWeightedList [ (13, "cortex"), (20, "origin"), (42, "vision") ])
+        === wl ++ newWeightedList [ (13, "cortex"), (20, "origin"), (42, "vision") ]
   ]
 
 test_typeclasses :: [Assertion]
