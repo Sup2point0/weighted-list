@@ -23,49 +23,36 @@ A list class for weighted randomisation, implemented (eventually) in every langu
 
 ```py
 # Python
-greetings = WeightedList(
-  (20, "sup"),
-  (2, "salutations"),
-)
+greetings = WeightedList((20, "sup"), (2, "salutations"))
 
 print(greetings.select())
-# sup
+# => sup
 ```
 
 ```cs
 // C#
-WeightedList<string, int> greetings = new(
-    (20, "sup"),
-    (2, "salutations"),
-);
+WeightedList<string, int> greetings = new((20, "sup"), (2, "salutations"));
 
 Console.WriteLine(greetings.GetRandomValue());
-// salutations
+// => salutations
 ```
 
 ```ts
 // TypeScript (under development)
-let greetings = new WeightedList(
-  [20, "sup"],
-  [2, "salutations"],
-);
+let greetings = new WeightedList([20, "sup"], [2, "salutations"]);
 
 console.log(greetings.select_value());
+// => sup
 ```
 
 ```hs
 -- Haskell (under development)
 greetings :: WeightedList String Int
-greetings = newWeightedList
-  [ (20, "sup")
-  , (2, "salutations")
-  ]
+greetings = newWeightedList [(20, "sup"), (2, "salutations")]
 
 main :: IO ()
-main = print(
-    select greetings
-  )
--- salutations
+main = print (select greetings)
+-- => salutations
 ```
 
 ```rs
@@ -76,6 +63,7 @@ let wl: WeightedList<String, i32> = WeightedList::from([
 ]);
 
 println!("{}", wl.get_random_value());
+// => sup
 ```
 
 An immutable optimised variant `FrozenWeightedList` is also implemented, which provides $O(\log{n})$ item access.
@@ -105,9 +93,7 @@ An immutable optimised variant `FrozenWeightedList` is also implemented, which p
 > [!Tip]
 > For the full rationale behind this project, see [rationale](rationale.md).
 
-Mainly intended for *weighted randomisation*, where each element can have a different chance of being selected (its weight).
-
-The prime example of this is lootbox or reward systems in games, where items have different rarities.
+I made this class for *weighted randomisation*, where each element in a collection has a different chance of being selected – the greater an item’s weight, the higher the chance it is selected. This is super common in games for reward systems, displaying messages, etc.
 
 
 <br>
@@ -115,12 +101,14 @@ The prime example of this is lootbox or reward systems in games, where items hav
 
 ## Usage
 
+> [!Tip]
+> Walkthroughs and specimens for each language can be found in their respective folders.
+
+> Honestly, I don’t trust my code enough to publish it :P
+
 The project is not available as a package.[^package] Instead, just download the relevant files, or copy and paste the code directly.
 
 [^package]: I don’t think it’s a large enough project to warrant an entire package, when you could just copy and paste the code directly.
-
-> [!TIP]
-> Walkthroughs and specimens for each language can be found in their respective folders.
 
 ### Python
 All you need is the [`weightedlist.py`](python/source/weighted_list.py) file, which contains the `WeightedList` class with all the functionality. Simply import it, and you’re ready to go!
@@ -165,9 +153,7 @@ The `weight` of each item can be thought of as how many duplicates are stored (w
 -->
 
 ### C#
-All the code is contained within the [`WeightedList.cs`](c-sharp/weighted-list/weighted-list.cs) file. You might also need the [`weighted-list.csproj`](c-sharp/weighted-list/weighted-list.csproj) file.
-
-If you want the entire solution, you can download the repo and extract the [`c-sharp/`](c-sharp/) folder. This also contains tests to verify that everything is working.
+All the code is contained within the [`WeightedList.cs`](c-sharp/weighted-list/weighted-list.cs) file. You might also need the [`weighted-list.csproj`](c-sharp/weighted-list/weighted-list.csproj) file. If you want the entire solution, you can download the repo and extract the [`c-sharp/`](c-sharp/) folder.
 
 For a tutorial, see [walkthrough](c-sharp/walkthrough.md).
 
@@ -179,7 +165,7 @@ For a tutorial, see [walkthrough](c-sharp/walkthrough.md).
 
 ### Python
 - Made in Python 3.11
-- All imports are from the standard library, so there are no external dependencies
+- No external dependencies
 
 ### C#
 - Made in C# 12.0
