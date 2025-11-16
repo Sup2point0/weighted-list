@@ -148,13 +148,12 @@ impl<V: fmt::Display, W: Weight> Index<W> for WeightedList<V,W>
         for item in &self.data {
             t += item.weight;
 
-            if t >= weighted_index {
+            if t > weighted_index {
                 return item;
             }
         };
 
-        // panic!("index out of bounds: the len is {} but the index is {weighted_index}", self.len());
-        panic!();
+        panic!("index out of bounds: the len is {} but the index is {weighted_index}", self.len());
     }
 }
 
