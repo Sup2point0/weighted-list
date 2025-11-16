@@ -1,5 +1,9 @@
 # Specification
 
+> v1.0.0
+> Last updated: 16 November 2025
+
+> [!Tip]
 > Quicklink: [Jump to](#fields) fields reference
 
 I don’t know how to write a specification. (Yet.) But this is just so I can keep track of what I need to tick off when implementing `WeightedList` in a particular programming language.
@@ -165,6 +169,9 @@ These are special for `WeightedList`/`FrozenWeightedList`.
 
 > [!Note]
 > This is for personal use when implementing `WeightedList` in a new language.
+
+<!-- # Implementation Checklist
+v1.0.1 -->
 
 ### `WeightedItem`
 - [ ] print
