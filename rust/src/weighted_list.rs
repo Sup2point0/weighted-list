@@ -93,21 +93,21 @@ impl<V, W: Weight> WeightedList<V,W>
         self.data.iter().map(|item| item.weight).sum()
     }
 
-    pub fn items(&self) -> impl Iterator<Item = &WeightedItem<V,W>>
+    pub fn total_values(&self) -> usize
     {
-        self.data.iter()
-    }
-
-    /// Get an iterator over immutable references to the values of each item in the list.
-    pub fn values(&self) -> impl Iterator<Item = &V>
-    {
-        self.data.iter().map(|item| &item.value)
+        self.data.len()
     }
 
     /// Get an iterator over copies of the weights of each item in the list.
     pub fn weights(&self) -> impl Iterator<Item = W>
     {
         self.data.iter().map(|item| item.weight)
+    }
+
+    /// Get an iterator over immutable references to the values of each item in the list.
+    pub fn values(&self) -> impl Iterator<Item = &V>
+    {
+        self.data.iter().map(|item| &item.value)
     }
 
     /// Get an iterator over (weight, value) tuples representing each item in the list.
