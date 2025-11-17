@@ -294,6 +294,6 @@ impl<V> WeightedList<V, int>
     {
         let scalar: f64 = rng.random();
         let weighted_index = scalar * self.len() as f64;
-        &self[weighted_index.round() as int]
+        &self[weighted_index.floor() as int]
     }
 }
