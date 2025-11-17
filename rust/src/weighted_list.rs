@@ -83,7 +83,7 @@ impl<V, W: Weight> WeightedList<V,W>
 
     /// Construct a `WeightedList` from an iterable of (weight, value) pairs.
     pub fn from<I>(items: I) -> Self
-    where I: IntoIterator<Item = (W, V)>
+        where I: IntoIterator<Item = (W, V)>
     {
         Self {
             data: items.into_iter().map(
@@ -92,6 +92,16 @@ impl<V, W: Weight> WeightedList<V,W>
             ).collect::<Vec<WeightedItem<V,W>>>()
         }
     }
+}
+
+/// Construct a `WeightedList` from the provided (weight, value) tuples.
+#[macro_export]
+macro_rules! wlist {
+    ( $( $item: expr ),* ) => {
+        WeightedList::from([
+            $( $item, )*
+        ]);
+    };
 }
 
 // == PROPERTIES == //

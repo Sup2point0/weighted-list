@@ -22,3 +22,11 @@ pub fn wl() -> WeightedList<String, i32>
 {
     WeightedList::from(data_string())
 }
+
+
+#[macro_export]
+macro_rules! str {
+    ( $( $s: expr )? ) => {
+        String::from( $( $s )* )
+    };
+}

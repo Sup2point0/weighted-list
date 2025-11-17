@@ -1,6 +1,7 @@
-// use weighted_list::WeightedList;
 mod utils;
 use utils::*;
+
+// use weighted_list::*;
 
 
 #[test]
@@ -20,8 +21,8 @@ fn accessors()
     let e: [(i32, &String); 0] = [];
     assert!( el().raw().eq(e) );
     assert!( wl().raw().eq([
-        (2, &"sup".to_string()),
-        (3, &"nova".to_string()),
-        (5, &"shard".to_string()),
+        (2, &str!("sup")),
+        (3, &str!("nova")),
+        (5, &str!("shard")),
     ]) );
 }

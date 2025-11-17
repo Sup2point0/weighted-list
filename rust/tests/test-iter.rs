@@ -1,6 +1,7 @@
-// use weighted_list::WeightedList;
 mod utils;
 use utils::*;
+
+// use weighted_list::*;
 
 
 #[test]
