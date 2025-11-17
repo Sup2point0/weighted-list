@@ -152,7 +152,7 @@ impl<V: PartialEq, W: Weight> PartialEq for WeightedList<V, W>
 }
 
 // == INDEXING == //
-impl<V: fmt::Display, W: Weight> Index<W> for WeightedList<V,W>
+impl<V, W: Weight> Index<W> for WeightedList<V,W>
 {
     type Output = WeightedItem<V,W>;
 
@@ -259,5 +259,31 @@ impl<V, W: Weight> WeightedList<V,W>
     ) -> &Self
     {
         self.insert_item(weighted_index, WeightedItem::unit(value))
+    }
+}
+
+// == RANDOM SELECTION == //
+use rand::prelude::*;
+
+use duplicate::duplicate_item;
+
+#[duplicate_item(int; [i8]; [i16]; [i32]; [i64])]
+impl<V> WeightedList<V, int>
+{
+    pub fn select_random_value<RNG>(&self, rng: &mut RNG) -> &V
+        where RNG: Rng + ?Sized
+    {
+        &self.select_random_item(rng).value
+    }
+
+    /// Select a random item from the list.
+    /// 
+    /// This uses `f64` for random number generation.
+    pub fn select_random_item<RNG>(&self, rng: &mut RNG) -> &WeightedItem<V, int>
+        where RNG: Rng + ?Sized
+    {
+        let scalar: f64 = rng.random();
+        let weighted_index = scalar * self.len() as f64;
+        &self[weighted_index.round() as int]
     }
 }
