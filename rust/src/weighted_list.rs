@@ -26,12 +26,14 @@ impl<V, W: Weight> WeightedItem<V,W>
         }
     }
 
-    pub fn new(value: V, weight: W) -> WeightedItem<V,W>
+    pub fn new(weight: W, value: V) -> WeightedItem<V,W>
     {
-        Self {
-            weight,
-            value,
-        }
+        Self { weight, value }
+    }
+
+    pub fn from((weight, value): (W, V)) -> WeightedItem<V,W>
+    {
+        Self { weight, value }
     }
 }
 
@@ -71,6 +73,14 @@ impl<V, W: Weight> WeightedList<V,W>
         }
     }
 
+    /// Construct an empty `WeightedList` with the specified capacity.
+    pub fn with_capacity(capacity: usize) -> Self
+    {
+        Self {
+            data: Vec::with_capacity(capacity)
+        }
+    }
+
     /// Construct a `WeightedList` from an iterable of (weight, value) pairs.
     pub fn from<I>(items: I) -> Self
     where I: IntoIterator<Item = (W, V)>
@@ -78,7 +88,7 @@ impl<V, W: Weight> WeightedList<V,W>
         Self {
             data: items.into_iter().map(
                 |(weight, value)|
-                WeightedItem::new(value, weight)
+                WeightedItem::new(weight, value)
             ).collect::<Vec<WeightedItem<V,W>>>()
         }
     }
@@ -91,6 +101,11 @@ impl<V, W: Weight> WeightedList<V,W>
     pub fn len(&self) -> W
     {
         self.data.iter().map(|item| item.weight).sum()
+    }
+
+    pub fn is_empty(&self) -> bool
+    {
+        self.data.is_empty()
     }
 
     pub fn total_values(&self) -> usize
@@ -179,5 +194,70 @@ impl<V, W: Weight> IntoIterator for WeightedList<V,W>
     fn into_iter(self) -> Self::IntoIter
     {
         self.data.into_iter()
+    }
+}
+
+// == LIST MUTATION == //
+impl<V, W: Weight> WeightedList<V,W>
+{
+    pub fn push_item(&mut self, item: WeightedItem<V,W>) -> &Self
+    {
+        self.data.push(item);
+        self
+    }
+
+    pub fn push_new_item(&mut self,
+        weight: W,
+        value: V
+    ) -> &Self
+    {
+        self.push_item(WeightedItem { weight, value })
+    }
+    
+    pub fn push_value(&mut self, value: V) -> &Self
+    {
+        self.push_item(WeightedItem::unit(value))
+    }
+
+    /// Insert a `WeightedItem` into the list at `weighted_index`. If `weighted_index >= len`, the item is appended to the end (the function does *not* panic).
+    pub fn insert_item(&mut self,
+        weighted_index: W,
+        item: WeightedItem<V,W>
+    ) -> &Self
+    {
+        let mut t = W::zero();
+        let mut i: usize = 0;
+
+        for each in &self.data {
+            t += each.weight;
+
+            if t > weighted_index {
+                break;
+            }
+
+            i += 1;
+        }
+
+        self.data.insert(i, item);
+
+        self
+    }
+
+    /// Insert an item with `weight` and `value` into the list at `weighted_index`. If `weighted_index >= len`, the item is appended to the end (the function does *not* panic).
+    pub fn insert_new_item(&mut self,
+        weighted_index: W,
+        (weight, value): (W, V)
+    ) -> &Self
+    {
+        self.insert_item(weighted_index, WeightedItem::new(weight, value))
+    }
+
+    /// Insert an item with `value` and a weight of `1` into the list at `weighted_index`. If `weighted_index >= len`, the item is appended to the end (the function does *not* panic).
+    pub fn insert_value(&mut self,
+        weighted_index: W,
+        value: V,
+    ) -> &Self
+    {
+        self.insert_item(weighted_index, WeightedItem::unit(value))
     }
 }
