@@ -59,9 +59,9 @@ test_properties =
   , weights wl === [2, 3, 7]
 
   , raw  __ === []
-  , raw  wl === l
+  , raw  wl === tl
   , raw' __ === []
-  , raw' wl === map swap l
+  , raw' wl === map swap tl
   ]
 
 test_index :: [Assertion]

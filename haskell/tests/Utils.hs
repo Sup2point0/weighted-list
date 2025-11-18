@@ -5,13 +5,14 @@ import WeightedList
 
 __ = newWeightedList @String @Int []
 
-l  = [(2, "sup"), (3, "nova"), (7, "shard")]
+tl = [(2, "sup"), (3, "nova"), (7, "shard")]
 
 wl :: WeightedList String Int
-wl = newWeightedList l
+wl = newWeightedList tl
+
+
+tll :: Int -> [(Int, String)]
+tll n = map (\i -> (i, show i)) [1..n]
 
 wll :: Int -> WeightedList String Int
-wll n = newWeightedList $ map item [1..n]
-  where
-    item :: Int -> (Int, String)
-    item i = (i, show i)
+wll n = newWeightedList $ map (\i -> (i, show i)) [1..n]

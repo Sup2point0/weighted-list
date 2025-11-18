@@ -60,9 +60,6 @@ Sum the total weights of all items in a `WeightedList`.
 totalWeights :: (Num w) => WeightedList v w -> w
 totalWeights = foldl' (\t item -> t + weight item) 0
 
-totalWeights' :: (Num w) => WeightedList v w -> w
-totalWeights' = sum . map weight
-
 {- |
 Count the total number of items in a `WeightedList`.
 -}

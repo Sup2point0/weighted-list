@@ -21,14 +21,14 @@ bench_properties =
   where
     total_weights :: [Benchmark]
     total_weights =
-      [ bench "" $ nf totalWeights (wll 256)
-      , bench "" $ nf totalWeights (wll 1024)
-      , bench "" $ nf totalWeights (wll 4096)
+      [ bench "totalWeights wll 256" $ nf totalWeights (wll 256)
+      , bench "totalWeights wll 1024" $ nf totalWeights (wll 1024)
+      , bench "totalWeights wll 4096" $ nf totalWeights (wll 4096)
       ]
 
     total_weights' :: [Benchmark]
     total_weights' =
-      [ bench "" $ nf totalWeights' (wll 256)
-      , bench "" $ nf totalWeights' (wll 1024)
-      , bench "" $ nf totalWeights' (wll 4096)
+      [ bench "totalWeights tll 256" $ nf (sum . map fst) (tll 256)
+      , bench "totalWeights tll 1024" $ nf (sum . map fst) (tll 1024)
+      , bench "totalWeights tll 4096" $ nf (sum . map fst) (tll 4096)
       ]
