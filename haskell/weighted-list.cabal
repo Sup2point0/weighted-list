@@ -15,9 +15,12 @@ library
 test-suite weighted-list-test
     default-language: GHC2021
     type:             exitcode-stdio-1.0
-    other-modules:    Test.Syntax, Test.WeightedList
     hs-source-dirs:   tests
     main-is:          Test/tests.hs
+    other-modules:
+        Utils,
+        Test.Syntax,
+        Test.WeightedList
     build-depends:
         base ^>=4.18.3.0,
         weighted-list,
@@ -28,8 +31,11 @@ test-suite weighted-list-test
 benchmark weighted-list-bench
     default-language: GHC2021
     type:             exitcode-stdio-1.0
-    hs-source-dirs:   tests/Bench
-    main-is:          bench.hs
+    hs-source-dirs:   tests
+    main-is:          Bench/bench.hs
+    other-modules:
+        Utils,
+        Bench.WeightedList
     build-depends:
         base ^>=4.18.3.0,
         weighted-list,

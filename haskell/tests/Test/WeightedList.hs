@@ -7,7 +7,9 @@ import Test.Tasty.ExpectedFailure
 import Data.List
 import Data.Tuple
 
+import Utils
 import Test.Syntax
+
 import WeightedList
 
 
@@ -28,16 +30,6 @@ test_weighted_list_errors = expectFail $ testGroup "WeightedList Errors"
   [ test_collection "index" test_index_errors
   , test_collection "pop" test_pop_errors
   ]
-
-
----------------------------------------------------------------------
-
-__ = newWeightedList @String @Int []
-
-l  = [(2, "sup"), (3, "nova"), (7, "shard")]
-
-wl :: WeightedList String Int
-wl = newWeightedList l
 
 
 ---------------------------------------------------------------------
