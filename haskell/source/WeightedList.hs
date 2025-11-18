@@ -41,23 +41,14 @@ instance (Eq v, Eq w, Ord w) => Ord (WeightedItem v w) where
 {-|
 Construct a list of `WeightedItem`s from the provided (weight, value) pairs.
 -}
-newWeightedList :: forall v w. Num w
+newWeightedList :: forall v w. (Num w)
                 => [(w, v)]
                 -> WeightedList v w
-
-newWeightedList [] = []
-
-newWeightedList ((fst_weight, fst_value):items)
-    = scanl prep item' items
+newWeightedList []    = []
+newWeightedList items = map sanitise items
   where
-    item' :: WeightedItem v w
-    item' = WeightedItem { value = fst_value, weight = fst_weight }
-
-    prep :: WeightedItem v w
-         -> (w, v)
-         -> WeightedItem v w
-    prep acc (weight', value')
-      = WeightedItem { value = value', weight = weight' }
+    sanitise :: (w, v) -> WeightedItem v w
+    sanitise (weight', value') = WeightedItem { value = value', weight = weight' }
 
 
 {-| ACCESSORS -}
