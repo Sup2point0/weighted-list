@@ -17,11 +17,10 @@ type WeightedList v w = [WeightedItem v w]
 data WeightedItem v w = WeightedItem
     { value :: v
     , weight :: w
-    , c_weight :: w  -- cumulative weight for binary search
     }
 
 instance (Show v, Show w) => Show (WeightedItem v w) where
-  show (WeightedItem value weight _) = (
+  show (WeightedItem value weight) = (
       "{ value = " ++ show value ++ ", weight = " ++ show weight ++ " }"
     )
 
@@ -52,17 +51,13 @@ newWeightedList ((fst_weight, fst_value):items)
     = scanl prep item' items
   where
     item' :: WeightedItem v w
-    item' = WeightedItem { value = fst_value, weight = fst_weight, c_weight = 0 }
+    item' = WeightedItem { value = fst_value, weight = fst_weight }
 
     prep :: WeightedItem v w
          -> (w, v)
          -> WeightedItem v w
     prep acc (weight', value')
-      = WeightedItem {
-          value = value',
-          weight = weight',
-          c_weight = weight' + c_weight acc
-        }
+      = WeightedItem { value = value', weight = weight' }
 
 
 {-| ACCESSORS -}
