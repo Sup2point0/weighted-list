@@ -1,6 +1,6 @@
 import Test.Tasty
 
-import Test_WeightedList
+import Test.WeightedList
 
 
 main :: IO ()

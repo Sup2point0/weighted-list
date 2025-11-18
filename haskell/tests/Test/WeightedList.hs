@@ -1,4 +1,4 @@
-module Test_WeightedList where
+module Test.WeightedList where
 
 import Test.Tasty
 import Test.Tasty.HUnit
@@ -7,7 +7,7 @@ import Test.Tasty.ExpectedFailure
 import Data.List
 import Data.Tuple
 
-import Syntax
+import Test.Syntax
 import WeightedList
 
 

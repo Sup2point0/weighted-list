@@ -8,22 +8,31 @@ build-type:         Simple
 
 library
     exposed-modules:  WeightedList
-    -- other-modules:
-    -- other-extensions:
-    build-depends:    base ^>=4.18.3.0
-    hs-source-dirs:   source
     default-language: GHC2021
+    hs-source-dirs:   src
+    build-depends:    base ^>=4.18.3.0
 
 test-suite weighted-list-test
     default-language: GHC2021
-    other-modules:    Syntax, Test_WeightedList
-    -- other-extensions:
     type:             exitcode-stdio-1.0
+    other-modules:    Test.Syntax, Test.WeightedList
     hs-source-dirs:   tests
-    main-is:          tests.hs
+    main-is:          Test/tests.hs
     build-depends:
         base ^>=4.18.3.0,
         weighted-list,
         tasty,
         tasty-hunit >=0.9,
         tasty-expected-failure >=0.12
+
+benchmark weighted-list-bench
+    default-language: GHC2021
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   tests/Bench
+    main-is:          bench.hs
+    build-depends:
+        base ^>=4.18.3.0,
+        weighted-list,
+        tasty,
+        tasty-bench,
+        deepseq

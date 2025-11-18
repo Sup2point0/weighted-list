@@ -1,4 +1,4 @@
-module Syntax where
+module Test.Syntax where
 
 import Test.Tasty
 import Test.Tasty.HUnit
