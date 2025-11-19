@@ -21,8 +21,8 @@ fn constructors()
 fn macros()
 {
     let _: WeightedList<String, i32> = wlist!(
-        (2, String::from("sup")),
-        (3, String::from("nova")),
-        (5, String::from("shard"))
+        (2, str!("sup")),
+        (3, str!("nova")),
+        (5, str!("shard"))
     );
 }

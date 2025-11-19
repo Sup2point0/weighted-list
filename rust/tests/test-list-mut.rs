@@ -7,13 +7,15 @@ use weighted_list::*;
 #[test]
 fn push()
 {
-    assert!( *el().push_item(WeightedItem::unit(str!("elysion")))
-        == wlist!(
-            (1, str!("elysion"))
-        )
+    assert!(
+        *el().push_item(WeightedItem::unit(str!("elysion")))
+        ==
+        wlist!( (1, str!("elysion")) )
     );
-    assert!( *wl().push_item(WeightedItem::unit(str!("elysion")))
-        == wlist!(
+    assert!(
+        *wl().push_item(WeightedItem::unit(str!("elysion")))
+        ==
+        wlist!(
             (2, str!("sup")),
             (3, str!("nova")),
             (5, str!("shard")),
@@ -21,13 +23,15 @@ fn push()
         )
     );
 
-    assert!( *el().push_new_item(1, str!("elysion"))
-        ==  wlist!(
-            (1, str!("elysion"))
-        )
+    assert!(
+        *el().push_new_item(1, str!("elysion"))
+        ==
+        wlist!( (1, str!("elysion")) )
     );
-    assert!( *wl().push_new_item(1, str!("elysion"))
-        == wlist!(
+    assert!(
+        *wl().push_new_item(1, str!("elysion"))
+        ==
+        wlist!(
             (2, str!("sup")),
             (3, str!("nova")),
             (5, str!("shard")),
@@ -35,32 +39,32 @@ fn push()
         )
     );
 
-    assert!( *el().push_value(str!("elysion"))
-        == wlist!(
-            (1, str!("elysion"))
-        )
+    assert!(
+        *el().push_value(str!("elysion"))
+        ==
+        wlist!( (1, str!("elysion")) )
     );
 }
 
 #[test]
 fn insert()
 {
-    assert!( *el().insert_item(0, WeightedItem::new(1, str!("elysion")))
-        == wlist!(
-            (1, str!("elysion"))
-        )
+    assert!(
+        *el().insert_item(0, WeightedItem::new(1, str!("elysion")))
+        ==
+        wlist!( (1, str!("elysion")) )
     );
 
-    assert!( *el().insert_value(0, str!("elysion"))
-        == wlist!(
-            (1, str!("elysion"))
-        )
+    assert!(
+        *el().insert_value(0, str!("elysion"))
+        ==
+        wlist!( (1, str!("elysion")) )
     );
 
-    assert!( *el().insert_new_item(0, (1, str!("elysion")))
-        == wlist!(
-            (1, str!("elysion"))
-        )
+    assert!(
+        *el().insert_new_item(0, (1, str!("elysion")))
+        ==
+        wlist!( (1, str!("elysion")) )
     );
 
     let first = wlist!(
