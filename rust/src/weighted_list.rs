@@ -4,9 +4,24 @@ use std::{iter::*, ops::*};
 use num_traits::Num;
 
 
-pub trait Weight: Num + PartialOrd + AddAssign + Sum + Copy + fmt::Display {}
+pub trait Weight:
+    Num
+    + PartialOrd
+    + AddAssign + SubAssign
+    + Sum
+    + Copy
+    + fmt::Display
+{}
 
-impl<Type: Num + PartialOrd + AddAssign + Sum + Copy + fmt::Display> Weight for Type {}
+impl<Type> Weight for Type
+    where Type:
+        Num
+        + PartialOrd
+        + AddAssign + SubAssign
+        + Sum
+        + Copy
+        + fmt::Display
+{}
 
 
 #[derive(Debug, Clone)]
@@ -269,6 +284,73 @@ impl<V, W: Weight> WeightedList<V,W>
     ) -> &Self
     {
         self.insert_item(weighted_index, WeightedItem::unit(value))
+    }
+
+    pub fn pop(&mut self) -> Option<WeightedItem<V,W>>
+    {
+        self.data.pop()
+    }
+
+    pub fn pop_if(&mut self,
+        predicate: impl FnOnce(&mut WeightedItem<V,W>) -> bool
+    ) -> Option<WeightedItem<V,W>>
+    {
+        self.data.pop_if(predicate)
+    }
+
+    pub fn clear(&mut self) -> &Self
+    {
+        self.data.clear();
+        self
+    }
+}
+
+// == SPECIALISED MUTATION == //
+impl<V: Clone, W: Weight> WeightedList<V,W>
+{
+    pub fn take_one(&mut self, weighted_index: W) -> WeightedItem<V,W>
+    {
+        self.take_by(weighted_index, W::one())
+    }
+
+    /// Decrement the weight of the item at `weighted_index` by `decrement`. If its weight becomes non-positive as a result, remove the entire item. Returns a new `WeightedItem` with the original weight before decrementing and a clone of the original item’s value.
+    pub fn take_by(&mut self, weighted_index: W, decrement: W) -> WeightedItem<V,W>
+    {
+        let mut t = W::zero();
+
+        let mut original_weight = None;
+        let mut original_value = None;
+
+        let mut idx = 0;
+        let mut remove_at = None;
+        
+        for item in &mut self.data {
+            t += item.weight;
+
+            if t > weighted_index {
+                original_weight = Some(item.weight);
+                original_value = Some(item.value.clone());
+
+                item.weight -= decrement;
+                if item.weight <= W::zero() {
+                    remove_at = Some(idx);
+                }
+                break;
+            }
+
+            idx += 1;
+        }
+
+        if let Some(idx) = remove_at {
+            self.data.remove(idx);
+        }
+
+        match (original_weight, original_value) {
+            (Some(weight), Some(value)) => return WeightedItem { weight, value },
+            _ => panic!(
+                "index out of bounds: the len is {} but the index is {weighted_index}", self.len()
+            ),
+        }
     }
 }
 
