@@ -6,4 +6,4 @@ edition = "2024"
 [dependencies]
 num-traits = "0.2.19"
 rand = "0.9"
-duplicate = "2.0.1"
+bon = "3.8.1"

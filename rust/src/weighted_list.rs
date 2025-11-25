@@ -1,25 +1,26 @@
 use std::fmt;
 use std::{iter::*, ops::*};
 
-use num_traits::Num;
+// use bon::{bon, builder};
+use num_traits as nums;
 
 
 pub trait Weight:
-    Num
-    + PartialOrd
-    + AddAssign + SubAssign
-    + Sum
+    nums::NumAssign
+    + nums::NumCast
     + Copy
+    + PartialOrd
+    + Sum
     + fmt::Display
 {}
 
 impl<Type> Weight for Type
     where Type:
-        Num
-        + PartialOrd
-        + AddAssign + SubAssign
-        + Sum
+        nums::NumAssign
+        + nums::NumCast
         + Copy
+        + PartialOrd
+        + Sum
         + fmt::Display
 {}
 
@@ -357,25 +358,46 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
 // == RANDOM SELECTION == //
 use rand::prelude::*;
 
-use duplicate::duplicate_item;
-
-#[duplicate_item(int; [i8]; [i16]; [i32]; [i64])]
-impl<V> WeightedList<V, int>
+// #[bon]
+impl<V, W: Weight> WeightedList<V,W>
 {
-    pub fn select_random_value<RNG>(&self, rng: &mut RNG) -> &V
+    pub fn select_random_value<RNG>(&self, rng: &mut RNG) -> Option<&V>
         where RNG: Rng + ?Sized
     {
-        &self.select_random_item(rng).value
+        let out = &self.select_random_item(rng)?.value;
+        Some(out)
     }
 
     /// Select a random item from the list.
     /// 
     /// This uses `f64` for random number generation.
-    pub fn select_random_item<RNG>(&self, rng: &mut RNG) -> &WeightedItem<V, int>
+    pub fn select_random_item<RNG>(&self, rng: &mut RNG) -> Option<&WeightedItem<V,W>>
         where RNG: Rng + ?Sized
     {
+        if self.data.is_empty() { return None }
+
+        let len: f64 = nums::cast::<W, f64>(self.len())?;
         let scalar: f64 = rng.random();
-        let weighted_index = scalar * self.len() as f64;
-        &self[weighted_index.floor() as int]
+        let idx = (len * scalar).floor();
+
+        let weighted_index = nums::cast::<f64, W>(idx)?;
+        let out = &self[weighted_index];
+
+        Some(out)
     }
+
+    // #[builder]
+    // pub fn select_random_items<RNG>(&self,
+    //     count: u32,
+    //     rng: &mut RNG,
+    //     unique: Option<bool>,
+    //     replace: Option<bool>,
+    // ) -> Vec<WeightedItem<V,W>>
+    //     where RNG: Rng + ?Sized
+    // {
+    //     let unique = unique.unwrap_or(false);
+    //     let replace = replace.unwrap_or(false);
+
+    //     let mut pool = self.clone();
+    // }
 }
