@@ -7,8 +7,8 @@ use utils::*;
 #[test]
 fn accessors()
 {
-    assert!( el().len() == 0 );
-    assert!( wl().len() == 10 );
+    assert_eq!( el().len(), 0 );
+    assert_eq!( wl().len(), 10 );
 
     let e: [&String; 0] = [];
     assert!( el().values().eq(e) );
