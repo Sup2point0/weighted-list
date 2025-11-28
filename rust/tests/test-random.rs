@@ -14,11 +14,11 @@ fn select_single()
         (5, str!("woah"))
     );
 
-    let outs = vec![str!("sup"), str!("woah")];
+    let outs = vec!["sup", "woah"];
     let mut out;
     for _ in 0..50 {
         out = list.select_random_value(&mut rng);
-        assert!( outs.contains(out.unwrap()) );
+        assert!( outs.contains(&out.unwrap().as_str()) );
     }
 
     let outs = vec![wit!(100, str!("sup")), wit!(5, str!("woah"))];

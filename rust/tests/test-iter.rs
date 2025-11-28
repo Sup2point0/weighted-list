@@ -15,13 +15,11 @@ fn iter_methods()
         item.weight += 1;
     }
 
-    assert!(
-        list == wlist!(
-            (3, str!("sup")),
-            (4, str!("nova")),
-            (6, str!("shard"))
-        )
-    );
+    assert_eq!(list, wlist!(
+        (3, str!("sup")),
+        (4, str!("nova")),
+        (6, str!("shard"))
+    ) );
 }
 
 #[test]
