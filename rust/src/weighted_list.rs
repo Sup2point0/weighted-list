@@ -29,7 +29,7 @@ impl<Type> Weight for Type
 // == WEIGHTED ITEM == //
 // --------------------------------------------------------------------- //
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct WeightedItem<V, W: Weight>
 {
     pub weight: W,
@@ -57,14 +57,11 @@ impl<V, W: Weight> WeightedItem<V,W>
     }
 }
 
-impl<V: Eq, W: Weight> Eq for WeightedItem<V,W> {}
-
-impl<V: PartialEq, W: Weight> PartialEq for WeightedItem<V,W>
-{
-    fn eq(&self, other: &Self) -> bool
-    {
-        self.value == other.value && self.weight == other.weight
-    }
+#[macro_export]
+macro_rules! wit {
+    ( $weight: expr, $value: expr ) => {
+        WeightedItem::new($weight, $value)
+    };
 }
 
 impl<V: fmt::Display, W: Weight> fmt::Display for WeightedItem<V,W>
@@ -173,6 +170,49 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 }
 
+// == INTERNAL == //
+impl<V, W: Weight> WeightedList<V,W>
+{
+    fn unweight_index_nopanic(&self, weighted_index: W) -> usize
+    {
+        let mut t = W::zero();
+        let mut i = 0;
+
+        for each in &self.data {
+            t += each.weight;
+
+            if t > weighted_index {
+                return i;
+            }
+
+            i += 1;
+        }
+
+        i
+    }
+
+    fn unweight_index(&self, weighted_index: W) -> usize
+    {
+        let mut t = W::zero();
+        let mut i = 0;
+
+        for each in &self.data {
+            t += each.weight;
+
+            if t > weighted_index {
+                return i;
+            }
+
+            i += 1;
+        }
+
+        panic!(
+            "index out of bounds: the len is {} but the index is {}",
+            self.len(), weighted_index
+        );
+    }
+}
+
 // == EQUALITY == //
 impl<V: Eq, W: Weight> Eq for WeightedList<V, W> {}
 
@@ -209,22 +249,8 @@ impl<V, W: Weight> IndexMut<W> for WeightedList<V,W>
 {
     fn index_mut(&mut self, weighted_index: W) -> &mut WeightedItem<V,W>
     {
-        let mut t = W::zero();
-
-        for item in &mut self.data {
-            t += item.weight;
-
-            if t > weighted_index {
-                return &mut *item;
-            }
-        };
-
-        panic!("index out of bounds");
-        // TODO FIXME
-        // panic!(
-        //     "index out of bounds: the len is {} but the index is {}",
-        //     self.len(), weighted_index
-        // );
+        let idx = self.unweight_index(weighted_index);
+        &mut self.data[idx]
     }
 }
 
@@ -281,21 +307,7 @@ impl<V, W: Weight> WeightedList<V,W>
         item: WeightedItem<V,W>
     ) -> &Self
     {
-        let mut t = W::zero();
-        let mut i: usize = 0;
-
-        for each in &self.data {
-            t += each.weight;
-
-            if t > weighted_index {
-                break;
-            }
-
-            i += 1;
-        }
-
-        self.data.insert(i, item);
-
+        self.data.insert(self.unweight_index_nopanic(weighted_index), item);
         self
     }
 
@@ -334,6 +346,11 @@ impl<V, W: Weight> WeightedList<V,W>
         self.data.clear();
         self
     }
+
+    pub fn remove(&mut self, weighted_index: W) -> WeightedItem<V,W>
+    {
+        self.data.remove(self.unweight_index(weighted_index))
+    }
 }
 
 // == SPECIALISED MUTATION == //
@@ -344,50 +361,42 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
         self.take_by(weighted_index, W::one())
     }
 
-    /// Decrement the weight of the item at `weighted_index` by `decrement`. If its weight becomes non-positive as a result, remove the entire item. Returns a new `WeightedItem` with the original weight before decrementing and a clone of the original item’s value.
+    /// Decrement the weight of the item at `weighted_index` by `decrement`. If its weight becomes non-positive as a result, remove the entire item. Returns a clone of the item.
     pub fn take_by(&mut self, weighted_index: W, decrement: W) -> WeightedItem<V,W>
     {
-        let mut t = W::zero();
+        let idx = self.unweight_index(weighted_index);
+        let target = &mut self.data[idx];
+        target.weight -= decrement;
 
-        let mut original_weight = None;
-        let mut original_value = None;
-
-        let mut idx = 0;
-        let mut remove_at = None;
-        
-        for item in &mut self.data {
-            t += item.weight;
-
-            if t > weighted_index {
-                original_weight = Some(item.weight);
-                original_value = Some(item.value.clone());
-
-                item.weight -= decrement;
-                if item.weight <= W::zero() {
-                    remove_at = Some(idx);
-                }
-                break;
-            }
-
-            idx += 1;
+        if target.weight <= W::zero() {
+            self.data.remove(idx)
         }
-
-        if let Some(idx) = remove_at {
-            self.data.remove(idx);
+        else {
+            target.clone()
         }
+    }
 
-        match (original_weight, original_value) {
-            (Some(weight), Some(value)) => return WeightedItem { weight, value },
-            _ => panic!(
-                "index out of bounds: the len is {} but the index is {weighted_index}", self.len()
-            ),
-        }
+    pub fn take_entire(&mut self, weighted_index: W) -> WeightedItem<V,W>
+    {
+        self.remove(weighted_index)
     }
 }
 
 // == RANDOM SELECTION == //
 impl<V, W: Weight> WeightedList<V,W>
 {
+    fn get_random_weighted_index<RNG>(&self, rng: &mut RNG) -> Option<W>
+        where RNG: Rng + ?Sized
+    {
+        let len:    f64 = nums::cast::<W, f64>(self.len())?;
+        let scalar: f64 = rng.random();
+
+        let idx = (len * scalar).floor();
+        let out = nums::cast::<f64, W>(idx)?;
+
+        Some(out)
+    }
+
     pub fn select_random_value<RNG>(&self, rng: &mut RNG) -> Option<&V>
         where RNG: Rng + ?Sized
     {
@@ -403,28 +412,39 @@ impl<V, W: Weight> WeightedList<V,W>
     {
         if self.data.is_empty() { return None }
 
-        let len: f64 = nums::cast::<W, f64>(self.len())?;
-        let scalar: f64 = rng.random();
-        let idx = (len * scalar).floor();
-
-        let weighted_index = nums::cast::<f64, W>(idx)?;
-        let out = &self[weighted_index];
+        let idx = self.get_random_weighted_index(rng)?;
+        let out = &self[idx];
 
         Some(out)
     }
+}
 
-    pub fn pop_random_item_by<RNG>(&mut self, rng: &mut RNG, decrement: W) -> Option<&WeightedItem<V,W>>
+impl<V: Clone, W: Weight> WeightedList<V,W>
+{
+    pub fn take_one_random<RNG>(&mut self, rng: &mut RNG) -> Option<WeightedItem<V,W>>
+        where RNG: Rng + ?Sized
+    {
+        self.take_by_random(rng, W::one())
+    }
+
+    pub fn take_by_random<RNG>(&mut self, rng: &mut RNG, decrement: W) -> Option<WeightedItem<V,W>>
         where RNG: Rng + ?Sized
     {
         if self.data.is_empty() { return None }
 
-        let len: f64 = nums::cast::<W, f64>(self.len())?;
-        let scalar: f64 = rng.random();
-        let idx = (len * scalar).floor();
+        let idx = self.get_random_weighted_index(rng)?;
+        let out = self.take_by(idx, decrement);
 
-        let weighted_index = nums::cast::<f64, W>(idx)?;
-        let out = &mut self[weighted_index];
-        out.weight -= decrement;
+        Some(out)
+    }
+
+    pub fn take_random_item_entire<RNG>(&mut self, rng: &mut RNG) -> Option<WeightedItem<V,W>>
+        where RNG: Rng + ?Sized
+    {
+        if self.data.is_empty() { return None }
+
+        let idx = self.get_random_weighted_index(rng)?;
+        let out = self.take_entire(idx);
 
         Some(out)
     }
@@ -457,7 +477,7 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
             if i > count { break }
 
             if replace {
-                if let Some(item) = pool.pop_random_item_by(rng, W::one()) {
+                if let Some(item) = pool.take_by_random(rng, W::one()) {
                     cand = item.value.clone();
                 } else { continue }
             }
