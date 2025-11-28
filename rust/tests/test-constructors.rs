@@ -15,6 +15,11 @@ fn constructors()
         (2.0, false),
         (4.2, true)
     );
+    
+    let list = wl();
+    let mut cloned = list.clone();
+    cloned.clear();
+    assert_ne!( list, cloned );
 }
 
 #[test]

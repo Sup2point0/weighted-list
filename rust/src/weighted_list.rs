@@ -1,8 +1,9 @@
 use std::fmt;
 use std::{iter::*, ops::*};
 
-// use bon::{bon, builder};
+use bon::{bon};
 use num_traits as nums;
+use rand::prelude::*;
 
 
 pub trait Weight:
@@ -24,6 +25,9 @@ impl<Type> Weight for Type
         + fmt::Display
 {}
 
+
+// == WEIGHTED ITEM == //
+// --------------------------------------------------------------------- //
 
 #[derive(Debug, Clone)]
 pub struct WeightedItem<V, W: Weight>
@@ -72,7 +76,10 @@ impl<V: fmt::Display, W: Weight> fmt::Display for WeightedItem<V,W>
 }
 
 
-#[derive(Debug)]
+// == WEIGHTED LIST == //
+// --------------------------------------------------------------------- //
+
+#[derive(Debug, Clone)]
 pub struct WeightedList<V, W: Weight>
 {
     data: Vec<WeightedItem<V,W>>,
@@ -195,6 +202,29 @@ impl<V, W: Weight> Index<W> for WeightedList<V,W>
         };
 
         panic!("index out of bounds: the len is {} but the index is {weighted_index}", self.len());
+    }
+}
+
+impl<V, W: Weight> IndexMut<W> for WeightedList<V,W>
+{
+    fn index_mut(&mut self, weighted_index: W) -> &mut WeightedItem<V,W>
+    {
+        let mut t = W::zero();
+
+        for item in &mut self.data {
+            t += item.weight;
+
+            if t > weighted_index {
+                return &mut *item;
+            }
+        };
+
+        panic!("index out of bounds");
+        // TODO FIXME
+        // panic!(
+        //     "index out of bounds: the len is {} but the index is {}",
+        //     self.len(), weighted_index
+        // );
     }
 }
 
@@ -356,9 +386,6 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
 }
 
 // == RANDOM SELECTION == //
-use rand::prelude::*;
-
-// #[bon]
 impl<V, W: Weight> WeightedList<V,W>
 {
     pub fn select_random_value<RNG>(&self, rng: &mut RNG) -> Option<&V>
@@ -386,18 +413,67 @@ impl<V, W: Weight> WeightedList<V,W>
         Some(out)
     }
 
-    // #[builder]
-    // pub fn select_random_items<RNG>(&self,
-    //     count: u32,
-    //     rng: &mut RNG,
-    //     unique: Option<bool>,
-    //     replace: Option<bool>,
-    // ) -> Vec<WeightedItem<V,W>>
-    //     where RNG: Rng + ?Sized
-    // {
-    //     let unique = unique.unwrap_or(false);
-    //     let replace = replace.unwrap_or(false);
+    pub fn pop_random_item_by<RNG>(&mut self, rng: &mut RNG, decrement: W) -> Option<&WeightedItem<V,W>>
+        where RNG: Rng + ?Sized
+    {
+        if self.data.is_empty() { return None }
 
-    //     let mut pool = self.clone();
-    // }
+        let len: f64 = nums::cast::<W, f64>(self.len())?;
+        let scalar: f64 = rng.random();
+        let idx = (len * scalar).floor();
+
+        let weighted_index = nums::cast::<f64, W>(idx)?;
+        let out = &mut self[weighted_index];
+        out.weight -= decrement;
+
+        Some(out)
+    }
+}
+
+#[bon]
+impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
+{
+    #[builder]
+    pub fn select_random_items<RNG>(&self,
+        count: u32,
+        rng: &mut RNG,
+        unique: Option<bool>,
+        replace: Option<bool>,
+    ) -> Vec<V>
+        where RNG: Rng + ?Sized
+    {
+        let unique = unique.unwrap_or(false);
+        let replace = replace.unwrap_or(false);
+
+        let mut pool = self.clone();
+        let mut cand: V;
+
+        let mut i = 0;
+        let mut out = Vec::with_capacity(count as usize);
+
+        loop
+        {
+            i += 1;
+            if i > count { break }
+
+            if replace {
+                if let Some(item) = pool.pop_random_item_by(rng, W::one()) {
+                    cand = item.value.clone();
+                } else { continue }
+            }
+            else {
+                if let Some(value) = pool.select_random_value(rng) {
+                    cand = value.clone();
+                } else { continue }
+            }
+
+            if unique && out.contains(&cand) {
+                continue
+            } else {
+                out.push(cand)
+            }
+        }
+
+        out
+    }
 }
