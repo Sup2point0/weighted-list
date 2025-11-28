@@ -8,7 +8,7 @@ on:
   
   push:
     paths:
-      - 'test-ts.yml'
+      - '**/test-ts.yml'
       - '**.ts'
 
 jobs:
@@ -19,18 +19,18 @@ jobs:
         working-directory: './typescript'
 
     steps:
-      - name: 'git - checkout'
+      - name: 'github / checkout'
         uses: actions/checkout@v4
 
-      - name: 'node / setup'
+      - name: 'github / node / setup'
         uses: actions/setup-node@v6
         with:
           node-version: 'latest'
           cache: 'npm'
           cache-dependency-path: './typescript/package-lock.json'
       
-      - name: 'node / install'
+      - name: 'node / npm install'
         run: npm install
 
-      - name: 'vitest / test'
+      - name: 'node / vitest'
         run: npm run test
