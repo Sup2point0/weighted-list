@@ -99,3 +99,20 @@ fn insert()
     assert_eq!( *wl().insert_new_item(10, (1, str!("elysion"))), fourth );
     assert_eq!( *wl().insert_new_item(11, (1, str!("elysion"))), fourth );
 }
+
+#[test]
+fn clear()
+{
+    assert_eq!( *wl().clear(), el() );
+}
+
+#[test]
+fn remove()
+{
+    let orig = wl();
+    let mut list = wl();
+
+    assert_eq!( list.remove(0), orig.items()[0] );
+    assert_eq!( list.remove(0), orig.items()[1] );
+    assert_eq!( list.remove(0), orig.items()[2] );
+}

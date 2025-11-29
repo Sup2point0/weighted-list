@@ -23,5 +23,5 @@ pub fn el() -> WeightedList<String, i32>
 #[allow(dead_code)]
 pub fn wl() -> WeightedList<String, i32>
 {
-    WeightedList::from(data_string())
+    WeightedList::init(data_string())
 }
