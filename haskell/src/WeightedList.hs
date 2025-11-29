@@ -11,27 +11,27 @@ import Data.Either
 
 ---------------------------------------------------------------------
 
-type WeightedList v w = [WeightedItem v w]
+type WeightedList v w = [Item v w]
 
 
-data WeightedItem v w = WeightedItem
+data Item v w = Item
     { value :: v
     , weight :: w
     }
 
-instance (Show v, Show w) => Show (WeightedItem v w) where
-  show (WeightedItem value weight) = (
+instance (Show v, Show w) => Show (Item v w) where
+  show (Item value weight) = (
       "{ value = " ++ show value ++ ", weight = " ++ show weight ++ " }"
     )
 
-instance (Eq v, Eq w) => Eq (WeightedItem v w) where
+instance (Eq v, Eq w) => Eq (Item v w) where
   item == item'
     = (
       value item == value item'
       && weight item == weight item'
     )
 
-instance (Eq v, Eq w, Ord w) => Ord (WeightedItem v w) where
+instance (Eq v, Eq w, Ord w) => Ord (Item v w) where
   item <= item' = weight item <= weight item'
 
 
@@ -39,7 +39,7 @@ instance (Eq v, Eq w, Ord w) => Ord (WeightedItem v w) where
 ---------------------------------------------------------------------
 
 {-|
-Construct a list of `WeightedItem`s from the provided (weight, value) pairs.
+Construct a list of `Item`s from the provided (weight, value) pairs.
 -}
 newWeightedList :: forall v w. (Num w)
                 => [(w, v)]
@@ -47,8 +47,8 @@ newWeightedList :: forall v w. (Num w)
 newWeightedList []    = []
 newWeightedList items = map sanitise items
   where
-    sanitise :: (w, v) -> WeightedItem v w
-    sanitise (weight', value') = WeightedItem { value = value', weight = weight' }
+    sanitise :: (w, v) -> Item v w
+    sanitise (weight', value') = Item { value = value', weight = weight' }
 
 
 {-| ACCESSORS -}
@@ -106,7 +106,7 @@ Note that this has $O(n)$ time complexity.
 get :: forall v w. (Num w, Ord w)
     => WeightedList v w
     -> w
-    -> WeightedItem v w
+    -> Item v w
 
 get [] _ = error "Cannot access an empty WeightedList"
 
@@ -117,7 +117,7 @@ get list i
   where
     get' :: WeightedList v w
          -> w
-         -> WeightedItem v w
+         -> Item v w
     get' [] _ = error "Index exceeded length of WeightedList"
     get' (item:items) t
         | t' > i    = item
@@ -125,9 +125,9 @@ get list i
       where
         t' = t + weight item
     
-    get_r :: WeightedItem v w
-          -> Either w (WeightedItem v w)
-          -> Either w (WeightedItem v w)
+    get_r :: Item v w
+          -> Either w (Item v w)
+          -> Either w (Item v w)
     get_r item (Right out) = Right out
     get_r item (Left acc)
         | t' >= (-i) = Right item
@@ -179,7 +179,7 @@ Merge an item into the list. If an instance already exists, that instance’s we
 -}
 merge :: (Eq v, Num w)
       => WeightedList v w
-      -> WeightedItem v w
+      -> Item v w
       -> WeightedList v w
 merge [] item = [item]
 merge (cand:rest) item

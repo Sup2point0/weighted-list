@@ -39,9 +39,9 @@ test_constructor =
   [
     __ === []
 
-  , wl === [ WeightedItem { value = "sup", weight = 2 }
-           , WeightedItem { value = "nova", weight = 3 }
-           , WeightedItem { value = "shard", weight = 7 }
+  , wl === [ Item { value = "sup", weight = 2 }
+           , Item { value = "nova", weight = 3 }
+           , Item { value = "shard", weight = 7 }
            ]
   ]
 
