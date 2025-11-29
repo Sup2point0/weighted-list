@@ -18,7 +18,7 @@
 
 </div>
 
-A list class for weighted randomisation, implemented (eventually) in every language I’ve learnt.
+A list implementation for weighted randomisation, implemented (eventually) in every programming language I’ve learnt.
 
 
 ```py
@@ -51,19 +51,23 @@ greetings :: WeightedList String Int
 greetings = newWeightedList [(20, "sup"), (2, "salutations")]
 
 main :: IO ()
-main = print (select greetings)
+main = print (selectValue greetings)
 -- => salutations
 ```
 
 ```rs
 // Rust (under development)
-let wl: WeightedList<String, i32> = WeightedList::from([
-    (20, "sup".to_string()),
-    (2, "salutations".to_string()),
-]);
+let wl = wlist![
+    (20, String::from("sup")),
+    (2,  String::from("salutations")),
+];
 
-println!("{}", wl.get_random_value());
+println!("{}", wl.select_random_value());
 // => sup
+```
+
+```rb
+# Ruby (working on it!)
 ```
 
 An immutable optimised variant `FrozenWeightedList` is also implemented, which provides $O(\log{n})$ item access.
@@ -163,33 +167,14 @@ For a tutorial, see [walkthrough](c-sharp/walkthrough.md).
 
 ## Compatibility
 
-### Python
-- Made in Python 3.11
-- No external dependencies
-
-### C#
-- Made in C# 12.0
-- Supports LINQ querying
-
-### TypeScript
-Under development!
-
-### Ruby
-Under development!
-
-### Haskell
-Under development!
-
-### Rust
-Under development!
-
-
-<br>
-
-
-## License
-
-This project is licensed under the MIT license, so feel free to use it however you wish (although some credit would be cool!).
+| Language   | Version   | Status | Dependencies | Notes |
+| :--------- | :-------- | :----- | :----------- | :---- |
+| Python     | `>= 3.11` | Awaiting rewrite |
+| C#         | `12.0`    | Awaiting maintenance | None | Supports LINQ querying |
+| TypeScript |           | Under development | None |
+| Haskell    | `GHC2021` | Under development | None |
+| Rust       | `2024`    | Under development | `rand`, `num_traits`, `bon` |
+| Ruby       |           | Awaiting development |
 
 
 <br>
@@ -206,19 +191,36 @@ A couple years later, I’ve come back to do the same in C#, this time also addi
 
 [^translate]: This was not exactly the way I created the project in C#, but the Python implementation certainly laid out a general framework and was influential in some design decisions.
 
+A few more years later, I’m back to do the same in Haskell and Rust (and also finish off the TypeScript and Ruby implementations that I started but never finished). Damn I love this project. Seriously, it never fails to raise so many questions about a language’s mechanics and quirks that I would never encounter otherwise.
+
 ### Is this even useful?
-I mean yeah, a whole several-hundred-lines class to handle one thing might be a bit overkill. But it’s far more convenient to have it all packaged this way into a single portable file that can easily be slotted into other projects. Regardless, I’ve used my own code[^surprise] in at least 2 major projects ([PENGUIN<sup>↗</sup>](https://github.com/Sup2point0/PENGUIN) and [Algorhythm<sup>↗</sup>](https://Sup2point0/Algorhythm)), so I can definitely say it’s been useful to me!
+I mean yeah, a whole several-hundred-lines class to handle one thing is probably overkill... it’s more an exercise and proof-of-concept.
+
+Regardless, I’ve used my own code[^surprise] in at least 2 major projects ([PENGUIN<sup>↗</sup>](https://github.com/Sup2point0/PENGUIN) and [Algorhythm<sup>↗</sup>](https://Sup2point0/Algorhythm)), so I can definitely say it’s been useful to me!
 
 [^surprise]: To my own surprise, somewhat.
 
 ### Why are the source files several hundred lines long?
-1, documentation; 2, line breaks; 3, extra functionality. Particularly documentation. That stuff just *eats* the line count. Also, implementing something as complex as an enumerable container requires a lot of methods, operators and interfaces, both in Python and C#. And in C# you've even got overloading to account for as well.
+1. documentation
+2. line breaks
+3. utility
 
-### Is the code that optimised?
-I have tried to ensure everything is implemented as efficiently as possible, but I cannot guarantee every single part is perfectly optimised, and I haven’t gone to the extremes of timing different approaches. Operations that may take longer than expected will likely have that mentioned in their documentation (docstrings for Python, XML comments for C#).
+Particularly documentation. That stuff just *eats* the line count. Also, implementing something as complex as an enumerable container requires a lot of methods, operators, interfaces and delegation. And in C# you've even got overloading to account for as well.
+
+### How fast is it?
+In all honesty, I don’t know. I’m slowly adding benchmarks to test different approaches.
 
 ### Why is your Python code not compliant to PEP 8?
 I have my own particular preferences when it comes to coding in Python, which I explain fully [here<sup>↗</sup>](https://github.com/Sup2point0/Assort/blob/origin/~dev/Python%20Syntax.md).
+
+### Why do you start `{}` on a new line?
+I’m a C# programmer, what can I say :P
+
+### Why do you use `snake_case` in TypeScript?
+I’m a Python programmer, what can I say :P
+
+### Why are you okay with `camelCase` in Haskell then?
+I used `snake_case` before, and ngl, in Haskell you kinda need the `camelCase` to keep things readable without parentheses...
 
 
 <br>
