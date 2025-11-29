@@ -117,7 +117,7 @@ impl<V, W: Weight> WeightedList<V,W>
 /// Construct a `WeightedList` from the provided (weight, value) tuples.
 #[macro_export]
 macro_rules! wlist {
-    ( $( $item: expr ),* ) => {
+    ( $( $item: expr ),+ $(,)? ) => {
         WeightedList::from([
             $( $item, )*
         ]);
@@ -153,6 +153,11 @@ impl<V, W: Weight> WeightedList<V,W>
     pub fn values(&self) -> impl Iterator<Item = &V>
     {
         self.data.iter().map(|item| &item.value)
+    }
+
+    pub fn items(&self) -> &Vec<WeightedItem<V,W>>
+    {
+        &self.data
     }
 
     /// Get an iterator over (weight, value) tuples representing each item in the list.
