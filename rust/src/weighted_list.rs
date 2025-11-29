@@ -102,7 +102,7 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 
     /// Construct a `WeightedList` from an iterable of (weight, value) pairs.
-    pub fn from<I>(items: I) -> Self
+    pub fn init<I>(items: I) -> Self
         where I: IntoIterator<Item = (W, V)>
     {
         Self {
@@ -117,11 +117,41 @@ impl<V, W: Weight> WeightedList<V,W>
 /// Construct a `WeightedList` from the provided (weight, value) tuples.
 #[macro_export]
 macro_rules! wlist {
-    ( $( $item: expr ),* ) => {
-        WeightedList::from([
+    ( $( $item: expr ),+ $(,)? ) => {
+        WeightedList::init([
             $( $item, )*
         ]);
     };
+}
+
+impl<V, W: Weight> FromIterator<WeightedItem<V,W>> for WeightedList<V,W>
+{
+    fn from_iter<I>(items: I) -> Self
+        where I: IntoIterator<Item = WeightedItem<V,W>>
+    {
+        // TODO benchmark
+        // Self {
+        //     data: items.into_iter().collect::<Vec<WeightedItem<V,W>>>()
+        // }
+
+        let mut data = vec![];
+
+        for item in items {
+            data.push(item);
+        }
+
+        Self { data }
+    }
+}
+
+impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
+{
+    fn from(vec: Vec<WeightedItem<V,W>>) -> Self
+    {
+        Self {
+            data: vec
+        }
+    }
 }
 
 // == PROPERTIES == //
@@ -155,14 +185,24 @@ impl<V, W: Weight> WeightedList<V,W>
         self.data.iter().map(|item| &item.value)
     }
 
+    pub fn items(&self) -> &Vec<WeightedItem<V,W>>
+    {
+        &self.data
+    }
+
     /// Get an iterator over (weight, value) tuples representing each item in the list.
     /// 
     /// This satisfies the axiom:
     /// 
-    /// ```rust
-    /// # use weighted_list::WeightedList;
-    /// let wl = WeightedList::from([(2, "sup"), (3, "nova")]);
-    /// // assert_eq!(WeightedList::from(wl.raw()), wl)
+    /// ```
+    /// # use weighted_list::{WeightedList, wlist};
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// let rl = WeightedList::init(wl.raw());
+    /// 
+    /// for (left, right) in std::iter::zip(wl.clone(), rl.clone()) {
+    ///     assert_eq!(left.weight, right.weight);
+    ///     assert_eq!(left.value, *right.value);
+    /// }
     /// ```
     pub fn raw(&self) -> impl Iterator<Item = (W,&V)>
     {
@@ -178,8 +218,8 @@ impl<V, W: Weight> WeightedList<V,W>
         let mut t = W::zero();
         let mut i = 0;
 
-        for each in &self.data {
-            t += each.weight;
+        for item in &self.data {
+            t += item.weight;
 
             if t > weighted_index {
                 return i;
@@ -196,8 +236,8 @@ impl<V, W: Weight> WeightedList<V,W>
         let mut t = W::zero();
         let mut i = 0;
 
-        for each in &self.data {
-            t += each.weight;
+        for item in &self.data {
+            t += item.weight;
 
             if t > weighted_index {
                 return i;
@@ -282,21 +322,18 @@ impl<V, W: Weight> IntoIterator for WeightedList<V,W>
 // == LIST MUTATION == //
 impl<V, W: Weight> WeightedList<V,W>
 {
-    pub fn push_item(&mut self, item: WeightedItem<V,W>) -> &Self
+    pub fn push_item(&mut self, item: WeightedItem<V,W>) -> &mut Self
     {
         self.data.push(item);
         self
     }
 
-    pub fn push_new_item(&mut self,
-        weight: W,
-        value: V
-    ) -> &Self
+    pub fn push_new_item(&mut self, weight: W, value: V) -> &mut Self
     {
         self.push_item(WeightedItem { weight, value })
     }
     
-    pub fn push_value(&mut self, value: V) -> &Self
+    pub fn push_value(&mut self, value: V) -> &mut Self
     {
         self.push_item(WeightedItem::unit(value))
     }
@@ -329,6 +366,12 @@ impl<V, W: Weight> WeightedList<V,W>
         self.insert_item(weighted_index, WeightedItem::unit(value))
     }
 
+    pub fn append(&mut self, other: &mut WeightedList<V,W>) -> &mut Self
+    {
+        self.data.append(&mut other.data);
+        self
+    }
+
     pub fn pop(&mut self) -> Option<WeightedItem<V,W>>
     {
         self.data.pop()
@@ -341,19 +384,140 @@ impl<V, W: Weight> WeightedList<V,W>
         self.data.pop_if(predicate)
     }
 
-    pub fn clear(&mut self) -> &Self
+    /// Remove the entire item at `weighted_index` and return it.
+    pub fn remove(&mut self, weighted_index: W) -> WeightedItem<V,W>
+    {
+        self.data.remove(self.unweight_index(weighted_index))
+    }
+
+    pub fn truncate(&mut self, len: W) -> &mut Self
+    {
+        let mut t = W::zero();
+        
+        for each in &mut self.data {
+            t += each.weight;
+
+            if t > len {
+                each.weight = t - len;
+            }
+        }
+
+        self
+    }
+
+    /// Clear the `WeightedList`, removing all items.
+    pub fn clear(&mut self) -> &mut Self
     {
         self.data.clear();
         self
     }
 
-    pub fn remove(&mut self, weighted_index: W) -> WeightedItem<V,W>
+    pub fn retain<F>(&mut self, predicate: F) -> &mut Self
+        where F: FnMut(&WeightedItem<V,W>) -> bool
     {
-        self.data.remove(self.unweight_index(weighted_index))
+        self.data.retain(predicate);
+        self
+    }
+
+    pub fn retain_mut<F>(&mut self, predicate: F) -> &mut Self
+        where F: FnMut(&mut WeightedItem<V,W>) -> bool
+    {
+        self.data.retain_mut(predicate);
+        self
     }
 }
 
 // == SPECIALISED MUTATION == //
+impl<V, W: Weight> WeightedList<V,W>
+{
+    pub fn prune(&mut self) -> &mut Self
+    {
+        self.data.retain(|item| item.weight > W::zero());
+        self
+    }
+
+    /// Set the weight of all items to `0`.
+    pub fn zero_all_weights(&mut self) -> &mut Self
+    {
+        for item in &mut self.data {
+            item.weight = W::zero();
+        }
+
+        self
+    }
+
+    /// Set the weight of all items to `weight`.
+    pub fn set_all_weights(&mut self, weight: W) -> &mut Self
+    {
+        for item in &mut self.data {
+            item.weight = weight;
+        }
+
+        self
+    }
+
+    pub fn normalised(&mut self) -> Result<WeightedList<V, f64>, &str>
+        where V: Clone
+    {
+        let total;
+
+        if let Some(t) = nums::cast::<W, f64>(self.len()) {
+            total = t;
+        } else {
+            return Err("Error casting total weights to `f64`");
+        };
+
+        let items =
+            self.data
+                .iter()
+                .map(|item| {
+                    let weight = nums::cast::<W, f64>(item.weight)?;
+                    Some(WeightedItem {
+                        weight: weight / total,
+                        value: item.value.clone()
+                    })
+                })
+                .collect::<Option<Vec<WeightedItem<V, f64>>>>()
+        ;
+
+        match items {
+            Some(data) => Ok(WeightedList { data }),
+            None       => Err("Error casting weights to `f64`")
+        }
+    }
+}
+
+impl<V: PartialEq, W: Weight> WeightedList<V,W>
+{
+    pub fn merge_item(&mut self, item: WeightedItem<V,W>) -> &mut Self
+    {
+        if let Some(existing) = self.data.iter_mut().find(|each| **each == item) {
+            existing.weight += item.weight;
+        }
+
+        self
+    }
+
+    pub fn merge_new_item(&mut self, weight: W, value: V) -> &mut Self
+    {
+        self.merge_item(WeightedItem { weight, value })
+    }
+
+    pub fn merge_value(&mut self, value: V) -> &mut Self
+    {
+        self.merge_item(WeightedItem::unit(value))
+    }
+
+    pub fn merge_with(&mut self, other: WeightedList<V,W>) -> &mut Self
+    {
+        for item in other {
+            self.merge_item(item);
+        }
+
+        self
+    }
+}
+
 impl<V: Clone, W: Weight> WeightedList<V,W>
 {
     pub fn take_one(&mut self, weighted_index: W) -> WeightedItem<V,W>

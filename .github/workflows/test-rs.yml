@@ -8,7 +8,7 @@ on:
   
   push:
     paths:
-      - 'test-rs.yml'
+      - '**/test-rs.yml'
       - '**.rs'
 
 jobs:
@@ -19,11 +19,11 @@ jobs:
         working-directory: './rust'
 
     steps:
-      - name: 'git - checkout'
+      - name: 'github / checkout'
         uses: actions/checkout@v4
 
       - name: 'rust / setup'
         uses: actions-rust-lang/setup-rust-toolchain@v1
       
-      - name: 'cargo / test'
+      - name: 'rust / cargo test'
         run: cargo test

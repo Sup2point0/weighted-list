@@ -25,9 +25,11 @@ fn constructors()
 #[test]
 fn macros()
 {
-    let _: WeightedList<String, i32> = wlist!(
+    let list: WeightedList<String, i32> = wlist!(
         (2, str!("sup")),
         (3, str!("nova")),
         (5, str!("shard"))
     );
+
+    assert_eq!( list[0], wit!(2, str!("sup")) )
 }
