@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 num-traits = "0.2.19"
 rand = "0.9"
+itertools = "0.14.0"
 bon = "3.8.1"
 
 [dev-dependencies]

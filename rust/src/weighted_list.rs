@@ -602,7 +602,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
         Some(out)
     }
 
-    pub fn take_random_item_entire<RNG>(&mut self, rng: &mut RNG) -> Option<WeightedItem<V,W>>
+    pub fn take_entire_random<RNG>(&mut self, rng: &mut RNG) -> Option<WeightedItem<V,W>>
         where RNG: Rng + ?Sized
     {
         if self.data.is_empty() { return None }
@@ -617,21 +617,30 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
 #[bon]
 impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
 {
+    /// Select `count` items using weighted randomisation.
+    /// 
+    /// If `replace` is `false`, items will have their weight decremented by `decrement` after selection.
+    /// 
+    /// If `unique` is `true`, only distinct items will be returned. `replace` becomes irrelevant in this case.
+    /// 
+    /// If `count` exceeds the length of the list, excess iterations will be skipped. If selection for an iteration fails, the item is excluded from the output list. Note that these mean the results may have fewer items than the expected `count`.
+    /// 
+    /// This method reserves a `Vec<>` with capacity `count` initially, so be careful of passing in extremely large `count`s.
     #[builder]
-    pub fn select_random_items<RNG>(&self,
+    pub fn select_random_values<RNG>(&self,
         count: u32,
         rng: &mut RNG,
-        unique: Option<bool>,
         replace: Option<bool>,
+            decrement: Option<W>,
+        unique: Option<bool>,
     ) -> Vec<V>
-        where RNG: Rng + ?Sized
+        where RNG: Rng + ?Sized, V: std::fmt::Display + std::fmt::Debug
     {
         let unique = unique.unwrap_or(false);
-        let replace = replace.unwrap_or(false);
+        let replace = replace.unwrap_or(true);
+        let decrement = decrement.unwrap_or(W::one());
 
         let mut pool = self.clone();
-        let mut cand: V;
-
         let mut i = 0;
         let mut out = Vec::with_capacity(count as usize);
 
@@ -640,21 +649,15 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
             i += 1;
             if i > count { break }
 
-            if replace {
-                if let Some(item) = pool.take_by_random(rng, W::one()) {
-                    cand = item.value.clone();
-                } else { continue }
+            if let Some(item) = {
+                if unique       { pool.take_entire_random(rng) }
+                else if replace { pool.take_by_random(rng, W::zero()) }
+                else            { pool.take_by_random(rng, decrement) }
+            } {
+                out.push(item.value.clone());
             }
             else {
-                if let Some(value) = pool.select_random_value(rng) {
-                    cand = value.clone();
-                } else { continue }
-            }
-
-            if unique && out.contains(&cand) {
                 continue
-            } else {
-                out.push(cand)
             }
         }
 
