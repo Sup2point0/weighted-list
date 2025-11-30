@@ -11,9 +11,18 @@ const CRITICAL_PERCENT:   i32 = 100 - CONFIDENCE_PERCENT;
 const SIGNIFICANCE_LEVEL: f64 = CRITICAL_PERCENT as f64 / 200.0;
 
 
+pub enum Method {
+    SELECT_SINGLE,
+    SELECT_MANY,
+}
+
+
 #[allow(dead_code)]
-pub fn test_binomial<V>(wlist: &WeightedList<V, i32>) -> ()
-    where V: Eq + std::fmt::Display,
+pub fn test_binomial<V>(
+    wlist: &WeightedList<V, i32>,
+    method: Method,
+) -> ()
+    where V: Clone + Eq + std::fmt::Display,
 {
     let mut rng = rand::rng();
 
@@ -23,11 +32,21 @@ pub fn test_binomial<V>(wlist: &WeightedList<V, i32>) -> ()
         let prob = item.weight as f64 / wlist.len() as f64;
         let binomialdist = dist::Binomial::new(prob, TRIALS).unwrap();
 
-        let mut observed = 0;
+        let mut observed: u64 = 0;
 
-        for _ in 0..TRIALS {
-            if *wlist.select_random_value(&mut rng).unwrap() == *value {
-                observed += 1;
+        match method {
+            Method::SELECT_SINGLE => {
+                for _ in 0..TRIALS {
+                    if *wlist.select_random_value(&mut rng).unwrap() == *value {
+                        observed += 1;
+                    }
+                }
+            },
+            Method::SELECT_MANY => {
+                observed += wlist.select_random_values().rng(&mut rng)
+                    .count(TRIALS as u32)
+                    .call().iter()
+                    .filter(|val| *val == value).count() as u64;
             }
         }
 

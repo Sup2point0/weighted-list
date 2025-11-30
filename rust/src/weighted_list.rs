@@ -634,7 +634,7 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
             decrement: Option<W>,
         unique: Option<bool>,
     ) -> Vec<V>
-        where RNG: Rng + ?Sized, V: std::fmt::Display + std::fmt::Debug
+        where RNG: Rng + ?Sized
     {
         let unique = unique.unwrap_or(false);
         let replace = replace.unwrap_or(true);
