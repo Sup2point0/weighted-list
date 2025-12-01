@@ -57,13 +57,21 @@ main = print (selectValue greetings)
 
 ```rs
 // Rust (under development)
-let wl = wlist![
-    (20, String::from("sup")),
-    (2,  String::from("salutations")),
+let descriptors = wlist![
+    (10, String::from("cool")),
+    (5, String::from("awesome")),
+    (2,  String::from("elegant")),
+    (1,  String::from("beautiful")),
 ];
 
-println!("{}", wl.select_random_value());
-// => sup
+let words = descriptors.select_random_values()
+    .rng(&mut rand::rng())
+    .count(2)
+    .unique(true)
+    .call();
+
+println!("Rust is {} and {}", words[0], words[1]);
+// => Rust is cool and elegant
 ```
 
 ```rb

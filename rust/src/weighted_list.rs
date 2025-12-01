@@ -205,6 +205,14 @@ impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
     }
 }
 
+impl<V, W: Weight> Into<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
+{
+    fn into(self) -> Vec<WeightedItem<V,W>>
+    {
+        self.data
+    }
+}
+
 // == ACCESSORS == //
 impl<V, W: Weight> WeightedList<V,W>
 {
@@ -256,6 +264,11 @@ impl<V, W: Weight> WeightedList<V,W>
     pub fn len(&self) -> W
     {
         self.data.iter().map(|item| item.weight).sum()
+    }
+
+    pub fn capacity(&self) -> usize
+    {
+        self.data.capacity()
     }
 
     /// How many items/values are in the list?
@@ -392,6 +405,12 @@ impl<V, W: Weight> IntoIterator for WeightedList<V,W>
 // == LIST MUTATION == //
 impl<V, W: Weight> WeightedList<V,W>
 {
+    pub fn reserve(&mut self, additional: usize) -> &mut Self
+    {
+        self.data.reserve(additional);
+        self
+    }
+
     pub fn push_item(&mut self, item: WeightedItem<V,W>) -> &mut Self
     {
         self.data.push(item);
@@ -442,6 +461,20 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
+    pub fn reverse(&mut self) -> &mut Self
+    {
+        self.data.reverse();
+        self
+    }
+
+    pub fn swap(&mut self, left: W, right: W) -> &mut Self
+    {
+        let l = self.unweight_index(left);
+        let r = self.unweight_index(right);
+        self.data.swap(l, r);
+        self
+    }
+
     pub fn pop(&mut self) -> Option<WeightedItem<V,W>>
     {
         self.data.pop()
@@ -460,6 +493,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self.data.remove(self.unweight_index(weighted_index))
     }
 
+    // UNTESTED
     pub fn truncate(&mut self, len: W) -> &mut Self
     {
         let mut t = W::zero();
@@ -475,13 +509,6 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
-    /// Clear the `WeightedList`, removing all items.
-    pub fn clear(&mut self) -> &mut Self
-    {
-        self.data.clear();
-        self
-    }
-
     pub fn retain<F>(&mut self, predicate: F) -> &mut Self
         where F: FnMut(&WeightedItem<V,W>) -> bool
     {
@@ -493,6 +520,13 @@ impl<V, W: Weight> WeightedList<V,W>
         where F: FnMut(&mut WeightedItem<V,W>) -> bool
     {
         self.data.retain_mut(predicate);
+        self
+    }
+
+    /// Clear the `WeightedList`, removing all items.
+    pub fn clear(&mut self) -> &mut Self
+    {
+        self.data.clear();
         self
     }
 }
@@ -700,13 +734,61 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
 {
     /// Select `count` items using weighted randomisation.
     /// 
-    /// If `replace` is `false`, items will have their weight decremented by `decrement` after selection.
+    /// Call this method using `bon` builder syntax (see § Usage below).
     /// 
-    /// If `unique` is `true`, only distinct items will be returned. `replace` becomes irrelevant in this case.
+    /// ### Parameters
+    /// - `count`: How many values to select.
+    /// - `replace`: If `false`, items have their weight decremented after selection. If `true`, infinite values can be selected.
+    ///   - `decrement`: How much to decrement weights by if `replace` is `false`. Defaults to `1`.
+    /// - `unique`: If `true`, only distinct values will be returned. `replace` becomes irrelevant in this case.
     /// 
-    /// If `count` exceeds the length of the list, excess iterations will be skipped. If selection for an iteration fails, the item is excluded from the output list. Note that these mean the results may have fewer items than the expected `count`.
+    /// ### Notes
+    /// - If `count` exceeds the length of the list, excess iterations will be skipped. If selection for an iteration fails, the values is excluded from the output list. Note that these mean the results may have fewer values than the expected `count`.
+    /// - This method reserves a `Vec<>` with capacity `count` initially, so be careful of passing in extremely large `count`s.
     /// 
-    /// This method reserves a `Vec<>` with capacity `count` initially, so be careful of passing in extremely large `count`s.
+    /// ### Usage
+    /// This method uses the bon builder syntax:
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let list = wlist![
+    ///     (2, String::from("sup")),
+    ///     (3, String::from("nova")),
+    ///     (5, String::from("shard")),
+    /// ];
+    /// 
+    /// let mut rng = rand::rng();
+    /// 
+    /// // with replacement
+    /// let selected =
+    ///     list.select_random_values()
+    ///         .rng(&mut rng)
+    ///         .count(3)
+    ///         .call();
+    /// 
+    /// assert!(selected.len() == 3);
+    /// 
+    /// // without replacement
+    /// let selected =
+    ///     list.select_random_values()
+    ///         .rng(&mut rng)
+    ///         .count(10)
+    ///         .replace(false)
+    ///         .decrement(2)
+    ///         .call();
+    /// 
+    /// assert!(selected.len() == 6);
+    /// 
+    /// // unique only
+    /// let selected =
+    ///     list.select_random_values()
+    ///         .rng(&mut rng)
+    ///         .count(100)
+    ///         .unique(true)
+    ///         .call();
+    /// 
+    /// assert!(selected.len() == 3);
+    /// ```
     #[builder]
     pub fn select_random_values<RNG>(&self,
         count: u32,
