@@ -11,7 +11,7 @@ const CRITICAL_PERCENT:   i32 = 100 - CONFIDENCE_PERCENT;
 const SIGNIFICANCE_LEVEL: f64 = CRITICAL_PERCENT as f64 / 200.0;
 
 
-#[allow(dead_code)]
+#[allow(dead_code, non_camel_case_types)]
 pub enum Method {
     SELECT_SINGLE,
     SELECT_MANY,
