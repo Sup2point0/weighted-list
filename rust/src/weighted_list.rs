@@ -343,7 +343,7 @@ impl<V, W: Weight> WeightedList<V,W>
     pub fn insert_item(&mut self,
         weighted_index: W,
         item: WeightedItem<V,W>
-    ) -> &Self
+    ) -> &mut Self
     {
         self.data.insert(self.unweight_index_nopanic(weighted_index), item);
         self
@@ -353,7 +353,7 @@ impl<V, W: Weight> WeightedList<V,W>
     pub fn insert_new_item(&mut self,
         weighted_index: W,
         (weight, value): (W, V)
-    ) -> &Self
+    ) -> &mut Self
     {
         self.insert_item(weighted_index, WeightedItem::new(weight, value))
     }
@@ -362,7 +362,7 @@ impl<V, W: Weight> WeightedList<V,W>
     pub fn insert_value(&mut self,
         weighted_index: W,
         value: V,
-    ) -> &Self
+    ) -> &mut Self
     {
         self.insert_item(weighted_index, WeightedItem::unit(value))
     }
