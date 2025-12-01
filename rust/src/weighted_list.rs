@@ -4,6 +4,7 @@ use std::{iter::*, ops::*};
 use bon::{bon};
 use num_traits as nums;
 use rand::prelude::*;
+use rand::seq::SliceRandom;
 
 
 pub trait Weight:
@@ -672,6 +673,24 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
             }
         }
 
+        out
+    }
+}
+
+impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
+{
+    pub fn shuffle<RNG>(&mut self, rng: &mut RNG) -> &mut Self
+        where RNG: Rng + ?Sized
+    {
+        self.data.shuffle(rng);
+        self
+    }
+
+    pub fn shuffled<RNG>(&self, rng: &mut RNG) -> Self
+        where RNG: Rng + ?Sized
+    {
+        let mut out = self.clone();
+        out.shuffle(rng);
         out
     }
 }
