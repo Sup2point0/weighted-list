@@ -1,10 +1,15 @@
-use std::fmt;
-use std::{iter::*, ops::*};
+use std::{
+    fmt,
+    iter::*,
+    ops::*,
+};
 
 use bon::{bon};
 use num_traits as nums;
-use rand::prelude::*;
-use rand::seq::SliceRandom;
+use rand::{
+    prelude::*,
+    seq::SliceRandom,
+};
 
 
 pub trait Weight:
@@ -16,20 +21,22 @@ pub trait Weight:
     + fmt::Display
 {}
 
-impl<Type> Weight for Type
-    where Type:
-        nums::NumAssign
-        + nums::NumCast
-        + Copy
-        + PartialOrd
-        + Sum
-        + fmt::Display
+impl<Type> Weight for Type where Type:
+    nums::NumAssign
+    + nums::NumCast
+    + Copy
+    + PartialOrd
+    + Sum
+    + fmt::Display
 {}
 
 
 // == WEIGHTED ITEM == //
 // --------------------------------------------------------------------- //
 
+/// An item in a `WeightedList`, with a `value` of type `V` and a `weight` of numerical type `W`.
+/// 
+/// For consistency and layout, `weight` always comes before `value` when ordering is relevant.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct WeightedItem<V, W: Weight>
 {
@@ -39,6 +46,7 @@ pub struct WeightedItem<V, W: Weight>
 
 impl<V, W: Weight> WeightedItem<V,W>
 {
+    /// Construct a `WeightedItem` with `value` and a weight of 1.
     pub fn unit(value: V) -> WeightedItem<V,W>
     {
         Self {
@@ -47,17 +55,27 @@ impl<V, W: Weight> WeightedItem<V,W>
         }
     }
 
+    /// Construct a `WeightedItem` with `value` and `weight`.
     pub fn new(weight: W, value: V) -> WeightedItem<V,W>
     {
         Self { weight, value }
     }
 
+    /// Construct a `WeightedItem` from a `(weight, value)` pair.
     pub fn from((weight, value): (W, V)) -> WeightedItem<V,W>
     {
         Self { weight, value }
     }
 }
 
+/// Construct a `WeightedItem` from a `(weight, value) pair`.
+/// 
+/// ### Usage
+/// ```
+/// # use weighted_list::*;
+/// let item = wit!(2.0, "sup");
+/// assert_eq!(item, WeightedItem::new(2.0, "sup"));
+/// ```
 #[macro_export]
 macro_rules! wit {
     ( $weight: expr, $value: expr ) => {
@@ -77,7 +95,29 @@ impl<V: fmt::Display, W: Weight> fmt::Display for WeightedItem<V,W>
 // == WEIGHTED LIST == //
 // --------------------------------------------------------------------- //
 
-#[derive(Debug, Clone)]
+/// A homogeneous list of weighted items with values of type `V` and weights of numerical type `W`.
+/// 
+/// Near-identical to `Vec<T>`, but stores `WeightedItem<V,W>` objects instead. You can think of it like a `Vec<WeightedItem<V,W>>`.
+/// 
+/// ### Usage
+/// ```
+/// # use weighted_list::*;
+/// let list: WeightedList<String, i32> = wlist![
+///     (2, String::from("sup")),
+///     (3, String::from("nova")),
+///     (5, String::from("shard")),
+/// ];
+/// 
+/// for item in list.iter() {
+///     println!("{item}");
+/// }
+/// 
+/// let mut rng = rand::rng();
+/// if let Some(result) = list.select_random_value(&mut rng) {
+///     println!("{}", result);
+/// }
+/// ```
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct WeightedList<V, W: Weight>
 {
     data: Vec<WeightedItem<V,W>>,
@@ -115,7 +155,17 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 }
 
-/// Construct a `WeightedList` from the provided (weight, value) tuples.
+/// Construct a `WeightedList` from the provided (weight, value) pairs.
+/// 
+/// ### Usage
+/// ```
+/// # use weighted_list::*;
+/// let list = wlist![
+///     (2, String::from("sup")),
+///     (3, String::from("nova")),
+///     (5, String::from("shard")),
+/// ];
+/// ```
 #[macro_export]
 macro_rules! wlist {
     ( $( $item: expr ),* $(,)? ) => {
@@ -155,25 +205,9 @@ impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
     }
 }
 
-// == PROPERTIES == //
+// == ACCESSORS == //
 impl<V, W: Weight> WeightedList<V,W>
 {
-    /// Sum the weights of all items in the list.
-    pub fn len(&self) -> W
-    {
-        self.data.iter().map(|item| item.weight).sum()
-    }
-
-    pub fn is_empty(&self) -> bool
-    {
-        self.data.is_empty()
-    }
-
-    pub fn total_values(&self) -> usize
-    {
-        self.data.len()
-    }
-
     /// Get an iterator over copies of the weights of each item in the list.
     pub fn weights(&self) -> impl Iterator<Item = W>
     {
@@ -196,7 +230,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// This satisfies the axiom:
     /// 
     /// ```
-    /// # use weighted_list::{WeightedList, wlist};
+    /// # use weighted_list::*;
     /// let wl = wlist![(2, "sup"), (3, "nova")];
     /// let rl = WeightedList::init(wl.raw());
     /// 
@@ -211,9 +245,54 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 }
 
+// == PROPERTIES == //
+impl<V, W: Weight> WeightedList<V,W>
+{
+    /// Sum the weights of all items in the list.
+    /// 
+    /// ### Notes
+    /// - This is not the number of items in the list – use `.total_values()` for that.
+    /// - `len() == 0` does not imply the list is empty – items may have zero or negative weights! To check if the list is empty, use `.is_empty()` instead.
+    pub fn len(&self) -> W
+    {
+        self.data.iter().map(|item| item.weight).sum()
+    }
+
+    /// How many items/values are in the list?
+    /// 
+    /// Note that this is not equivalent to `.len()`, which is the total weights of all items in the list.
+    pub fn total_values(&self) -> usize
+    {
+        self.data.len()
+    }
+
+    /// Does the list contain no items?
+    /// 
+    /// Note that this returns `false` if the list contains items with weights of `0`.
+    pub fn is_empty(&self) -> bool
+    {
+        self.data.is_empty()
+    }
+
+    /// Do any items have a weight of `0`?
+    pub fn is_zero(&self) -> bool
+    {
+        !self.is_empty()
+        && self.data.iter().all(|item| item.weight == W::zero())
+    }
+
+    /// Do any items have a negative weight?
+    pub fn has_negative_weights(&self) -> bool
+    {
+        !self.is_empty()
+        && self.data.iter().any(|item| item.weight < W::zero())
+    }
+}
+
 // == INTERNAL == //
 impl<V, W: Weight> WeightedList<V,W>
 {
+    /// Convert a `weighted_index` to its unweighted equivalent in the underlying `Vec`. Does not panic on overflow and instead returns the `.len()` of the underlying `Vec`.
     fn unweight_index_nopanic(&self, weighted_index: W) -> usize
     {
         let mut t = W::zero();
@@ -232,6 +311,7 @@ impl<V, W: Weight> WeightedList<V,W>
         i
     }
 
+    /// Convert a `weighted_index` to its unweighted equivalent in the underlying `Vec`. Panics on overflow.
     fn unweight_index(&self, weighted_index: W) -> usize
     {
         let mut t = W::zero();
@@ -251,17 +331,6 @@ impl<V, W: Weight> WeightedList<V,W>
             "index out of bounds: the len is {} but the index is {}",
             self.len(), weighted_index
         );
-    }
-}
-
-// == EQUALITY == //
-impl<V: Eq, W: Weight> Eq for WeightedList<V, W> {}
-
-impl<V: PartialEq, W: Weight> PartialEq for WeightedList<V, W>
-{
-    fn eq(&self, other: &Self) -> bool
-    {
-        self.data == other.data
     }
 }
 
