@@ -7,12 +7,12 @@
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-cs.yml/badge.svg" />
   <img alt="TypeScript Tests Status"
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-ts.yml/badge.svg" />
-  <!-- <img alt="Ruby Tests Status"
-    src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-rb.yml/badge.svg" /> -->
   <img alt="Haskell Tests Status"
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-hs.yml/badge.svg" />
   <img alt="Rust Tests Status"
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-rs.yml/badge.svg" />
+  <!-- <img alt="Ruby Tests Status"
+    src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-rb.yml/badge.svg" /> -->
 
   [walkthrough](walkthrough.md) · [rationale](rationale.md) · [spec](SPEC.md)
 
@@ -27,7 +27,6 @@ A list implementation for weighted randomisation, implemented (eventually) in ev
   </summary>
 
 ```py
-# Python
 greetings = WeightedList((20, "sup"), (2, "salutations"))
 
 print(greetings.select())
@@ -42,7 +41,6 @@ print(greetings.select())
   </summary>
 
 ```cs
-// C#
 WeightedList<string, int> greetings = new((20, "sup"), (2, "salutations"));
 
 Console.WriteLine(greetings.GetRandomValue());
@@ -57,7 +55,6 @@ Console.WriteLine(greetings.GetRandomValue());
   </summary>
 
 ```ts
-// TypeScript (under development)
 let greetings = new WeightedList([20, "sup"], [2, "salutations"]);
 
 console.log(greetings.select_value());
@@ -72,7 +69,6 @@ console.log(greetings.select_value());
   </summary>
 
 ```hs
--- Haskell (under development)
 greetings :: WeightedList String Int
 greetings = newWeightedList [(20, "sup"), (2, "salutations")]
 
@@ -89,7 +85,6 @@ main = print (selectValue greetings)
   </summary>
 
 ```rs
-// Rust (under development)
 let descriptors = wlist![
     (10, String::from("cool")),
     (5, String::from("awesome")),
@@ -285,4 +280,3 @@ Any feedback, suggestions or improvements are definitely welcome!
 
 
 <!-- what you lookin at? -->
-
