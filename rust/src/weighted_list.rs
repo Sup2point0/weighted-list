@@ -430,6 +430,7 @@ impl<V, W: Weight> WeightedList<V,W>
 // == SPECIALISED MUTATION == //
 impl<V, W: Weight> WeightedList<V,W>
 {
+    /// Remove all items with non-positive weight.
     pub fn prune(&mut self) -> &mut Self
     {
         self.data.retain(|item| item.weight > W::zero());
@@ -491,8 +492,11 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
 {
     pub fn merge_item(&mut self, item: WeightedItem<V,W>) -> &mut Self
     {
-        if let Some(existing) = self.data.iter_mut().find(|each| **each == item) {
+        if let Some(existing) = self.data.iter_mut().find(|each| each.value == item.value) {
             existing.weight += item.weight;
+        }
+        else {
+            self.data.push(item);
         }
 
         self
@@ -514,6 +518,13 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
             self.merge_item(item);
         }
 
+        self
+    }
+
+    pub fn merge_duplicates(&mut self) -> &mut Self
+    {
+        let orig = std::mem::replace(self, WeightedList::new());
+        self.merge_with(orig);
         self
     }
 }
