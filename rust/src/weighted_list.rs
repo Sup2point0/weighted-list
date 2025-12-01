@@ -118,7 +118,7 @@ impl<V, W: Weight> WeightedList<V,W>
 /// Construct a `WeightedList` from the provided (weight, value) tuples.
 #[macro_export]
 macro_rules! wlist {
-    ( $( $item: expr ),+ $(,)? ) => {
+    ( $( $item: expr ),* $(,)? ) => {
         WeightedList::init([
             $( $item, )*
         ]);
