@@ -73,6 +73,7 @@ impl<V, W: Weight> WeightedItem<V,W>
 /// ### Usage
 /// ```
 /// # use weighted_list::*;
+/// 
 /// let item = wit!(2.0, "sup");
 /// assert_eq!(item, WeightedItem::new(2.0, "sup"));
 /// ```
@@ -102,6 +103,7 @@ impl<V: fmt::Display, W: Weight> fmt::Display for WeightedItem<V,W>
 /// ### Usage
 /// ```
 /// # use weighted_list::*;
+/// 
 /// let list: WeightedList<String, i32> = wlist![
 ///     (2, String::from("sup")),
 ///     (3, String::from("nova")),
@@ -116,6 +118,20 @@ impl<V: fmt::Display, W: Weight> fmt::Display for WeightedItem<V,W>
 /// if let Some(result) = list.select_random_value(&mut rng) {
 ///     println!("{}", result);
 /// }
+/// ```
+/// 
+/// ### Tips
+/// - Most methods return `&Self` or `&mut Self`, allowing you to chain methods. Here's a contrived example:
+/// 
+/// ```
+/// # use weighted_list::*;
+/// 
+/// let list = wlist![(2, "sup")];
+/// 
+/// list.push_value("sup")
+///     .merge_duplicates()
+///     .prune()
+///     .len();
 /// ```
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct WeightedList<V, W: Weight>
@@ -160,6 +176,7 @@ impl<V, W: Weight> WeightedList<V,W>
 /// ### Usage
 /// ```
 /// # use weighted_list::*;
+/// 
 /// let list = wlist![
 ///     (2, String::from("sup")),
 ///     (3, String::from("nova")),
@@ -201,6 +218,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
+    /// 
     /// let wl = wlist![(2, "sup"), (3, "nova")];
     /// let rl = WeightedList::init(wl.raw());
     /// 
@@ -394,15 +412,12 @@ impl<V, W: Weight> IndexMut<W> for WeightedList<V,W>
 }
 
 // == ITERATION == //
-impl<V, W: Weight> WeightedList<V,W>
-{
-    pub fn iter(&self) -> impl Iterator<Item = &WeightedItem<V,W>>
-    {
+impl<V, W: Weight> WeightedList<V,W> {
+    pub fn iter(&self) -> impl Iterator<Item = &WeightedItem<V,W>> {
         self.data.iter()
     }
 
-    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut WeightedItem<V,W>>
-    {
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut WeightedItem<V,W>> {
         self.data.iter_mut()
     }
 }
@@ -412,9 +427,35 @@ impl<V, W: Weight> IntoIterator for WeightedList<V,W>
     type Item = WeightedItem<V,W>;
     type IntoIter = <Vec<Self::Item> as IntoIterator>::IntoIter;
 
-    fn into_iter(self) -> Self::IntoIter
-    {
+    /// ```compile_fail
+    /// # use weighted_list::*;
+    /// 
+    /// let list = wlist![]
+    /// for _ in list {}
+    /// list;  // compile error
+    /// ```
+    fn into_iter(self) -> Self::IntoIter {
         self.data.into_iter()
+    }
+}
+
+impl<'l, V, W: Weight> IntoIterator for &'l WeightedList<V,W>
+{
+    type Item = &'l WeightedItem<V,W>;
+    type IntoIter = std::slice::Iter<'l, WeightedItem<V,W>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.data.iter()
+    }
+}
+
+impl<'l, V, W: Weight> IntoIterator for &'l mut WeightedList<V,W>
+{
+    type Item = &'l mut WeightedItem<V,W>;
+    type IntoIter = std::slice::IterMut<'l, WeightedItem<V,W>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.data.iter_mut()
     }
 }
 
@@ -610,6 +651,27 @@ impl<V, W: Weight> WeightedList<V,W>
 
 impl<V: PartialEq, W: Weight> WeightedList<V,W>
 {
+    /// Merge a `WeightedItem` into the list. If an item with the same value already exists, add the weight of the new item to the existing item. Otherwise, append the new item to the list.
+    /// 
+    /// ### Tips
+    /// - Use this method when you already have an existing `WeightedItem` instance. If you're going to construct a new `WeightedItem`, `.merge_new_item()` will be more convenient.
+    /// 
+    /// ### Usage
+    /// ```
+    /// # use weighted_list::*;
+    /// 
+    /// let mut wl = wlist![(1, "sup")];
+    /// 
+    /// let item = WeightedItem::new(2, "sup");
+    /// wl.merge_item(item);
+    /// assert!(wl == wlist![(3, "sup")]);
+    /// // "sup" merged with existing instance
+    /// 
+    /// let item = WeightedItem::unit("elysion");
+    /// wl.merge_item(item);
+    /// assert!(wl == wlist![(3, "sup"), (1, "elysion")]);
+    /// // "elysion" appended to end
+    /// ```
     pub fn merge_item(&mut self, item: WeightedItem<V,W>) -> &mut Self
     {
         if let Some(existing) = self.data.iter_mut().find(|each| each.value == item.value) {
@@ -622,11 +684,17 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
         self
     }
 
+    /// Merge an item with `value` and `weight` into the list.
+    /// 
+    /// See `.merge_item()` for details.
     pub fn merge_new_item(&mut self, weight: W, value: V) -> &mut Self
     {
         self.merge_item(WeightedItem { weight, value })
     }
 
+    /// Merge an item with `value` and a weight of `1` into the list.
+    /// 
+    /// See `.merge_item()` for details.
     pub fn merge_value(&mut self, value: V) -> &mut Self
     {
         self.merge_item(WeightedItem::unit(value))
