@@ -7,12 +7,12 @@
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-cs.yml/badge.svg" />
   <img alt="TypeScript Tests Status"
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-ts.yml/badge.svg" />
-  <!-- <img alt="Ruby Tests Status"
-    src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-rb.yml/badge.svg" /> -->
   <img alt="Haskell Tests Status"
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-hs.yml/badge.svg" />
   <img alt="Rust Tests Status"
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-rs.yml/badge.svg" />
+  <!-- <img alt="Ruby Tests Status"
+    src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-rb.yml/badge.svg" /> -->
 
   [walkthrough](walkthrough.md) · [rationale](rationale.md) · [spec](SPEC.md)
 
@@ -21,32 +21,54 @@
 A list implementation for weighted randomisation, implemented (eventually) in every programming language I’ve learnt.
 
 
+<details>
+  <summary>
+    <strong> Python </strong>
+  </summary>
+
 ```py
-# Python
 greetings = WeightedList((20, "sup"), (2, "salutations"))
 
 print(greetings.select())
 # => sup
 ```
 
+</details>
+
+<details>
+  <summary>
+    <strong> C# </strong>
+  </summary>
+
 ```cs
-// C#
 WeightedList<string, int> greetings = new((20, "sup"), (2, "salutations"));
 
 Console.WriteLine(greetings.GetRandomValue());
 // => salutations
 ```
 
+</details>
+
+<details>
+  <summary>
+    <strong> TypeScript </strong> (under development)
+  </summary>
+
 ```ts
-// TypeScript (under development)
 let greetings = new WeightedList([20, "sup"], [2, "salutations"]);
 
 console.log(greetings.select_value());
 // => sup
 ```
 
+</details>
+
+<details>
+  <summary>
+    <strong> Haskell </strong> (under development)
+  </summary>
+
 ```hs
--- Haskell (under development)
 greetings :: WeightedList String Int
 greetings = newWeightedList [(20, "sup"), (2, "salutations")]
 
@@ -55,8 +77,14 @@ main = print (selectValue greetings)
 -- => salutations
 ```
 
+</details>
+
+<details open>
+  <summary>
+    <strong> Rust </strong> (under development)
+  </summary>
+
 ```rs
-// Rust (under development)
 let descriptors = wlist![
     (10, String::from("cool")),
     (5, String::from("awesome")),
@@ -74,9 +102,18 @@ println!("Rust is {} and {}", words[0], words[1]);
 // => Rust is cool and elegant
 ```
 
+</details>
+
+<details>
+  <summary>
+    <strong> Ruby </strong> (awaiting development)
+  </summary>
+
 ```rb
 # Ruby (working on it!)
 ```
+
+</details>
 
 An immutable optimised variant `FrozenWeightedList` is also implemented, which provides $O(\log{n})$ item access.
 
