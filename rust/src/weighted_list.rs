@@ -126,7 +126,7 @@ impl<V: fmt::Display, W: Weight> fmt::Display for WeightedItem<V,W>
 /// ```
 /// # use weighted_list::*;
 /// 
-/// let list = wlist![(2, "sup")];
+/// let mut list = wlist![(2, "sup")];
 /// 
 /// list.push_value("sup")
 ///     .merge_duplicates()
