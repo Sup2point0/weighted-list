@@ -1,7 +1,12 @@
 [package]
 name = "weighted-list"
 version = "0.1.0"
+authors = ["Sup#2.0"]
 edition = "2024"
+
+description = "A list class for weighted randomisation"
+repository = "https://github.com/Sup2point0/weighted-list/tree/main/rust"
+license-file = "LICENCE"
 
 [dependencies]
 num-traits = "0.2.19"
