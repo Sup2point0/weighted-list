@@ -175,44 +175,6 @@ macro_rules! wlist {
     };
 }
 
-impl<V, W: Weight> FromIterator<WeightedItem<V,W>> for WeightedList<V,W>
-{
-    fn from_iter<I>(items: I) -> Self
-        where I: IntoIterator<Item = WeightedItem<V,W>>
-    {
-        // TODO benchmark
-        // Self {
-        //     data: items.into_iter().collect::<Vec<WeightedItem<V,W>>>()
-        // }
-
-        let mut data = vec![];
-
-        for item in items {
-            data.push(item);
-        }
-
-        Self { data }
-    }
-}
-
-impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
-{
-    fn from(vec: Vec<WeightedItem<V,W>>) -> Self
-    {
-        Self {
-            data: vec
-        }
-    }
-}
-
-impl<V, W: Weight> Into<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
-{
-    fn into(self) -> Vec<WeightedItem<V,W>>
-    {
-        self.data
-    }
-}
-
 // == ACCESSORS == //
 impl<V, W: Weight> WeightedList<V,W>
 {
@@ -222,7 +184,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self.data.iter().map(|item| item.weight)
     }
 
-    /// Get an iterator over immutable references to the values of each item in the list.
+    /// Get an iterator over references to the values of each item in the list.
     pub fn values(&self) -> impl Iterator<Item = &V>
     {
         self.data.iter().map(|item| &item.value)
@@ -299,6 +261,60 @@ impl<V, W: Weight> WeightedList<V,W>
     {
         !self.is_empty()
         && self.data.iter().any(|item| item.weight < W::zero())
+    }
+}
+
+// == CONVERSIONS == //
+impl<V, W: Weight> FromIterator<WeightedItem<V,W>> for WeightedList<V,W>
+{
+    fn from_iter<I>(items: I) -> Self
+        where I: IntoIterator<Item = WeightedItem<V,W>>
+    {
+        // TODO benchmark
+        // Self {
+        //     data: items.into_iter().collect::<Vec<WeightedItem<V,W>>>()
+        // }
+
+        let mut data = vec![];
+
+        for item in items {
+            data.push(item);
+        }
+
+        Self { data }
+    }
+}
+
+impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
+    fn from(vec: Vec<WeightedItem<V,W>>) -> Self {
+        Self { data: vec }
+    }
+}
+
+impl<V, W: Weight> Into<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
+    fn into(self) -> Vec<WeightedItem<V,W>> {
+        self.data
+    }
+}
+
+impl<V, W: Weight> AsRef<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
+    fn as_ref(&self) -> &Vec<WeightedItem<V,W>> {
+        &self.data
+    }
+}
+
+impl<V, W: Weight> Deref for WeightedList<V,W> {
+    type Target = [WeightedItem<V,W>];
+
+    fn deref(&self) -> &Self::Target {
+        self.data.deref()
+    }
+}
+
+// == TRAITS == //
+impl<V, W: Weight> Default for WeightedList<V, W> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
