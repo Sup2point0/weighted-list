@@ -121,7 +121,7 @@ for item in WeightedList(...):
 | total items | Total number of items. | – | `int` | – | $O(n)$ |
 | **get weights** | Get the weights of all items. | – | `iter[Weight]` | – | lazy | Weights are in order. |
 | **get values** | Get the values of all items. | – | `iter[Value]` | – | lazy | Values are in order. |
-| **get raw** | Get the (weight, value) representations of all items. | – | `iter[(Weight, Value)]` | – | lazy | This usually satisifes the axiom that for any list `wl` we have `WeightedList(wl.raw()) == wl` |
+| **get raw** | Get the (weight, value) representations of all items. | – | `iter[(Weight, Value)]` | – | lazy | This usually satisfies the axiom that for any list `wl` we have `WeightedList(wl.raw()) == wl` |
 
 ### List Methods
 These are usually inherited from the built-in array type of the language and adapted for a `WeightedList`/`FrozenWeightedList`.
