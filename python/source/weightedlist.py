@@ -748,7 +748,7 @@ class WeightedList(list):
 
 
   def average(self, /) -> float:
-    '''Return average (arithemetic mean) of item weights.'''
+    '''Return average (arithmetic mean) of item weights.'''
 
     return float(len(self) / super().__len__())
 

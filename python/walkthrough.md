@@ -40,7 +40,7 @@ WeightedItem('sup', 2)
 2
 ```
 
-A `WeightedList` uses *weighted indexing*, which drives the weighting machanic. The `weight` of each item can be thought of as how many times that object is repeated.
+A `WeightedList` uses *weighted indexing*, which drives the weighting mechanic. The `weight` of each item can be thought of as how many times that object is repeated.
 
 ```py
 >>> wl[0].value
