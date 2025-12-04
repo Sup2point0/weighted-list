@@ -47,7 +47,7 @@ pub struct WeightedItem<V, W: Weight>
 
 impl<V, W: Weight> WeightedItem<V,W>
 {
-    /// Construct a `WeightedItem` with `value` and a weight of 1.
+    /// Construct a `WeightedItem` with `value` and a weight of `1`.
     pub fn unit(value: V) -> WeightedItem<V,W>
     {
         Self {
@@ -69,12 +69,12 @@ impl<V, W: Weight> WeightedItem<V,W>
     }
 }
 
-/// Construct a `WeightedItem` from a `(weight, value) pair`.
+/// Construct a `WeightedItem` from a `(weight, value)`` pair.
 /// 
-/// ### Usage
+/// # Usage
+/// 
 /// ```
 /// # use weighted_list::*;
-/// 
 /// let item = wit!(2.0, "sup");
 /// assert_eq!(item, WeightedItem::new(2.0, "sup"));
 /// ```
@@ -117,10 +117,10 @@ impl<V: Eq, W: Weight> PartialOrd for WeightedItem<V,W>
 /// 
 /// Near-identical to `Vec<T>`, but stores `WeightedItem<V,W>` objects instead. You can think of it like a `Vec<WeightedItem<V,W>>`.
 /// 
-/// ### Usage
+/// # Usage
+/// 
 /// ```
 /// # use weighted_list::*;
-/// 
 /// let list: WeightedList<String, i32> = wlist![
 ///     (2, String::from("sup")),
 ///     (3, String::from("nova")),
@@ -137,12 +137,12 @@ impl<V: Eq, W: Weight> PartialOrd for WeightedItem<V,W>
 /// }
 /// ```
 /// 
-/// ### Tips
+/// # Tips
+/// 
 /// - Most methods return `&Self` or `&mut Self`, allowing you to chain methods. Here's a contrived example:
 /// 
 /// ```
 /// # use weighted_list::*;
-/// 
 /// let mut list = wlist![(2, "sup")];
 /// 
 /// list.push_value("sup")
@@ -175,7 +175,7 @@ impl<V, W: Weight> WeightedList<V,W>
         }
     }
 
-    /// Construct a `WeightedList` from an iterable of (weight, value) pairs.
+    /// Construct a `WeightedList` from an iterable of `(weight, value)` pairs.
     pub fn init<I>(items: I) -> Self
         where I: IntoIterator<Item = (W, V)>
     {
@@ -188,12 +188,12 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 }
 
-/// Construct a `WeightedList` from the provided (weight, value) pairs.
+/// Construct a `WeightedList` from the provided `(weight, value)`` pairs.
 /// 
-/// ### Usage
+/// # Usage
+/// 
 /// ```
 /// # use weighted_list::*;
-/// 
 /// let list = wlist![
 ///     (2, String::from("sup")),
 ///     (3, String::from("nova")),
@@ -236,7 +236,6 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// 
     /// let wl = wlist![(2, "sup"), (3, "nova")];
     /// let rl = WeightedList::init(wl.raw());
     /// 
@@ -256,7 +255,8 @@ impl<V, W: Weight> WeightedList<V,W>
 {
     /// Sum the weights of all items in the list.
     /// 
-    /// ### Notes
+    /// # Notes
+    /// 
     /// - This is not the number of items in the list – use `.total_values()` for that.
     /// - `len() == 0` does not imply the list is empty – items may have zero or negative weights! To check if the list is empty, use `.is_empty()` instead.
     pub fn len(&self) -> W
@@ -473,7 +473,6 @@ impl<V, W: Weight> IntoIterator for WeightedList<V,W>
 
     /// ```compile_fail
     /// # use weighted_list::*;
-    /// 
     /// let list = wlist![]
     /// for _ in list {}
     /// list;  // compile error
@@ -715,13 +714,14 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
 {
     /// Merge a `WeightedItem` into the list. If an item with the same value already exists, add the weight of the new item to the existing item. Otherwise, append the new item to the list.
     /// 
-    /// ### Tips
+    /// # Tips
+    /// 
     /// - Use this method when you already have an existing `WeightedItem` instance. If you're going to construct a new `WeightedItem`, `.merge_new_item()` will be more convenient.
     /// 
-    /// ### Usage
+    /// # Usage
+    /// 
     /// ```
     /// # use weighted_list::*;
-    /// 
     /// let mut wl = wlist![(1, "sup")];
     /// 
     /// let item = WeightedItem::new(2, "sup");
@@ -882,22 +882,24 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     /// 
     /// Call this method using `bon` builder syntax (see § Usage below).
     /// 
-    /// ### Parameters
+    /// # Parameters
+    /// 
     /// - `count`: How many values to select.
     /// - `replace`: If `false`, items have their weight decremented after selection. If `true`, infinite values can be selected.
     ///   - `decrement`: How much to decrement weights by if `replace` is `false`. Defaults to `1`.
     /// - `unique`: If `true`, only distinct values will be returned. `replace` becomes irrelevant in this case.
     /// 
-    /// ### Notes
+    /// # Notes
+    /// 
     /// - If `count` exceeds the length of the list, excess iterations will be skipped. If selection for an iteration fails, the values is excluded from the output list. Note that these mean the results may have fewer values than the expected `count`.
     /// - This method reserves a `Vec<>` with capacity `count` initially, so be careful of passing in extremely large `count`s.
     /// 
-    /// ### Usage
+    /// # Usage
+    /// 
     /// This method uses the bon builder syntax:
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// let list = wlist![
     ///     (2, String::from("sup")),
     ///     (3, String::from("nova")),
     ///     (5, String::from("shard")),
