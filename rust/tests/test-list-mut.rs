@@ -4,6 +4,8 @@ use utils::*;
 use weighted_list::*;
 
 
+// == IN-PLACE == //
+
 #[test]
 fn push()
 {
@@ -101,12 +103,6 @@ fn insert()
 }
 
 #[test]
-fn clear()
-{
-    assert_eq!( *wl().clear(), el() );
-}
-
-#[test]
 fn remove()
 {
     let orig = wl();
@@ -115,4 +111,21 @@ fn remove()
     assert_eq!( list.remove(0), orig.items()[0] );
     assert_eq!( list.remove(0), orig.items()[1] );
     assert_eq!( list.remove(0), orig.items()[2] );
+}
+
+#[test]
+fn clear()
+{
+    assert_eq!( *wl().clear(), el() );
+}
+
+
+// == OUT-OF-PLACE == //
+
+#[test]
+fn sorted()
+{
+    assert_eq!( el().sorted(), el() );
+    assert_eq!( wl().sorted(), wl() );
+    assert_eq!( wl().reversed().sorted(), wl() );
 }

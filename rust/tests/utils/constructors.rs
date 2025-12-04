@@ -4,13 +4,25 @@ use weighted_list::WeightedList;
 
 
 #[allow(dead_code)]
-pub fn data_string() -> [(i32, String); 3]
+pub fn data_string(long: bool) -> Vec<(i32, String)>
 {
     [
-        (2, str!("sup")),
-        (3, str!("nova")),
-        (5, str!("shard")),
-    ]
+        vec![
+            (2, str!("sup")),
+            (3, str!("nova")),
+            (5, str!("shard")),
+        ],
+        
+        if long {
+            vec![
+                (7, str!("cortex")),
+                (13, str!("origin")),
+                (20, str!("vision")),
+            ]
+        } else {
+            vec![]
+        }
+    ].concat()
 }
 
 
@@ -23,5 +35,11 @@ pub fn el() -> WeightedList<String, i32>
 #[allow(dead_code)]
 pub fn wl() -> WeightedList<String, i32>
 {
-    WeightedList::init(data_string())
+    WeightedList::init(data_string(false))
+}
+
+#[allow(dead_code)]
+pub fn wll() -> WeightedList<String, i32>
+{
+    WeightedList::init(data_string(true))
 }

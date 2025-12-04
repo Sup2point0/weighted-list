@@ -6,7 +6,7 @@ use weighted_list::*;
 
 
 const TRIALS:             u64 = 20000;
-const CONFIDENCE_PERCENT: i32 = 95;
+const CONFIDENCE_PERCENT: i32 = 99;
 const CRITICAL_PERCENT:   i32 = 100 - CONFIDENCE_PERCENT;
 const SIGNIFICANCE_LEVEL: f64 = CRITICAL_PERCENT as f64 / 200.0;
 
@@ -15,6 +15,7 @@ const SIGNIFICANCE_LEVEL: f64 = CRITICAL_PERCENT as f64 / 200.0;
 pub enum Method {
     SELECT_SINGLE,
     SELECT_MANY,
+    SHUFFLE,
 }
 
 
@@ -30,7 +31,11 @@ pub fn test_binomial<V>(
     let mut test_binomial_single = |item: &WeightedItem<V, i32>| {
         let value = &item.value;
 
-        let prob = item.weight as f64 / wlist.len() as f64;
+        let prob = match method {
+            Method::SHUFFLE => 1.0 / (1..(wlist.total_values()+1)).product::<usize>() as f64,
+            _               => item.weight as f64 / wlist.len() as f64,
+        };
+
         let binomialdist = dist::Binomial::new(prob, TRIALS).unwrap();
 
         let mut observed: u64 = 0;
@@ -48,24 +53,19 @@ pub fn test_binomial<V>(
                     .count(TRIALS as u32)
                     .call().iter()
                     .filter(|val| *val == value).count() as u64;
-            }
+            },
+            Method::SHUFFLE => {
+                for _ in 0..TRIALS {
+                    if wlist.shuffled_weights(&mut rng) == *wlist {
+                        observed += 1;
+                    }
+                }
+            },
         }
 
         let expected = binomialdist.mean().unwrap().round() as i32;
         let lower_bound = binomialdist.inverse_cdf(SIGNIFICANCE_LEVEL);
         let upper_bound = binomialdist.inverse_cdf(1.0 - SIGNIFICANCE_LEVEL);
-
-        let err_lower = format!(
-            "OUTLIER: too few -- got `{value}`: {observed} times -- expected: {expected} -- critical region < {lower_bound} has probability: {}", SIGNIFICANCE_LEVEL
-        );
-        
-        let err_upper = format!(
-            "OUTLIER: too many -- got `{value}`: {observed} times -- expected: {expected} -- critical region > {upper_bound} has probability: {}", SIGNIFICANCE_LEVEL
-        );
-
-        assert!( observed > lower_bound, "{err_lower}");
-        assert!( observed < upper_bound, "{err_upper}");
-
         let deviation = (
             (
                 1000.0 * (
@@ -74,6 +74,16 @@ pub fn test_binomial<V>(
                 )
             ).round() / 10.0
         ).round() as i32;
+
+        let err_lower = format!(
+            "OUTLIER: too few -- got `{value}`: {observed} times -- expected: {expected} -- probability < {lower_bound}: {}, deviation: {deviation}%", SIGNIFICANCE_LEVEL
+        );
+        let err_upper = format!(
+            "OUTLIER: too many -- got `{value}`: {observed} times -- expected: {expected} -- probability > {upper_bound}: {}, deviation: {deviation}%", SIGNIFICANCE_LEVEL
+        );
+
+        assert!( observed > lower_bound, "{err_lower}");
+        assert!( observed < upper_bound, "{err_upper}");
 
         println!(
             "CONSISTENT -- got `{value}`: {observed}/{TRIALS} times -- expected: {expected} -- confidence interval: {lower_bound}...{upper_bound} -- deviation: {deviation}%",

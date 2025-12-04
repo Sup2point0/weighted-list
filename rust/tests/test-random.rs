@@ -140,3 +140,18 @@ fn select_many()
         }
     }
 }
+
+#[test]
+fn shuffle()
+{
+    let mut list = wl();
+    list.append(&mut wl());
+    list.append(&mut wl());
+    list.append(&mut wl());
+    let orig = list.clone();
+
+    let mut rng = rand::rng();
+    assert_ne!( *list.shuffle_weights(&mut rng), orig );
+
+    assert_ne!( list.shuffled_weights(&mut rng), list );
+}
