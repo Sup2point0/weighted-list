@@ -50,7 +50,11 @@ let descriptors = wlist![
 // single selection
 let word = descriptors.select_random_value(&mut rand::rng());
 
-println!("You look {word}");
+if let Some(chosen) = word {
+    println!("You look {chosen}");
+    // => You look cool
+    //    (10/18 probability)
+}
 
 // multiple selection (bon builder syntax)
 let words = descriptors.select_random_values()
@@ -59,8 +63,10 @@ let words = descriptors.select_random_values()
     .unique(true)
     .call();
 
-println!("Rust is {} and {}", words[0], words[1]);
-// => Rust is cool and elegant
+if let Some(first) = words[0] && let Some(second) = words[1] {
+    println!("Rust is {} and {}", first, second);
+    // => Rust is awesome and elegant
+}
 ```
 
 ### Indexing
@@ -79,5 +85,5 @@ wl[4]; // => WeightedItem { weight: 5, value: "shard" }
 wl[5]; // => WeightedItem { weight: 5, value: "shard" }
 wl[6]; // => WeightedItem { weight: 5, value: "shard" }
 wl[7]; // => WeightedItem { weight: 5, value: "shard" }
-wl[8]; // panics!
+wl[8]; // panic - out of bounds!
 ```

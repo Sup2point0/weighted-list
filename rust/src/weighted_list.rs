@@ -38,10 +38,15 @@ impl<Type> Weight for Type where Type:
 /// An item in a `WeightedList`, with a `value` of type `V` and a `weight` of numerical type `W`.
 /// 
 /// For consistency and layout, `weight` always comes before `value` when ordering is relevant.
+/// 
+/// You should rarely find yourself constructing a `WeightedItem` by hand – instead, you'll usually interact with existing instances from a `WeightedList`.
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct WeightedItem<V, W: Weight>
 {
+    /// The weight of the item. A non-negative number. `0` is technically valid, but not advised.
     pub weight: W,
+
+    /// The value stored in the item.
     pub value: V,
 }
 
@@ -127,12 +132,11 @@ impl<V: Eq, W: Weight> PartialOrd for WeightedItem<V,W>
 ///     (5, String::from("shard")),
 /// ];
 /// 
-/// for item in list.iter() {
+/// for item in list {
 ///     println!("{item}");
 /// }
 /// 
-/// let mut rng = rand::rng();
-/// if let Some(result) = list.select_random_value(&mut rng) {
+/// if let Some(result) = list.select_random_value(&mut rand::rng()) {
 ///     println!("{}", result);
 /// }
 /// ```
