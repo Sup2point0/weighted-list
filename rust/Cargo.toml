@@ -6,6 +6,9 @@ edition = "2024"
 
 description = "A list class for weighted randomisation"
 repository = "https://github.com/Sup2point0/weighted-list/tree/main/rust"
+readme = "README.md"
+documentation = "https://docs.rs/weighted-list/latest/weighted_list/"
+license = "MIT"
 license-file = "LICENCE"
 
 exclude = [
