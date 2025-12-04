@@ -132,7 +132,7 @@ impl<V: Eq, W: Weight> PartialOrd for WeightedItem<V,W>
 ///     (5, String::from("shard")),
 /// ];
 /// 
-/// for item in list {
+/// for item in &list {
 ///     println!("{item}");
 /// }
 /// 
