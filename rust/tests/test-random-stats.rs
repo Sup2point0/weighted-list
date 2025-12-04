@@ -53,7 +53,14 @@ fn select_many_stats_1()
 
 #[test]
 #[ignore]
-fn shuffle()
+fn shuffle_stats_1()
 {
     stats::test_binomial(&wl(), stats::Method::SHUFFLE);
+}
+
+#[test]
+#[ignore]
+fn shuffle_stats_2()
+{
+    stats::test_binomial(&wll(), stats::Method::SHUFFLE);
 }
