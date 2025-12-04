@@ -781,12 +781,13 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
 
 impl<V: Clone, W: Weight> WeightedList<V,W>
 {
+    /// Decrement the weight of the item at `weighted_index` by `1`. If its weight becomes non-positive as a result, remove the entire item. Returns a clone of the item with its updated weight.
     pub fn take_one(&mut self, weighted_index: W) -> WeightedItem<V,W>
     {
         self.take_by(weighted_index, W::one())
     }
 
-    /// Decrement the weight of the item at `weighted_index` by `decrement`. If its weight becomes non-positive as a result, remove the entire item. Returns a clone of the item.
+    /// Decrement the weight of the item at `weighted_index` by `decrement`. If its weight becomes non-positive as a result, remove the entire item. Returns a clone of the item with its updated weight.
     pub fn take_by(&mut self, weighted_index: W, decrement: W) -> WeightedItem<V,W>
     {
         let idx = self._unweight_index_(weighted_index);
@@ -801,6 +802,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
         }
     }
 
+    /// Remove the entire item at `weighted_index`.
     pub fn take_entire(&mut self, weighted_index: W) -> WeightedItem<V,W>
     {
         self.remove(weighted_index)
@@ -822,6 +824,24 @@ impl<V, W: Weight> WeightedList<V,W>
         Some(out)
     }
 
+    /// Select a random item from the list and return its value, using weighted randomisation.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = wlist![
+    ///     (2, String::from("sup")),
+    ///     (3, String::from("nova")),
+    ///     (5, String::from("shard")),
+    /// ];
+    /// 
+    /// wl.select_random_value(&mut rand::rng());
+    /// // could give:
+    /// //   - Some("sup"  ) with 20% probability
+    /// //   - Some("nova" ) with 30% probability
+    /// //   - Some("shard") with 50% probability
+    /// ```
     pub fn select_random_value<RNG>(&self, rng: &mut RNG) -> Option<&V>
         where RNG: Rng + ?Sized
     {
@@ -829,9 +849,24 @@ impl<V, W: Weight> WeightedList<V,W>
         Some(out)
     }
 
-    /// Select a random item from the list.
+    /// Select a random item from the list, using weighted randomisation.
     /// 
-    /// This uses `f64` for random number generation.
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = wlist![
+    ///     (2, String::from("sup")),
+    ///     (3, String::from("nova")),
+    ///     (5, String::from("shard")),
+    /// ];
+    /// 
+    /// wl.select_random_item(&mut rand::rng());
+    /// // could give:
+    /// //   - Some(WeightedItem { 2, "sup"   }) with 20% probability
+    /// //   - Some(WeightedItem { 3, "nova"  }) with 30% probability
+    /// //   - Some(WeightedItem { 5, "shard" }) with 50% probability
+    /// ```
     pub fn select_random_item<RNG>(&self, rng: &mut RNG) -> Option<&WeightedItem<V,W>>
         where RNG: Rng + ?Sized
     {
@@ -846,12 +881,48 @@ impl<V, W: Weight> WeightedList<V,W>
 
 impl<V: Clone, W: Weight> WeightedList<V,W>
 {
+    /// Select a random item from the list using weighted randomisation, and decrement its weight by `1`.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![
+    ///     (2, String::from("sup")),
+    ///     (3, String::from("nova")),
+    ///     (5, String::from("shard")),
+    /// ];
+    /// 
+    /// wl.take_one_random(&mut rand::rng());
+    /// // could give:
+    /// //   - Some(WeightedItem { 1, "sup"   })   with 20% probability
+    /// //   - Some(WeightedItem { 2, "nova"  })  with 30% probability
+    /// //   - Some(WeightedItem { 4, "shard" }) with 50% probability
+    /// ```
     pub fn take_one_random<RNG>(&mut self, rng: &mut RNG) -> Option<WeightedItem<V,W>>
         where RNG: Rng + ?Sized
     {
         self.take_by_random(rng, W::one())
     }
 
+    /// Select a random item from the list using weighted randomisation, and decrement its weight by `decrement`.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![
+    ///     (2, String::from("sup")),
+    ///     (3, String::from("nova")),
+    ///     (5, String::from("shard")),
+    /// ];
+    /// 
+    /// wl.take_by_random(&mut rand::rng(), 2);
+    /// // could give:
+    /// //   - Some(WeightedItem { 0, "sup"   })   with 20% probability
+    /// //   - Some(WeightedItem { 1, "nova"  })  with 30% probability
+    /// //   - Some(WeightedItem { 3, "shard" }) with 50% probability
+    /// ```
     pub fn take_by_random<RNG>(&mut self, rng: &mut RNG, decrement: W) -> Option<WeightedItem<V,W>>
         where RNG: Rng + ?Sized
     {
@@ -863,6 +934,26 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
         Some(out)
     }
 
+    /// Select and remove a random item from the list, using weighted randomisation.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![
+    ///     (2, String::from("sup")),
+    ///     (3, String::from("nova")),
+    ///     (5, String::from("shard")),
+    /// ];
+    /// 
+    /// wl.take_entire_random(&mut rand::rng());
+    /// // could give:
+    /// //   - Some(WeightedItem { 2, "sup"   })   with 20% probability
+    /// //   - Some(WeightedItem { 3, "nova"  })  with 30% probability
+    /// //   - Some(WeightedItem { 5, "shard" }) with 50% probability
+    /// 
+    /// assert!( wl.total_values() == 2 );
+    /// ```
     pub fn take_entire_random<RNG>(&mut self, rng: &mut RNG) -> Option<WeightedItem<V,W>>
         where RNG: Rng + ?Sized
     {
@@ -900,6 +991,7 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
+    /// let mut pool = wlist![
     ///     (2, String::from("sup")),
     ///     (3, String::from("nova")),
     ///     (5, String::from("shard")),
@@ -909,7 +1001,7 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     /// 
     /// // with replacement
     /// let selected =
-    ///     list.select_random_values()
+    ///     pool.select_random_values()
     ///         .rng(&mut rng)
     ///         .count(3)
     ///         .call();
@@ -918,7 +1010,7 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     /// 
     /// // without replacement
     /// let selected =
-    ///     list.select_random_values()
+    ///     pool.select_random_values()
     ///         .rng(&mut rng)
     ///         .count(10)
     ///         .replace(false)
@@ -929,7 +1021,7 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     /// 
     /// // unique only
     /// let selected =
-    ///     list.select_random_values()
+    ///     pool.select_random_values()
     ///         .rng(&mut rng)
     ///         .count(100)
     ///         .unique(true)
@@ -978,6 +1070,7 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
 
 impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
 {
+    /// Shuffle the order of items in the list in-place.
     pub fn shuffle_items<RNG>(&mut self, rng: &mut RNG) -> &mut Self
         where RNG: Rng + ?Sized
     {
@@ -985,6 +1078,9 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
         self
     }
 
+    /// Return a clone with the order of items shuffled.
+    /// 
+    /// Out-of-place version of `.shuffle_items()`.
     pub fn shuffled_items<RNG>(&self, rng: &mut RNG) -> Self
         where RNG: Rng + ?Sized
     {
@@ -994,6 +1090,30 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
         out
     }
 
+    /// Shuffle the pairings of (weight, value) for items in the list, in-place.
+    /// 
+    /// Values remain in the same order, while weights are re-assigned.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![
+    ///     (2, "sup"),
+    ///     (3, "nova"),
+    ///     (5, "shard"),
+    /// ];
+    /// 
+    /// wl.shuffle_weights(&mut rand::rng());
+    /// 
+    /// println!("{wl}");
+    /// // could give:
+    /// //   WeightedList[{3, sup}, {5, nova}, {2, shard}]
+    /// 
+    /// println!("{wl}");
+    /// // could now give:
+    /// //   WeightedList[{2, sup}, {5, nova}, {3, shard}]
+    /// ```
     pub fn shuffle_weights<RNG>(&mut self, rng: &mut RNG) -> &mut Self
         where RNG: Rng + ?Sized
     {
@@ -1008,6 +1128,9 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
         self
     }
 
+    /// Return a copy of the list with (weight, value) pairings shuffled.
+    /// 
+    /// Out-of-place version of `.shuffle_weights()`.
     pub fn shuffled_weights<RNG>(&self, rng: &mut RNG) -> Self
         where RNG: Rng + ?Sized
     {
