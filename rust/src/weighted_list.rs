@@ -914,18 +914,42 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
 
 impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
 {
-    pub fn shuffle<RNG>(&mut self, rng: &mut RNG) -> &mut Self
+    pub fn shuffle_items<RNG>(&mut self, rng: &mut RNG) -> &mut Self
         where RNG: Rng + ?Sized
     {
         self.data.shuffle(rng);
         self
     }
 
-    pub fn shuffled<RNG>(&self, rng: &mut RNG) -> Self
+    pub fn shuffled_items<RNG>(&self, rng: &mut RNG) -> Self
         where RNG: Rng + ?Sized
     {
         let mut out = self.clone();
-        out.shuffle(rng);
+        out.shuffle_items(rng);
+
+        out
+    }
+
+    pub fn shuffle_weights<RNG>(&mut self, rng: &mut RNG) -> &mut Self
+        where RNG: Rng + ?Sized
+    {
+        let mut weights: Vec<W> = self.weights().collect();
+        weights.shuffle(rng);
+        
+        for item in &mut self.data {
+            /* guaranteed to be Some */
+            item.weight = weights.pop().unwrap();
+        }
+
+        self
+    }
+
+    pub fn shuffled_weights<RNG>(&self, rng: &mut RNG) -> Self
+        where RNG: Rng + ?Sized
+    {
+        let mut out = self.clone();
+        out.shuffle_weights(rng);
+        
         out
     }
 }

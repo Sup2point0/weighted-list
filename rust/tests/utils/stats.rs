@@ -15,6 +15,7 @@ const SIGNIFICANCE_LEVEL: f64 = CRITICAL_PERCENT as f64 / 200.0;
 pub enum Method {
     SELECT_SINGLE,
     SELECT_MANY,
+    SHUFFLE,
 }
 
 
@@ -30,7 +31,11 @@ pub fn test_binomial<V>(
     let mut test_binomial_single = |item: &WeightedItem<V, i32>| {
         let value = &item.value;
 
-        let prob = item.weight as f64 / wlist.len() as f64;
+        let prob = match method {
+            Method::SHUFFLE => 1.0 / wlist.total_values() as f64,
+            _               => item.weight as f64 / wlist.len() as f64,
+        };
+
         let binomialdist = dist::Binomial::new(prob, TRIALS).unwrap();
 
         let mut observed: u64 = 0;
@@ -48,7 +53,14 @@ pub fn test_binomial<V>(
                     .count(TRIALS as u32)
                     .call().iter()
                     .filter(|val| *val == value).count() as u64;
-            }
+            },
+            Method::SHUFFLE => {
+                for _ in 0..TRIALS {
+                    if wlist.shuffled_weights(&mut rng) == *wlist {
+                        observed += 1;
+                    }
+                }
+            },
         }
 
         let expected = binomialdist.mean().unwrap().round() as i32;
