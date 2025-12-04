@@ -103,14 +103,16 @@ impl<V: fmt::Display, W: Weight> fmt::Display for WeightedItem<V,W>
 
 impl<V: Eq, W: Weight + Ord> Ord for WeightedItem<V,W>
 {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering
+    {
         self.weight.cmp(&other.weight)
     }
 }
 
 impl<V: Eq, W: Weight> PartialOrd for WeightedItem<V,W>
 {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering>
+    {
         self.weight.partial_cmp(&other.weight)
     }
 }
@@ -211,7 +213,7 @@ macro_rules! wlist {
     ( $( $item: expr ),* $(,)? ) => {
         WeightedList::init([
             $( $item, )*
-        ]);
+        ])
     };
 }
 
@@ -230,6 +232,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self.data.iter().map(|item| &item.value)
     }
 
+    /// Get a reference to the `Vec<>` of items in the list.
     pub fn items(&self) -> &Vec<WeightedItem<V,W>>
     {
         &self.data
@@ -326,25 +329,29 @@ impl<V, W: Weight> FromIterator<WeightedItem<V,W>> for WeightedList<V,W>
     }
 }
 
-impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
+impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
+{
     fn from(vec: Vec<WeightedItem<V,W>>) -> Self {
         Self { data: vec }
     }
 }
 
-impl<V, W: Weight> Into<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
+impl<V, W: Weight> Into<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
+{
     fn into(self) -> Vec<WeightedItem<V,W>> {
         self.data
     }
 }
 
-impl<V, W: Weight> AsRef<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
+impl<V, W: Weight> AsRef<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
+{
     fn as_ref(&self) -> &Vec<WeightedItem<V,W>> {
         &self.data
     }
 }
 
-impl<V, W: Weight> Deref for WeightedList<V,W> {
+impl<V, W: Weight> Deref for WeightedList<V,W>
+{
     type Target = [WeightedItem<V,W>];
 
     fn deref(&self) -> &Self::Target {
@@ -360,7 +367,8 @@ impl<V, W: Weight> DerefMut for WeightedList<V,W>
 }
 
 // == TRAITS == //
-impl<V, W: Weight> Default for WeightedList<V, W> {
+impl<V, W: Weight> Default for WeightedList<V, W>
+{
     fn default() -> Self {
         Self::new()
     }
@@ -999,5 +1007,57 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
         out.shuffle_weights(rng);
 
         out
+    }
+}
+
+
+// == INTERNAL TESTS == //
+// --------------------------------------------------------------------- //
+
+#[cfg(test)]
+mod tests
+{
+    use super::*;
+
+    fn wl() -> WeightedList<String, i32>
+    {
+        wlist![
+            (2, String::from("sup")),
+            (3, String::from("nova")),
+            (5, String::from("shard")),
+        ]
+    }
+
+    #[test]
+    fn unweight_index()
+    {
+        let list = wl();
+        assert_eq!( list.unweight_index(0), 0 );
+        assert_eq!( list.unweight_index(1), 0 );
+        assert_eq!( list.unweight_index(2), 1 );
+        assert_eq!( list.unweight_index(3), 1 );
+        assert_eq!( list.unweight_index(4), 1 );
+        assert_eq!( list.unweight_index(5), 2 );
+        assert_eq!( list.unweight_index(6), 2 );
+        assert_eq!( list.unweight_index(7), 2 );
+        assert_eq!( list.unweight_index(8), 2 );
+        assert_eq!( list.unweight_index(9), 2 );
+    }
+
+    #[test]
+    #[should_panic]
+    fn unweight_index_panic()
+    {
+        let list = wl();
+        list.unweight_index(10);
+    }
+
+    #[test]
+    fn unweight_index_nopanic()
+    {
+        let list = wl();
+        assert_eq!( list.unweight_index_nopanic(10), 3 );
+        assert_eq!( list.unweight_index_nopanic(11), 3 );
+        assert_eq!( list.unweight_index_nopanic(12), 3 );
     }
 }
