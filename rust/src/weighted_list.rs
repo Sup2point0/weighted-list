@@ -5,6 +5,7 @@ use std::{
 };
 
 use bon::{bon};
+use itertools::Itertools;
 use num_traits as nums;
 use rand::{
     prelude::*,
@@ -37,7 +38,7 @@ impl<Type> Weight for Type where Type:
 /// An item in a `WeightedList`, with a `value` of type `V` and a `weight` of numerical type `W`.
 /// 
 /// For consistency and layout, `weight` always comes before `value` when ordering is relevant.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct WeightedItem<V, W: Weight>
 {
     pub weight: W,
@@ -88,18 +89,9 @@ impl<V: fmt::Display, W: Weight> fmt::Display for WeightedItem<V,W>
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
     {
-        write!(f, "{{ weight: {}, value: {} }}", self.weight, self.value)
+        write!(f, "{{ {}, {} }}", self.weight, self.value)
     }
 }
-
-// impl<V: PartialEq, W: Weight> PartialEq for WeightedItem<V,W>
-// {
-//     fn eq(&self, other: &Self) -> bool {
-//         self.value == other.value && self.weight == other.weight
-//     }
-// }
-
-// impl<V: Eq, W: Weight> Eq for WeightedItem<V,W> {}
 
 impl<V: Eq, W: Weight + Ord> Ord for WeightedItem<V,W>
 {
@@ -158,7 +150,7 @@ impl<V: Eq, W: Weight> PartialOrd for WeightedItem<V,W>
 ///     .prune()
 ///     .len();
 /// ```
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
 pub struct WeightedList<V, W: Weight>
 {
     data: Vec<WeightedItem<V,W>>,
@@ -367,10 +359,24 @@ impl<V, W: Weight> DerefMut for WeightedList<V,W>
 }
 
 // == TRAITS == //
-impl<V, W: Weight> Default for WeightedList<V, W>
+impl<V: fmt::Display, W: Weight + fmt::Display> fmt::Display for WeightedList<V,W>
 {
-    fn default() -> Self {
-        Self::new()
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {            
+        write!(f,
+            "WeightedList[{}]",
+            self.data.iter().map(|item| item.to_string()).join(", ")
+        )
+    }
+}
+
+impl<V, W: Weight> Extend<WeightedItem<V,W>> for WeightedList<V,W>
+{
+    fn extend<T>(&mut self, iter: T)
+        where T: IntoIterator<Item = WeightedItem<V,W>>
+    {
+        for item in iter {
+            self.push_item(item);
+        }
     }
 }
 
