@@ -5,6 +5,7 @@ use std::{
 };
 
 use bon::{bon};
+use itertools::Itertools;
 use num_traits as nums;
 use rand::{
     prelude::*,
@@ -37,7 +38,7 @@ impl<Type> Weight for Type where Type:
 /// An item in a `WeightedList`, with a `value` of type `V` and a `weight` of numerical type `W`.
 /// 
 /// For consistency and layout, `weight` always comes before `value` when ordering is relevant.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct WeightedItem<V, W: Weight>
 {
     pub weight: W,
@@ -88,18 +89,9 @@ impl<V: fmt::Display, W: Weight> fmt::Display for WeightedItem<V,W>
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
     {
-        write!(f, "{{ weight: {}, value: {} }}", self.weight, self.value)
+        write!(f, "{{ {}, {} }}", self.weight, self.value)
     }
 }
-
-// impl<V: PartialEq, W: Weight> PartialEq for WeightedItem<V,W>
-// {
-//     fn eq(&self, other: &Self) -> bool {
-//         self.value == other.value && self.weight == other.weight
-//     }
-// }
-
-// impl<V: Eq, W: Weight> Eq for WeightedItem<V,W> {}
 
 impl<V: Eq, W: Weight + Ord> Ord for WeightedItem<V,W>
 {
@@ -158,7 +150,7 @@ impl<V: Eq, W: Weight> PartialOrd for WeightedItem<V,W>
 ///     .prune()
 ///     .len();
 /// ```
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
 pub struct WeightedList<V, W: Weight>
 {
     data: Vec<WeightedItem<V,W>>,
@@ -367,10 +359,24 @@ impl<V, W: Weight> DerefMut for WeightedList<V,W>
 }
 
 // == TRAITS == //
-impl<V, W: Weight> Default for WeightedList<V, W>
+impl<V: fmt::Display, W: Weight + fmt::Display> fmt::Display for WeightedList<V,W>
 {
-    fn default() -> Self {
-        Self::new()
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {            
+        write!(f,
+            "WeightedList[{}]",
+            self.data.iter().map(|item| item.to_string()).join(", ")
+        )
+    }
+}
+
+impl<V, W: Weight> Extend<WeightedItem<V,W>> for WeightedList<V,W>
+{
+    fn extend<T>(&mut self, iter: T)
+        where T: IntoIterator<Item = WeightedItem<V,W>>
+    {
+        for item in iter {
+            self.push_item(item);
+        }
     }
 }
 
@@ -378,7 +384,7 @@ impl<V, W: Weight> Default for WeightedList<V, W>
 impl<V, W: Weight> WeightedList<V,W>
 {
     /// Convert a `weighted_index` to its unweighted equivalent in the underlying `Vec`. Does not panic on overflow and instead returns the `.len()` of the underlying `Vec`.
-    fn unweight_index_nopanic(&self, weighted_index: W) -> usize
+    fn _unweight_index_nopanic_(&self, weighted_index: W) -> usize
     {
         let mut t = W::zero();
         let mut i = 0;
@@ -397,7 +403,7 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 
     /// Convert a `weighted_index` to its unweighted equivalent in the underlying `Vec`. Panics on overflow.
-    fn unweight_index(&self, weighted_index: W) -> usize
+    fn _unweight_index_(&self, weighted_index: W) -> usize
     {
         let mut t = W::zero();
         let mut i = 0;
@@ -444,7 +450,7 @@ impl<V, W: Weight> IndexMut<W> for WeightedList<V,W>
 {
     fn index_mut(&mut self, weighted_index: W) -> &mut WeightedItem<V,W>
     {
-        let idx = self.unweight_index(weighted_index);
+        let idx = self._unweight_index_(weighted_index);
         &mut self.data[idx]
     }
 }
@@ -528,7 +534,7 @@ impl<V, W: Weight> WeightedList<V,W>
         item: WeightedItem<V,W>
     ) -> &mut Self
     {
-        self.data.insert(self.unweight_index_nopanic(weighted_index), item);
+        self.data.insert(self._unweight_index_nopanic_(weighted_index), item);
         self
     }
 
@@ -564,8 +570,8 @@ impl<V, W: Weight> WeightedList<V,W>
 
     pub fn swap(&mut self, left: W, right: W) -> &mut Self
     {
-        let l = self.unweight_index(left);
-        let r = self.unweight_index(right);
+        let l = self._unweight_index_(left);
+        let r = self._unweight_index_(right);
         self.data.swap(l, r);
         self
     }
@@ -585,7 +591,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// Remove the entire item at `weighted_index` and return it.
     pub fn remove(&mut self, weighted_index: W) -> WeightedItem<V,W>
     {
-        self.data.remove(self.unweight_index(weighted_index))
+        self.data.remove(self._unweight_index_(weighted_index))
     }
 
     // UNTESTED
@@ -783,7 +789,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
     /// Decrement the weight of the item at `weighted_index` by `decrement`. If its weight becomes non-positive as a result, remove the entire item. Returns a clone of the item.
     pub fn take_by(&mut self, weighted_index: W, decrement: W) -> WeightedItem<V,W>
     {
-        let idx = self.unweight_index(weighted_index);
+        let idx = self._unweight_index_(weighted_index);
         let target = &mut self.data[idx];
         target.weight -= decrement;
 
@@ -804,7 +810,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
 // == RANDOM SELECTION == //
 impl<V, W: Weight> WeightedList<V,W>
 {
-    fn get_random_weighted_index<RNG>(&self, rng: &mut RNG) -> Option<W>
+    fn _get_random_weighted_index_<RNG>(&self, rng: &mut RNG) -> Option<W>
         where RNG: Rng + ?Sized
     {
         let len:    f64 = nums::cast::<W, f64>(self.len())?;
@@ -831,7 +837,7 @@ impl<V, W: Weight> WeightedList<V,W>
     {
         if self.data.is_empty() { return None }
 
-        let idx = self.get_random_weighted_index(rng)?;
+        let idx = self._get_random_weighted_index_(rng)?;
         let out = &self[idx];
 
         Some(out)
@@ -851,7 +857,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
     {
         if self.data.is_empty() { return None }
 
-        let idx = self.get_random_weighted_index(rng)?;
+        let idx = self._get_random_weighted_index_(rng)?;
         let out = self.take_by(idx, decrement);
 
         Some(out)
@@ -862,7 +868,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
     {
         if self.data.is_empty() { return None }
 
-        let idx = self.get_random_weighted_index(rng)?;
+        let idx = self._get_random_weighted_index_(rng)?;
         let out = self.take_entire(idx);
 
         Some(out)
@@ -1029,35 +1035,35 @@ mod tests
     }
 
     #[test]
-    fn unweight_index()
+    fn _unweight_index_()
     {
         let list = wl();
-        assert_eq!( list.unweight_index(0), 0 );
-        assert_eq!( list.unweight_index(1), 0 );
-        assert_eq!( list.unweight_index(2), 1 );
-        assert_eq!( list.unweight_index(3), 1 );
-        assert_eq!( list.unweight_index(4), 1 );
-        assert_eq!( list.unweight_index(5), 2 );
-        assert_eq!( list.unweight_index(6), 2 );
-        assert_eq!( list.unweight_index(7), 2 );
-        assert_eq!( list.unweight_index(8), 2 );
-        assert_eq!( list.unweight_index(9), 2 );
+        assert_eq!( list._unweight_index_(0), 0 );
+        assert_eq!( list._unweight_index_(1), 0 );
+        assert_eq!( list._unweight_index_(2), 1 );
+        assert_eq!( list._unweight_index_(3), 1 );
+        assert_eq!( list._unweight_index_(4), 1 );
+        assert_eq!( list._unweight_index_(5), 2 );
+        assert_eq!( list._unweight_index_(6), 2 );
+        assert_eq!( list._unweight_index_(7), 2 );
+        assert_eq!( list._unweight_index_(8), 2 );
+        assert_eq!( list._unweight_index_(9), 2 );
     }
 
     #[test]
     #[should_panic]
-    fn unweight_index_panic()
+    fn _unweight_index_panic_()
     {
         let list = wl();
-        list.unweight_index(10);
+        list._unweight_index_(10);
     }
 
     #[test]
-    fn unweight_index_nopanic()
+    fn _unweight_index_nopanic_()
     {
         let list = wl();
-        assert_eq!( list.unweight_index_nopanic(10), 3 );
-        assert_eq!( list.unweight_index_nopanic(11), 3 );
-        assert_eq!( list.unweight_index_nopanic(12), 3 );
+        assert_eq!( list._unweight_index_nopanic_(10), 3 );
+        assert_eq!( list._unweight_index_nopanic_(11), 3 );
+        assert_eq!( list._unweight_index_nopanic_(12), 3 );
     }
 }
