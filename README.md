@@ -87,7 +87,7 @@ main = print (selectValue greetings)
 ```rs
 let descriptors = wlist![
     (10, String::from("cool")),
-    (5, String::from("awesome")),
+    (5,  String::from("awesome")),
     (2,  String::from("elegant")),
     (1,  String::from("beautiful")),
 ];
@@ -98,8 +98,10 @@ let words = descriptors.select_random_values()
     .unique(true)
     .call();
 
-println!("Rust is {} and {}", words[0], words[1]);
-// => Rust is cool and elegant
+if let Some(first) = words[0] && let Some(second) = words[1] {
+    println!("Rust is {} and {}", first, second);
+    // => Rust is awesome and elegant
+}
 ```
 
 </details>
