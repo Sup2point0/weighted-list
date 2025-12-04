@@ -92,6 +92,29 @@ impl<V: fmt::Display, W: Weight> fmt::Display for WeightedItem<V,W>
     }
 }
 
+// impl<V: PartialEq, W: Weight> PartialEq for WeightedItem<V,W>
+// {
+//     fn eq(&self, other: &Self) -> bool {
+//         self.value == other.value && self.weight == other.weight
+//     }
+// }
+
+// impl<V: Eq, W: Weight> Eq for WeightedItem<V,W> {}
+
+impl<V: Eq, W: Weight + Ord> Ord for WeightedItem<V,W>
+{
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.weight.cmp(&other.weight)
+    }
+}
+
+impl<V: Eq, W: Weight> PartialOrd for WeightedItem<V,W>
+{
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.weight.partial_cmp(&other.weight)
+    }
+}
+
 
 // == WEIGHTED LIST == //
 // --------------------------------------------------------------------- //
@@ -326,6 +349,13 @@ impl<V, W: Weight> Deref for WeightedList<V,W> {
 
     fn deref(&self) -> &Self::Target {
         self.data.deref()
+    }
+}
+
+impl<V, W: Weight> DerefMut for WeightedList<V,W>
+{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.data.deref_mut()
     }
 }
 
@@ -585,6 +615,24 @@ impl<V, W: Weight> WeightedList<V,W>
     {
         self.data.clear();
         self
+    }
+}
+
+impl<V: Clone, W: Weight> WeightedList<V,W>
+{
+    pub fn sorted(&self) -> Self
+        where V: Eq, W: Ord
+    {
+        let mut out = self.clone();
+        out.sort();
+        out
+    }
+    
+    pub fn reversed(&self) -> Self
+    {
+        let mut out = self.clone();
+        out.reverse();
+        out
     }
 }
 
@@ -949,7 +997,7 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
     {
         let mut out = self.clone();
         out.shuffle_weights(rng);
-        
+
         out
     }
 }
