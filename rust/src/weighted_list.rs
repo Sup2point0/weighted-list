@@ -456,7 +456,8 @@ impl<V, W: Weight> IndexMut<W> for WeightedList<V,W>
 }
 
 // == ITERATION == //
-impl<V, W: Weight> WeightedList<V,W> {
+impl<V, W: Weight> WeightedList<V,W>
+{
     pub fn iter(&self) -> impl Iterator<Item = &WeightedItem<V,W>> {
         self.data.iter()
     }
@@ -511,23 +512,26 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
+    /// Append an item to the end of the list.
     pub fn push_item(&mut self, item: WeightedItem<V,W>) -> &mut Self
     {
         self.data.push(item);
         self
     }
 
+    /// Append a new item with `value` and `weight` to the end of the list.
     pub fn push_new_item(&mut self, weight: W, value: V) -> &mut Self
     {
         self.push_item(WeightedItem { weight, value })
     }
     
+    /// Append a new item with `value` and a weight of `1` to the end of the list.
     pub fn push_value(&mut self, value: V) -> &mut Self
     {
         self.push_item(WeightedItem::unit(value))
     }
 
-    /// Insert a `WeightedItem` into the list at `weighted_index`. If `weighted_index >= len`, the item is appended to the end (the function does *not* panic).
+    /// Insert an item into the list at `weighted_index`. If `weighted_index >= len`, the item is appended to the end (the function does *not* panic).
     pub fn insert_item(&mut self,
         weighted_index: W,
         item: WeightedItem<V,W>
@@ -537,7 +541,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
-    /// Insert an item with `weight` and `value` into the list at `weighted_index`. If `weighted_index >= len`, the item is appended to the end (the function does *not* panic).
+    /// Insert a new item with `value` and `weight` into the list at `weighted_index`. If `weighted_index >= len`, the item is appended to the end (the function does *not* panic).
     pub fn insert_new_item(&mut self,
         weighted_index: W,
         (weight, value): (W, V)
@@ -555,18 +559,25 @@ impl<V, W: Weight> WeightedList<V,W>
         self.insert_item(weighted_index, WeightedItem::unit(value))
     }
 
+    /// Move all items in `other` into `self`, leaving `other` empty.
     pub fn append(&mut self, other: &mut WeightedList<V,W>) -> &mut Self
     {
         self.data.append(&mut other.data);
         self
     }
 
+    /// Reverse the order of items in the list.
     pub fn reverse(&mut self) -> &mut Self
     {
         self.data.reverse();
         self
     }
 
+    /// Swap the items at weighted indices `left` and `right`.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if `left` or `right` are out of bounds.
     pub fn swap(&mut self, left: W, right: W) -> &mut Self
     {
         let l = self._unweight_index_(left);
@@ -575,6 +586,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
+    /// Removes the last item from the list and returns it, or `None` if the list is empty.
     pub fn pop(&mut self) -> Option<WeightedItem<V,W>>
     {
         self.data.pop()
@@ -609,6 +621,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
+    /// Retain only items that fulfil the predicate.
     pub fn retain<F>(&mut self, predicate: F) -> &mut Self
         where F: FnMut(&WeightedItem<V,W>) -> bool
     {
@@ -616,6 +629,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
+    /// Retain only items that fulfil the predicate, passing a mutable reference to the predicate.
     pub fn retain_mut<F>(&mut self, predicate: F) -> &mut Self
         where F: FnMut(&mut WeightedItem<V,W>) -> bool
     {
@@ -623,7 +637,9 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
-    /// Clear the `WeightedList`, removing all items.
+    /// Clear the list, removing all items.
+    /// 
+    /// If you'd like to set the weights of all items to `0`, you can use `.zero_all_weights()`.
     pub fn clear(&mut self) -> &mut Self
     {
         self.data.clear();
@@ -679,6 +695,27 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
+    /// Return a copy of the list with all item weights normalised such that they sum to `1.0`.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![
+    ///     (2, "sup"),
+    ///     (3, "nova"),
+    ///     (5, "shard"),
+    /// ];
+    /// 
+    /// assert_eq!(
+    ///     wl.normalised().ok(),
+    ///     Some(wlist![
+    ///         (0.2, "sup"),
+    ///         (0.3, "nova"),
+    ///         (0.5, "shard"),
+    ///     ])
+    /// );
+    /// ```
     pub fn normalised(&mut self) -> Result<WeightedList<V, f64>, &str>
         where V: Clone
     {
@@ -746,7 +783,7 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
         self
     }
 
-    /// Merge an item with `value` and `weight` into the list.
+    /// Merge a new item with `value` and `weight` into the list.
     /// 
     /// See `.merge_item()` for details.
     pub fn merge_new_item(&mut self, weight: W, value: V) -> &mut Self
@@ -754,7 +791,7 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
         self.merge_item(WeightedItem { weight, value })
     }
 
-    /// Merge an item with `value` and a weight of `1` into the list.
+    /// Merge a new item with `value` and a weight of `1` into the list.
     /// 
     /// See `.merge_item()` for details.
     pub fn merge_value(&mut self, value: V) -> &mut Self
@@ -762,6 +799,9 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
         self.merge_item(WeightedItem::unit(value))
     }
 
+    /// Merge the items of `other` into `self`, leaving `other` empty.
+    /// 
+    /// See `.merge_item()` for details.
     pub fn merge_with(&mut self, other: WeightedList<V,W>) -> &mut Self
     {
         for item in other {
@@ -771,6 +811,26 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
         self
     }
 
+    /// Merge any duplicate items in the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![
+    ///     (1, "sup"),
+    ///     (2, ""),
+    ///     (20, "sup")
+    /// ];
+    /// 
+    /// assert_eq!(
+    ///     *wl.merge_duplicates(),
+    ///     wlist![
+    ///         (21, "sup"),
+    ///         (2, ""),
+    ///     ]
+    /// );
+    /// ```
     pub fn merge_duplicates(&mut self) -> &mut Self
     {
         let orig = std::mem::replace(self, WeightedList::new());
