@@ -2,7 +2,11 @@
 //! 
 //! See `WeightedList` for more.
 
-mod weighted_list;
+mod root;
 
-pub use weighted_list::WeightedItem;
+
+mod weighted_item;
+pub use weighted_item::WeightedItem;
+
+mod weighted_list;
 pub use weighted_list::WeightedList;
