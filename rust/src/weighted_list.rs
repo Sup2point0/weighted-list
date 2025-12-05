@@ -1052,15 +1052,18 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     /// 
     /// # Options
     /// 
+    /// ```ignore
+    /// rng: RNG,
+    /// count: usize,
+    /// replace: Option<bool> = true,
+    ///     decrement: Option<W> = 1,
+    /// unique: Option<bool> = false,
+    /// ```
+    /// 
     /// - `count`: How many values to select.
-    /// - `replace`: If `false`, items have their weight decremented after selection. If `true`, infinite values can be selected.
-    ///   - `decrement`: How much to decrement weights by if `replace` is `false`. Defaults to `1`.
-    /// - `unique`: If `true`, only distinct values will be returned. `replace` becomes irrelevant in this case.
-    /// 
-    /// # Notes
-    /// 
-    /// - If `count` exceeds the length of the list, excess iterations will be skipped. If selection for an iteration fails, the values is excluded from the output list. Note that these mean the results may have fewer values than the expected `count`.
-    /// - This method reserves a `Vec<>` with capacity `count` initially, so be careful of passing in extremely large `count`s.
+    /// - `replace`: If `true`, items do not have their weight decremented after selection, and infinite values can be selected. If `false`, items have their weight decremented after selection. This means at most `self.len()` values will be returned.
+    ///   - `decrement`: How much to decrement weights by if `replace` is `false`.
+    /// - `unique`: If `true`, only distinct values will be returned. `replace` becomes irrelevant in this case. This means at most `self.total_values()` values will be returned.
     /// 
     /// # Usage
     /// 
@@ -1106,23 +1109,30 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     /// 
     /// assert!(selected.len() == 3);
     /// ```
+    /// 
+    /// # Notes
+    /// 
+    /// - It is not guaranteed that the results will have exactly `count` values.
+    ///   - If `count` exceeds the maximum possible number of values that can be returned, excess iterations will be skipped.
+    ///   - If selection for an iteration fails, that value is excluded from the output list.
+    /// - This method reserves a `Vec<>` with capacity `count` initially, so be careful of passing in extremely large `count`s.
     #[builder]
     pub fn select_random_values<RNG>(&self,
         rng: &mut RNG,
-        count: u32,
+        count: usize,
         replace: Option<bool>,
             decrement: Option<W>,
         unique: Option<bool>,
     ) -> Vec<V>
         where RNG: Rng + ?Sized
     {
-        let unique = unique.unwrap_or(false);
         let replace = replace.unwrap_or(true);
         let decrement = decrement.unwrap_or(W::one());
+        let unique = unique.unwrap_or(false);
 
         let mut pool = self.clone();
         let mut i = 0;
-        let mut out = Vec::with_capacity(count as usize);
+        let mut out = Vec::with_capacity(count);
 
         loop
         {
