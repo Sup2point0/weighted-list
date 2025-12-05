@@ -50,7 +50,7 @@ pub fn test_binomial<V>(
             },
             Method::SELECT_MANY => {
                 observed += wlist.select_random_values().rng(&mut rng)
-                    .count(TRIALS as u32)
+                    .count(TRIALS as usize)
                     .call().iter()
                     .filter(|val| *val == value).count() as u64;
             },

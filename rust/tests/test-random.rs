@@ -53,7 +53,7 @@ use weighted_list::*;
     let mut rng = rand::rng();
 
     let list = wl();
-    let count = list.len() as u32;
+    let count = list.len() as usize;
 
     let valid = vec!["sup", "nova", "shard"];
     let mut results;
