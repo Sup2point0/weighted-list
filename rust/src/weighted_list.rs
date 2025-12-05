@@ -254,6 +254,19 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 }
 
+impl<V, W: Weight + nums::PrimInt> WeightedList<V,W>
+{
+    pub fn expanded(&self) -> impl Iterator<Item = &V>
+    {
+        self.data
+            .iter()
+            .flat_map(|item| repeat_n(
+                &item.value,
+                nums::cast::<W, usize>(item.weight).unwrap_or(0)
+            ))
+    }
+}
+
 // == PROPERTIES == //
 impl<V, W: Weight> WeightedList<V,W>
 {
@@ -873,7 +886,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
     }
 }
 
-// == RANDOM SELECTION == //
+// == RANDOMISATION == //
 impl<V, W: Weight> WeightedList<V,W>
 {
     fn _get_random_weighted_index_<RNG>(&self, rng: &mut RNG) -> Option<W>
@@ -1037,7 +1050,7 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     /// 
     /// Call this method using `bon` builder syntax (see § Usage below).
     /// 
-    /// # Parameters
+    /// # Options
     /// 
     /// - `count`: How many values to select.
     /// - `replace`: If `false`, items have their weight decremented after selection. If `true`, infinite values can be selected.
@@ -1095,8 +1108,8 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     /// ```
     #[builder]
     pub fn select_random_values<RNG>(&self,
-        count: u32,
         rng: &mut RNG,
+        count: u32,
         replace: Option<bool>,
             decrement: Option<W>,
         unique: Option<bool>,
