@@ -64,17 +64,13 @@ impl<V, W: Weight> WeightedList<V,W>
     /// Construct an empty `WeightedList`.
     pub fn new() -> Self
     {
-        Self {
-            data: Vec::new()
-        }
+        Self { data: Vec::new() }
     }
 
     /// Construct an empty `WeightedList` with the specified capacity.
     pub fn with_capacity(capacity: usize) -> Self
     {
-        Self {
-            data: Vec::with_capacity(capacity)
-        }
+        Self { data: Vec::with_capacity(capacity) }
     }
 
     /// Construct a `WeightedList` from an iterable of `(weight, value)` pairs.
@@ -959,9 +955,13 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     /// ```
     /// 
     /// - `count`: How many values to select.
-    /// - `replace`: If `true`, items do not have their weight decremented after selection, and infinite values can be selected. If `false`, items have their weight decremented after selection. This means at most `self.len()` values will be returned.
-    ///   - `decrement`: How much to decrement weights by if `replace` is `false`.
-    /// - `unique`: If `true`, only distinct values will be returned. `replace` becomes irrelevant in this case. This means at most `self.total_values()` values will be returned.
+    /// - `replace`: If `true`, items do not have their weight decremented after selection, and infinite values can be selected. If `false`, items have their weight decremented after selection.
+    ///   - This means at most `self.len()` values will be returned.
+    /// - `decrement`: How much to decrement weights by if `replace` is `false`.
+    /// - `unique`: If `true`, only distinct values will be returned.
+    ///   - `replace` becomes irrelevant in this case.
+    ///   - This uses `Eq` equality comparison.
+    ///   - This means at most `self.total_values()` values will be returned.
     /// 
     /// # Usage
     /// 

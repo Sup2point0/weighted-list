@@ -23,7 +23,7 @@ pub struct WeightedItem<V, W: Weight>
 impl<V, W: Weight> WeightedItem<V,W>
 {
     /// Construct a `WeightedItem` with `value` and a weight of `1`.
-    pub fn unit(value: V) -> WeightedItem<V,W>
+    pub fn unit(value: V) -> Self
     {
         Self {
             weight: W::one(),
@@ -32,13 +32,13 @@ impl<V, W: Weight> WeightedItem<V,W>
     }
 
     /// Construct a `WeightedItem` with `value` and `weight`.
-    pub fn new(weight: W, value: V) -> WeightedItem<V,W>
+    pub fn new(weight: W, value: V) -> Self
     {
         Self { weight, value }
     }
 
     /// Construct a `WeightedItem` from a `(weight, value)` pair.
-    pub fn from((weight, value): (W, V)) -> WeightedItem<V,W>
+    pub fn from((weight, value): (W, V)) -> Self
     {
         Self { weight, value }
     }
