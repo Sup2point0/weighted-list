@@ -4,8 +4,7 @@ use utils::*;
 use weighted_list::*;
 
 
-#[test]
-#[ignore]
+#[test] #[ignore]
 fn select_single_stats_1()
 {
     stats::test_binomial(
@@ -14,8 +13,7 @@ fn select_single_stats_1()
     );
 }
 
-#[test]
-#[ignore]
+#[test] #[ignore]
 fn select_single_stats_2()
 {
     stats::test_binomial(
@@ -24,8 +22,7 @@ fn select_single_stats_2()
     );
 }
 
-#[test]
-#[ignore]
+#[test] #[ignore]
 fn select_single_stats_3()
 {
     stats::test_binomial(
@@ -34,8 +31,7 @@ fn select_single_stats_3()
     );
 }
 
-#[test]
-#[ignore]
+#[test] #[ignore]
 fn select_single_stats_4()
 {
     stats::test_binomial(
@@ -44,22 +40,19 @@ fn select_single_stats_4()
     );
 }
 
-#[test]
-#[ignore]
+#[test] #[ignore]
 fn select_many_stats_1()
 {
     stats::test_binomial(&wl(), stats::Method::SELECT_MANY);
 }
 
-#[test]
-#[ignore]
+#[test] #[ignore]
 fn shuffle_stats_1()
 {
     stats::test_binomial(&wl(), stats::Method::SHUFFLE);
 }
 
-#[test]
-#[ignore]
+#[test] #[ignore]
 fn shuffle_stats_2()
 {
     stats::test_binomial(&wll(), stats::Method::SHUFFLE);

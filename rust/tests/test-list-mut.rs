@@ -6,8 +6,7 @@ use weighted_list::*;
 
 // == IN-PLACE == //
 
-#[test]
-fn push()
+#[test] fn push()
 {
     assert_eq!(
         *el().push_item(WeightedItem::unit(str!("elysion"))),
@@ -43,8 +42,7 @@ fn push()
     );
 }
 
-#[test]
-fn insert()
+#[test] fn insert()
 {
     assert_eq!(
         *el().insert_item(0, WeightedItem::new(1, str!("elysion"))),
@@ -102,8 +100,7 @@ fn insert()
     assert_eq!( *wl().insert_new_item(11, (1, str!("elysion"))), fourth );
 }
 
-#[test]
-fn remove()
+#[test] fn remove()
 {
     let orig = wl();
     let mut list = wl();
@@ -113,8 +110,7 @@ fn remove()
     assert_eq!( list.remove(0), orig.items()[2] );
 }
 
-#[test]
-fn clear()
+#[test] fn clear()
 {
     assert_eq!( *wl().clear(), el() );
 }
@@ -122,8 +118,7 @@ fn clear()
 
 // == OUT-OF-PLACE == //
 
-#[test]
-fn sorted()
+#[test] fn sorted()
 {
     assert_eq!( el().sorted(), el() );
     assert_eq!( wl().sorted(), wl() );

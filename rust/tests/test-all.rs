@@ -4,8 +4,7 @@ use utils::*;
 // use weighted_list::*;
 
 
-#[test]
-fn test_chaining()
+#[test] fn test_chaining()
 {
     let mut list = el();
 

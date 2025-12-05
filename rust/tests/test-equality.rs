@@ -4,8 +4,7 @@ use utils::*;
 // use weighted_list::*;
 
 
-#[test]
-fn equality()
+#[test] fn equality()
 {
     assert_eq!( el(), el() );
     assert_eq!( wl(), wl() );

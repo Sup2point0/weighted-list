@@ -4,8 +4,7 @@ use utils::*;
 use weighted_list::*;
 
 
-#[test]
-fn index()
+#[test] fn index()
 {
     let list = wl();
 
@@ -21,8 +20,7 @@ fn index()
     assert_eq!( list[9].value, "shard" );
 }
 
-#[test]
-fn iter_methods()
+#[test] fn iter_methods()
 {
     let mut list = wl();
 
@@ -42,8 +40,7 @@ fn iter_methods()
     );
 }
 
-#[test]
-fn iter_sugar()
+#[test] fn iter_sugar()
 {
     let mut list = wl();
 

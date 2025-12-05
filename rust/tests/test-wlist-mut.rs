@@ -4,8 +4,7 @@ use utils::*;
 use weighted_list::*;
 
 
-#[test]
-fn prune()
+#[test] fn prune()
 {
     assert_eq!( *el().prune(), el() );
     assert_eq!( *wl().prune(), wl() );
@@ -13,8 +12,7 @@ fn prune()
     assert_eq!( *wlist![(-1, str!("sup"))].prune(), el() );
 }
 
-#[test]
-fn set_weights()
+#[test] fn set_weights()
 {
     assert_eq!( *el().zero_all_weights(), el() );
 
@@ -39,8 +37,7 @@ fn set_weights()
     );
 }
 
-#[test]
-fn normalise()
+#[test] fn normalise()
 {
     assert_eq!( el().normalised().unwrap(), wlist![] );
 
@@ -54,8 +51,7 @@ fn normalise()
     );
 }
 
-#[test]
-fn merge_single()
+#[test] fn merge_single()
 {
     assert_eq!(
         *el().merge_item(wit!(2, str!("sup"))),
@@ -124,8 +120,7 @@ fn merge_single()
     );
 }
 
-#[test]
-fn merge_many()
+#[test] fn merge_many()
 {
     assert_eq!( *el().merge_with(el()), el() );
     assert_eq!( *el().merge_with(wl()), wl() );
@@ -144,8 +139,7 @@ fn merge_many()
     )
 }
 
-#[test]
-fn merge_duplicates()
+#[test] fn merge_duplicates()
 {
     assert_eq!( *el().merge_duplicates(), el() );
     assert_eq!( *wl().merge_duplicates(), wl() );
@@ -155,8 +149,7 @@ fn merge_duplicates()
     );
 }
 
-#[test]
-fn take_one()
+#[test] fn take_one()
 {
     let mut list = wl();
 
@@ -182,8 +175,7 @@ fn take_one()
     ));
 }
 
-#[test]
-fn take_by()
+#[test] fn take_by()
 {
     let mut list = wl();
 

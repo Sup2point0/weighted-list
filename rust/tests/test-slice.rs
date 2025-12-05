@@ -2,8 +2,7 @@ mod utils;
 use utils::*;
 
 
-#[test]
-fn sort()
+#[test] fn sort()
 {
     let mut list = el();
     list.sort();
