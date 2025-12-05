@@ -4,8 +4,7 @@ use utils::*;
 use weighted_list::*;
 
 
-#[test]
-fn constructors()
+#[test] fn constructors()
 {
     let _: WeightedList<String, i32> = el();
 
@@ -22,8 +21,7 @@ fn constructors()
     assert_ne!( list, cloned );
 }
 
-#[test]
-fn macros()
+#[test] fn macros()
 {
     let list: WeightedList<String, i32> = wlist!(
         (2, str!("sup")),

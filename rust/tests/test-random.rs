@@ -6,8 +6,7 @@ use itertools::Itertools;
 use weighted_list::*;
 
 
-#[test]
-fn select_single()
+#[test] fn select_single()
 {
     let mut rng = rand::rng();
 
@@ -33,8 +32,7 @@ fn select_single()
     }
 }
 
-#[test]
-fn take_single()
+#[test] fn take_single()
 {
     let mut rng = rand::rng();
 
@@ -50,8 +48,7 @@ fn take_single()
     list.take_by_random(&mut rng, 5); assert_eq!( list.total_values(), 0 );
 }
 
-#[test]
-fn select_many()
+#[test] fn select_many()
 {
     let mut rng = rand::rng();
 
@@ -141,8 +138,7 @@ fn select_many()
     }
 }
 
-#[test]
-fn shuffle()
+#[test] fn shuffle()
 {
     let mut list = wl();
     list.append(&mut wl());

@@ -2,8 +2,7 @@ mod utils;
 use utils::*;
 
 
-#[test]
-fn printing()
+#[test] fn printing()
 {
     println!("\n");
 
