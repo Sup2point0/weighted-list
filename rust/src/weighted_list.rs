@@ -55,7 +55,7 @@ use crate::WeightedItem;
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
 pub struct WeightedList<V, W: Weight>
 {
-    data: Vec<WeightedItem<V,W>>,
+    data: Vec<WeightedItem<V,W>>
 }
 
 // == CONSTRUCTORS == //

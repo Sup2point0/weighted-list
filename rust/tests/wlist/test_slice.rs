@@ -1,5 +1,4 @@
-mod utils;
-use utils::*;
+use crate::*;
 
 
 #[test] fn sort()
