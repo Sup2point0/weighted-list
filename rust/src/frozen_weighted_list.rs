@@ -83,27 +83,58 @@ impl<V, W: Weight> FrozenWeightedList<V,W>
     }
 }
 
+// == CONVERSIONS == //
+impl<V, W: Weight> From<Vec<FrozenWeightedItem<V,W>>> for FrozenWeightedList<V,W>
+{
+    fn from(vec: Vec<FrozenWeightedItem<V,W>>) -> Self {
+        Self { data: vec }
+    }
+}
+
+impl<V, W: Weight> Into<Vec<FrozenWeightedItem<V,W>>> for FrozenWeightedList<V,W>
+{
+    fn into(self) -> Vec<FrozenWeightedItem<V,W>> {
+        self.data
+    }
+}
+
+impl<V, W: Weight> AsRef<Vec<FrozenWeightedItem<V,W>>> for FrozenWeightedList<V,W>
+{
+    fn as_ref(&self) -> &Vec<FrozenWeightedItem<V,W>> {
+        &self.data
+    }
+}
+
+impl<V, W: Weight> Deref for FrozenWeightedList<V,W>
+{
+    type Target = [FrozenWeightedItem<V,W>];
+
+    fn deref(&self) -> &Self::Target {
+        self.data.deref()
+    }
+}
+
+impl<V, W: Weight> DerefMut for FrozenWeightedList<V,W>
+{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.data.deref_mut()
+    }
+}
+
 // == INTERNAL == //
 impl<V, W: Weight> FrozenWeightedList<V,W>
 {
     fn _binary_unweight_index_(&self, weighted_index: W) -> usize
     {
         let max = self.total_values();
-
         let mut left_idx:  usize = 0;
         let mut right_idx: usize = max - 1;
-        let mut pivot_idx: usize;
 
-        let mut cand: &FrozenWeightedItem<V,W>;
-        let mut weight: W;
-        let mut c_weight: W;
-
-        for _ in 0..max {
-            pivot_idx = left_idx.midpoint(right_idx);
-
-            cand = &self.data[pivot_idx];
-            weight = cand.weight();
-            c_weight = cand.c_weight();
+        for _ in 0..(max / 2) {
+            let pivot_idx = left_idx.midpoint(right_idx);
+            let cand = &self.data[pivot_idx];
+            let weight = cand.weight();
+            let c_weight = cand.c_weight();
 
             if c_weight > weighted_index && weighted_index >= c_weight - weight {
                 return pivot_idx;
@@ -181,6 +212,8 @@ impl<'l, V, W: Weight> IntoIterator for &'l mut FrozenWeightedList<V,W>
     }
 }
 
+
+// == INTERNAL TESTS == //
 
 #[cfg(test)]
 mod tests
