@@ -1,5 +1,5 @@
 use std::{
-    fmt,
+    fmt, ops::Deref,
 };
 
 use crate::root::*;
@@ -20,6 +20,7 @@ pub struct WeightedItem<V, W: Weight>
     pub value: V,
 }
 
+// == CONSTRUCTORS == //
 impl<V, W: Weight> WeightedItem<V,W>
 {
     /// Construct a `WeightedItem` with `value` and a weight of `1`.
@@ -60,6 +61,15 @@ macro_rules! wit {
     };
 }
 
+// == CONVERSIONS == //
+impl<V, W: Weight> Into<(W, V)> for WeightedItem<V,W>
+{
+    fn into(self) -> (W, V) {
+        (self.weight, self.value)
+    }
+}
+
+// == TRAITS == //
 impl<V: fmt::Display, W: Weight> fmt::Display for WeightedItem<V,W>
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
@@ -73,6 +83,7 @@ impl<V: Eq, W: Weight + Ord> Ord for WeightedItem<V,W>
     fn cmp(&self, other: &Self) -> std::cmp::Ordering
     {
         self.weight.cmp(&other.weight)
+        // .then(self.value.cmp(&other.value))
     }
 }
 
