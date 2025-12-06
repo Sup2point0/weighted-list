@@ -1,7 +1,6 @@
-use crate::*;
-
 use itertools::Itertools;
 
+use crate::*;
 use weighted_list::*;
 
 
