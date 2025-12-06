@@ -145,24 +145,27 @@ impl<V, W: Weight> FrozenWeightedList<V,W>
     fn _binary_unweight_index_(&self, weighted_index: W) -> usize
     {
         let max = self.total_values();
-        let mut left_idx:  usize = 0;
-        let mut right_idx: usize = max - 1;
 
-        for _ in 0 .. max.ilog2() + 1
-        {
-            let pivot_idx = left_idx.midpoint(right_idx);
-            let cand      = &self.data[pivot_idx];
-            let weight    = cand.weight();
-            let c_weight  = cand.c_weight();
+        if max != 0 {
+            let mut left_idx:  usize = 0;
+            let mut right_idx: usize = max - 1;
 
-            if c_weight > weighted_index && weighted_index >= c_weight - weight {
-                return pivot_idx;
-            }
+            for _ in 0 .. max.ilog2() + 1
+            {
+                let pivot_idx = left_idx.midpoint(right_idx);
+                let cand      = &self.data[pivot_idx];
+                let weight    = cand.weight();
+                let c_weight  = cand.c_weight();
 
-            if weighted_index < c_weight {
-                right_idx = pivot_idx - 1;
-            } else {
-                left_idx = pivot_idx + 1;
+                if c_weight > weighted_index && weighted_index >= c_weight - weight {
+                    return pivot_idx;
+                }
+
+                if weighted_index < c_weight {
+                    right_idx = pivot_idx - 1;
+                } else {
+                    left_idx = pivot_idx + 1;
+                }
             }
         }
 
