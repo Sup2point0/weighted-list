@@ -1,4 +1,9 @@
-use std::ops::Index;
+use std::{
+    fmt,
+    iter::*,
+    ops::*,
+    slice,
+};
 
 use crate::root::*;
 use crate::FrozenWeightedItem;
@@ -125,6 +130,54 @@ impl<V, W: Weight> Index<W> for FrozenWeightedList<V,W>
 
     fn index(&self, weighted_index: W) -> &Self::Output {
         &self.data[self._binary_unweight_index_(weighted_index)]
+    }
+}
+
+impl<V, W: Weight> IndexMut<W> for FrozenWeightedList<V,W>
+{
+    fn index_mut(&mut self, weighted_index: W) -> &mut Self::Output
+    {
+        let idx = self._binary_unweight_index_(weighted_index);
+        &mut self.data[idx]
+    }
+}
+
+impl<V, W: Weight> FrozenWeightedList<V,W>
+{
+    pub fn get(&self, weighted_index: W) -> Option<&FrozenWeightedItem<V,W>>
+    {
+        self.data.get(self._binary_unweight_index_(weighted_index))
+    }
+}
+
+// == ITERATION == //
+impl<V, W: Weight> IntoIterator for FrozenWeightedList<V,W>
+{
+    type Item = FrozenWeightedItem<V,W>;
+    type IntoIter = <Vec<Self::Item> as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.data.into_iter()
+    }
+}
+
+impl<'l, V, W: Weight> IntoIterator for &'l FrozenWeightedList<V,W>
+{
+    type Item = &'l FrozenWeightedItem<V,W>;
+    type IntoIter = slice::Iter<'l, FrozenWeightedItem<V,W>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.data.iter()
+    }
+}
+
+impl<'l, V, W: Weight> IntoIterator for &'l mut FrozenWeightedList<V,W>
+{
+    type Item = &'l mut FrozenWeightedItem<V,W>;
+    type IntoIter = slice::IterMut<'l, FrozenWeightedItem<V,W>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.data.iter_mut()
     }
 }
 
