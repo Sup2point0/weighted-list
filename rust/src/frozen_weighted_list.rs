@@ -128,6 +128,17 @@ impl<V: Display, W: Weight + Display> Display for FrozenWeightedList<V,W>
     }
 }
 
+// == TRAITS == //
+impl<V: Display, W: Weight + Display> Display for FrozenWeightedList<V,W>
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {            
+        write!(f,
+            "FrozenWeightedList[{}]",
+            self.data.iter().map(|item| item.to_string()).join(", ")
+        )
+    }
+}
+
 // == INTERNAL == //
 impl<V, W: Weight> FrozenWeightedList<V,W>
 {
