@@ -34,4 +34,6 @@ mod wlist {
 mod fwlist
 {
     mod test_constructors;
+
+    mod test_index;
 }
