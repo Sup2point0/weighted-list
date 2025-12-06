@@ -116,13 +116,6 @@ impl<V, W: Weight> Deref for FrozenWeightedList<V,W>
     }
 }
 
-impl<V, W: Weight> DerefMut for FrozenWeightedList<V,W>
-{
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        self.data.deref_mut()
-    }
-}
-
 // == TRAITS == //
 impl<V: Display, W: Weight + Display> Display for FrozenWeightedList<V,W>
 {
@@ -178,15 +171,6 @@ impl<V, W: Weight> Index<W> for FrozenWeightedList<V,W>
     }
 }
 
-impl<V, W: Weight> IndexMut<W> for FrozenWeightedList<V,W>
-{
-    fn index_mut(&mut self, weighted_index: W) -> &mut Self::Output
-    {
-        let idx = self._binary_unweight_index_(weighted_index);
-        &mut self.data[idx]
-    }
-}
-
 impl<V, W: Weight> FrozenWeightedList<V,W>
 {
     pub fn get(&self, weighted_index: W) -> Option<&FrozenWeightedItem<V,W>>
@@ -216,16 +200,6 @@ impl<'l, V, W: Weight> IntoIterator for &'l FrozenWeightedList<V,W>
     }
 }
 
-impl<'l, V, W: Weight> IntoIterator for &'l mut FrozenWeightedList<V,W>
-{
-    type Item = &'l mut FrozenWeightedItem<V,W>;
-    type IntoIter = slice::IterMut<'l, FrozenWeightedItem<V,W>>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.data.iter_mut()
-    }
-}
-
 
 // == INTERNAL TESTS == //
 
@@ -244,7 +218,7 @@ mod tests
     }
 
     #[test]
-    fn _unweight_index_()
+    fn _binary_unweight_index_()
     {
         let list = fwl();
         assert_eq!( list._binary_unweight_index_(0), 0 );
