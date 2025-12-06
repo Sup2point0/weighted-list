@@ -27,7 +27,7 @@ impl<V, W: Weight> WeightedItem<V,W>
     {
         Self {
             weight: W::one(),
-            value: value
+            value
         }
     }
 
