@@ -11,6 +11,7 @@ use crate::root::*;
 use crate::FrozenWeightedItem;
 
 
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
 pub struct FrozenWeightedList<V, W: Weight>
 {
     data: Vec<FrozenWeightedItem<V,W>>
