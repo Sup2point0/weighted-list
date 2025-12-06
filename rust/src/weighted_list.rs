@@ -12,8 +12,7 @@ use rand::{
     seq::SliceRandom,
 };
 
-use crate::root::*;
-use crate::WeightedItem;
+use crate::*;
 
 
 /// A homogeneous list of weighted items with values of type `V` and weights of numerical type `W`.
@@ -212,10 +211,18 @@ impl<V, W: Weight> WeightedList<V,W>
 }
 
 // == CONVERSIONS == //
-impl<V, W: Weight> FromIterator<WeightedItem<V,W>> for WeightedList<V,W>
+impl<V, W: Weight> From<FrozenWeightedList<V,W>> for WeightedList<V,W>
+{
+    fn from(list: FrozenWeightedList<V,W>) -> Self {
+        Self::from_iter(list)
+    }
+}
+
+impl<T, V, W: Weight> FromIterator<T> for WeightedList<V,W>
+    where T: Into<WeightedItem<V,W>>
 {
     fn from_iter<I>(items: I) -> Self
-        where I: IntoIterator<Item = WeightedItem<V,W>>
+        where I: IntoIterator<Item = T>
     {
         // TODO benchmark
         // Self {
@@ -225,19 +232,19 @@ impl<V, W: Weight> FromIterator<WeightedItem<V,W>> for WeightedList<V,W>
         let mut data = vec![];
 
         for item in items {
-            data.push(item);
+            data.push(item.into());
         }
 
         Self { data }
     }
 }
 
-impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
-{
-    fn from(vec: Vec<WeightedItem<V,W>>) -> Self {
-        Self { data: vec }
-    }
-}
+// impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
+// {
+//     fn from(vec: Vec<WeightedItem<V,W>>) -> Self {
+//         Self { data: vec }
+//     }
+// }
 
 impl<V, W: Weight> Into<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
 {

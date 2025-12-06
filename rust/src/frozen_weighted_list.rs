@@ -1,9 +1,11 @@
 use std::{
-    fmt,
+    fmt::{self, Display},
     iter::*,
     ops::*,
     slice,
 };
+
+use itertools::Itertools;
 
 use crate::root::*;
 use crate::FrozenWeightedItem;
@@ -118,6 +120,17 @@ impl<V, W: Weight> DerefMut for FrozenWeightedList<V,W>
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.data.deref_mut()
+    }
+}
+
+// == TRAITS == //
+impl<V: Display, W: Weight + Display> Display for FrozenWeightedList<V,W>
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {            
+        write!(f,
+            "FrozenWeightedList[{}]",
+            self.data.iter().map(|item| item.to_string()).join(", ")
+        )
     }
 }
 

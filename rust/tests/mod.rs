@@ -13,6 +13,8 @@ mod wlist {
 
     mod test_equality;
 
+    mod test_conversions;
+
     mod test_slice;
 
     mod test_traits;
