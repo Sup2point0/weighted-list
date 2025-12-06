@@ -1148,11 +1148,15 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
 
 
 // == INTERNAL TESTS == //
-
 #[cfg(test)]
 mod tests
 {
     use super::*;
+
+    fn el() -> WeightedList<String, i32>
+    {
+        wlist![]
+    }
 
     fn wl() -> WeightedList<String, i32>
     {
@@ -1163,8 +1167,7 @@ mod tests
         ]
     }
 
-    #[test]
-    fn _unweight_index_()
+    #[test] fn _unweight_index_()
     {
         let list = wl();
         assert_eq!( list._unweight_index_(0), 0 );
@@ -1179,16 +1182,17 @@ mod tests
         assert_eq!( list._unweight_index_(9), 2 );
     }
 
-    #[test]
-    #[should_panic]
-    fn _unweight_index_panic_()
+    #[test] #[should_panic] fn _unweight_index_empty_()
     {
-        let list = wl();
-        list._unweight_index_(10);
+        el()._unweight_index_(0);
     }
 
-    #[test]
-    fn _unweight_index_nopanic_()
+    #[test] #[should_panic] fn _unweight_index_out_of_bounds_()
+    {
+        wl()._unweight_index_(10);
+    }
+
+    #[test] fn _unweight_index_nopanic_()
     {
         let list = wl();
         assert_eq!( list._unweight_index_nopanic_(10), 3 );
