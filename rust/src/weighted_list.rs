@@ -359,7 +359,7 @@ impl<V, W: Weight> Index<W> for WeightedList<V,W>
 
 impl<V, W: Weight> IndexMut<W> for WeightedList<V,W>
 {
-    fn index_mut(&mut self, weighted_index: W) -> &mut WeightedItem<V,W>
+    fn index_mut(&mut self, weighted_index: W) -> &mut Self::Output
     {
         let idx = self._unweight_index_(weighted_index);
         &mut self.data[idx]
@@ -367,6 +367,7 @@ impl<V, W: Weight> IndexMut<W> for WeightedList<V,W>
 }
 
 // == ITERATION == //
+// TODO: is this still necessary?
 impl<V, W: Weight> WeightedList<V,W>
 {
     pub fn iter(&self) -> impl Iterator<Item = &WeightedItem<V,W>> {
@@ -560,6 +561,9 @@ impl<V, W: Weight> WeightedList<V,W>
 
 impl<V: Clone, W: Weight> WeightedList<V,W>
 {
+    /// Return a clone of the list with items sorted in ascending order of weights.
+    /// 
+    /// Orderings of items with equivalent weights is (currently) undefined behaviour.
     pub fn sorted(&self) -> Self
         where V: Eq, W: Ord
     {
@@ -568,6 +572,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
         out
     }
     
+    /// Return a clone of the list with items reversed.
     pub fn reversed(&self) -> Self
     {
         let mut out = self.clone();
@@ -584,6 +589,14 @@ impl<V, W: Weight> WeightedList<V,W>
     {
         self.data.retain(|item| item.weight > W::zero());
         self
+    }
+
+    pub fn pruned(&self) -> Self
+        where V: Clone
+    {
+        let mut out = self.clone();
+        out.prune();
+        out
     }
 
     /// Set the weight of all items to `0`.
@@ -606,7 +619,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
-    /// Return a copy of the list with all item weights normalised such that they sum to `1.0`.
+    /// Return a clone of the list with all item weights normalised such that they sum to `1.0`.
     /// 
     /// # Usage
     /// 
@@ -1113,7 +1126,7 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
         self
     }
 
-    /// Return a copy of the list with (weight, value) pairings shuffled.
+    /// Return a clone of the list with (weight, value) pairings shuffled.
     /// 
     /// Out-of-place version of `.shuffle_weights()`.
     pub fn shuffled_weights<RNG>(&self, rng: &mut RNG) -> Self
@@ -1128,7 +1141,6 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
 
 
 // == INTERNAL TESTS == //
-// --------------------------------------------------------------------- //
 
 #[cfg(test)]
 mod tests
