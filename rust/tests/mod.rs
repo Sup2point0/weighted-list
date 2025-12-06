@@ -27,3 +27,9 @@ mod wlist {
     
     mod test_random_stats;
 }
+
+
+mod fwlist
+{
+    mod test_constructors;
+}
