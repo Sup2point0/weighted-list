@@ -143,11 +143,12 @@ impl<V, W: Weight> FrozenWeightedList<V,W>
         let mut left_idx:  usize = 0;
         let mut right_idx: usize = max - 1;
 
-        for _ in 0..(max / 2) {
+        for _ in 0 .. max.ilog2() + 1
+        {
             let pivot_idx = left_idx.midpoint(right_idx);
-            let cand = &self.data[pivot_idx];
-            let weight = cand.weight();
-            let c_weight = cand.c_weight();
+            let cand      = &self.data[pivot_idx];
+            let weight    = cand.weight();
+            let c_weight  = cand.c_weight();
 
             if c_weight > weighted_index && weighted_index >= c_weight - weight {
                 return pivot_idx;
