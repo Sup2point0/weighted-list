@@ -3,6 +3,7 @@
 //! See `WeightedList` for more.
 
 mod root;
+pub(crate) use root::*;
 
 
 mod weighted_item;

@@ -2,17 +2,18 @@ use std::{
     fmt,
 };
 
-use crate::root::*;
+use crate::*;
 
 
 #[derive(Debug, Clone, Hash)]
 pub struct FrozenWeightedItem<V, W: Weight>
 {
-    pub cumulative_weight: W,
-    pub weight: W,
-    pub value: V,
+    cumulative_weight: W,
+    weight: W,
+    value: V,
 }
 
+// == CONSTRUCTORS == //
 impl<V, W: Weight> FrozenWeightedItem<V,W>
 {
     pub fn new(
@@ -47,6 +48,39 @@ macro_rules! fwit {
     };
 }
 
+// == ACCESSORS == //
+impl<V, W: Weight> FrozenWeightedItem<V,W>
+{
+    pub fn cumulative_weight(&self) -> W {
+        self.cumulative_weight
+    }
+    
+    pub fn weight(&self) -> W {
+        self.weight
+    }
+    
+    pub fn value(&self) -> &V {
+        &self.value
+    }
+}
+
+// == CONVERSIONS == //
+impl<V, W: Weight> Into<WeightedItem<V,W>> for FrozenWeightedItem<V,W>
+{
+    fn into(self) -> WeightedItem<V,W> {
+        WeightedItem::new(self.weight, self.value)
+    }
+}
+
+// == TRAITS == //
+impl<V: fmt::Display, W: Weight> fmt::Display for FrozenWeightedItem<V,W>
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
+    {
+        write!(f, "{{ {}, {} }}", self.weight, self.value)
+    }
+}
+
 impl<V: Eq, W: Weight> Eq for FrozenWeightedItem<V,W> {}
 
 impl<V: PartialEq, W: Weight> PartialEq for FrozenWeightedItem<V,W>
@@ -70,13 +104,5 @@ impl<V: Eq, W: Weight> PartialOrd for FrozenWeightedItem<V,W>
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering>
     {
         self.weight.partial_cmp(&other.weight)
-    }
-}
-
-impl<V: fmt::Display, W: Weight> fmt::Display for FrozenWeightedItem<V,W>
-{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
-    {
-        write!(f, "{{ {}, {} }}", self.weight, self.value)
     }
 }
