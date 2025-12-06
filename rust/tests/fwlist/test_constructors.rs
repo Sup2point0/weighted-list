@@ -27,5 +27,5 @@ use weighted_list::*;
         (5, str!("shard"))
     );
 
-    // assert_eq!( list[0], fwit!(2, 2, str!("sup")) )
+    assert_eq!( list[0], fwit!(2, 2, str!("sup")) )
 }

@@ -51,6 +51,11 @@ macro_rules! fwit {
 // == ACCESSORS == //
 impl<V, W: Weight> FrozenWeightedItem<V,W>
 {
+    #[allow(dead_code)]
+    pub(crate) fn c_weight(&self) -> W {
+        self.cumulative_weight
+    }
+
     pub fn cumulative_weight(&self) -> W {
         self.cumulative_weight
     }
