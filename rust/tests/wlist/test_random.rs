@@ -176,7 +176,7 @@ use weighted_list::*;
         list.take_random_values_unique().rng(&mut rng).count(3).call();
         assert_eq!( list, wlist![(1, str!("nova")), (3, str!("shard"))] );
 
-        list.take_random_values_unique().rng(&mut rng).count(2).call();
+        list.take_random_values_unique().rng(&mut rng).count(3).call();
         assert_eq!( list, wlist![(2, str!("shard"))] );
     }
 
