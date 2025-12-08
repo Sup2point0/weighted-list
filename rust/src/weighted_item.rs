@@ -45,7 +45,7 @@ impl<V, W: Weight> WeightedItem<V,W>
     }
 }
 
-/// Construct a `WeightedItem` from a `(weight, value)`` pair.
+/// Construct a `WeightedItem` from a `(weight, value)` pair.
 /// 
 /// # Usage
 /// 
