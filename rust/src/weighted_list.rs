@@ -964,7 +964,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
 #[bon]
 impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
 {
-    /// Select `count` items using weighted randomisation.
+    /// Select `count` values using weighted randomisation.
     /// 
     /// Call this method using `bon` builder syntax (see § Usage below).
     /// 
@@ -1059,7 +1059,7 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
         loop
         {
             n += 1;
-            if n > count { break }
+            if n > count || self.data.is_empty() { break }
 
             if let Some(item) = {
                 if unique       { pool.take_entire_random(rng) }
@@ -1073,6 +1073,7 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
         out
     }
 
+    /// Take `count` values using weighted randomisation.
     #[builder]
     pub fn take_random_values<RNG>(&mut self,
         rng: &mut RNG,
@@ -1091,7 +1092,7 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
         loop
         {
             n += 1;
-            if n > count { break }
+            if n > count || self.data.is_empty() { break }
 
             if let Some(item) = {
                 if take_entire { self.take_entire_random(rng) }
@@ -1134,6 +1135,7 @@ impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
         );
     }
 
+    /// Take `count` values using weighted randomisation.
     #[builder]
     pub fn take_random_values_unique<RNG>(&mut self,
         rng: &mut RNG,
@@ -1160,7 +1162,7 @@ impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
         loop
         {
             n += 1;
-            if n > count { break }
+            if n > count || self.data.is_empty() { break }
 
             if let Some(value) = (|| {
                 let weighted_index = self._get_random_weighted_index_up_to_(rng, l)?;
@@ -1181,16 +1183,14 @@ impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
                 seen.insert(value.clone());
                 out.push(value.clone());
 
-                l -= self.data.iter()
+                l = self.data.iter()
                     .filter_map(
                         |item| {
-                            if item.value == value { Some(item.weight) }
+                            if !seen.contains(&item.value) { Some(item.weight) }
                             else { None }
                         }
                     )
-                    .sum::<W>()
-                    + decrement
-                ;
+                    .sum::<W>();
             }
         }
 
