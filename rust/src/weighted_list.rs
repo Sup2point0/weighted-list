@@ -364,18 +364,6 @@ impl<V, W: Weight> IndexMut<W> for WeightedList<V,W>
 }
 
 // == ITERATION == //
-// TODO: is this still necessary?
-impl<V, W: Weight> WeightedList<V,W>
-{
-    pub fn iter(&self) -> impl Iterator<Item = &WeightedItem<V,W>> {
-        self.data.iter()
-    }
-
-    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut WeightedItem<V,W>> {
-        self.data.iter_mut()
-    }
-}
-
 impl<V, W: Weight> IntoIterator for WeightedList<V,W>
 {
     type Item = WeightedItem<V,W>;
