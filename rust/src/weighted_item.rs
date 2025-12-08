@@ -1,5 +1,5 @@
 use std::{
-    fmt, ops::Deref,
+    fmt
 };
 
 use crate::root::*;
@@ -62,10 +62,10 @@ macro_rules! wit {
 }
 
 // == CONVERSIONS == //
-impl<V, W: Weight> Into<(W, V)> for WeightedItem<V,W>
+impl<V, W: Weight> From<WeightedItem<V,W>> for (W, V)
 {
-    fn into(self) -> (W, V) {
-        (self.weight, self.value)
+    fn from(item: WeightedItem<V,W>) -> Self {
+        (item.weight, item.value)
     }
 }
 
