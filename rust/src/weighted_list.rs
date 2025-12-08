@@ -86,7 +86,7 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 }
 
-/// Construct a `WeightedList` from the provided `(weight, value)`` pairs.
+/// Construct a `WeightedList` from the provided `(weight, value)` pairs.
 /// 
 /// # Usage
 /// 
