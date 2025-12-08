@@ -1113,7 +1113,7 @@ impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
     fn _unweight_index_skipping_(&self,
         weighted_index: W,
         seen: &std::collections::HashSet<V>,
-    ) -> usize
+    ) -> Option<usize>
     {
         let mut t = W::zero();
 
@@ -1125,14 +1125,11 @@ impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
             t += item.weight;
 
             if t > weighted_index {
-                return i;
+                return Some(i);
             }
         }
 
-        panic!(
-            "index out of bounds: the len is {} but the index is {}",
-            self.len(), weighted_index
-        );
+        None
     }
 
     /// Take `count` values using weighted randomisation.
@@ -1166,7 +1163,7 @@ impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
 
             if let Some(value) = (|| {
                 let weighted_index = self._get_random_weighted_index_up_to_(rng, l)?;
-                let idx = self._unweight_index_skipping_(weighted_index, &seen);
+                let idx = self._unweight_index_skipping_(weighted_index, &seen)?;
 
                 let target = &mut self.data[idx];
                 let value = target.value.clone();
@@ -1328,24 +1325,24 @@ mod tests
     #[test] fn _unweight_index_skipping_()
     {
         let list = wl();
-
-        let seen = std::collections::HashSet::from(["nova".to_string()]);
-        assert_eq!( list._unweight_index_skipping_(0, &seen), 0 );
-        assert_eq!( list._unweight_index_skipping_(1, &seen), 0 );
-        assert_eq!( list._unweight_index_skipping_(2, &seen), 2 );
-        assert_eq!( list._unweight_index_skipping_(3, &seen), 2 );
-        assert_eq!( list._unweight_index_skipping_(4, &seen), 2 );
-        assert_eq!( list._unweight_index_skipping_(5, &seen), 2 );
-        assert_eq!( list._unweight_index_skipping_(6, &seen), 2 );
         
         let seen = std::collections::HashSet::from(["sup".to_string()]);
-        assert_eq!( list._unweight_index_skipping_(0, &seen), 1 );
-        assert_eq!( list._unweight_index_skipping_(1, &seen), 1 );
-        assert_eq!( list._unweight_index_skipping_(2, &seen), 1 );
-        assert_eq!( list._unweight_index_skipping_(3, &seen), 2 );
-        assert_eq!( list._unweight_index_skipping_(4, &seen), 2 );
-        assert_eq!( list._unweight_index_skipping_(5, &seen), 2 );
-        assert_eq!( list._unweight_index_skipping_(6, &seen), 2 );
-        assert_eq!( list._unweight_index_skipping_(7, &seen), 2 );
+        assert_eq!( list._unweight_index_skipping_(0, &seen), Some(1) );
+        assert_eq!( list._unweight_index_skipping_(1, &seen), Some(1) );
+        assert_eq!( list._unweight_index_skipping_(2, &seen), Some(1) );
+        assert_eq!( list._unweight_index_skipping_(3, &seen), Some(2) );
+        assert_eq!( list._unweight_index_skipping_(4, &seen), Some(2) );
+        assert_eq!( list._unweight_index_skipping_(5, &seen), Some(2) );
+        assert_eq!( list._unweight_index_skipping_(6, &seen), Some(2) );
+        assert_eq!( list._unweight_index_skipping_(7, &seen), Some(2) );
+
+        let seen = std::collections::HashSet::from(["nova".to_string()]);
+        assert_eq!( list._unweight_index_skipping_(0, &seen), Some(0) );
+        assert_eq!( list._unweight_index_skipping_(1, &seen), Some(0) );
+        assert_eq!( list._unweight_index_skipping_(2, &seen), Some(2) );
+        assert_eq!( list._unweight_index_skipping_(3, &seen), Some(2) );
+        assert_eq!( list._unweight_index_skipping_(4, &seen), Some(2) );
+        assert_eq!( list._unweight_index_skipping_(5, &seen), Some(2) );
+        assert_eq!( list._unweight_index_skipping_(6, &seen), Some(2) );
     }
 }
