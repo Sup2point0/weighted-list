@@ -246,10 +246,10 @@ impl<T, V, W: Weight> FromIterator<T> for WeightedList<V,W>
 //     }
 // }
 
-impl<V, W: Weight> Into<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
+impl<V, W: Weight> From<WeightedList<V,W>> for Vec<WeightedItem<V,W>>
 {
-    fn into(self) -> Vec<WeightedItem<V,W>> {
-        self.data
+    fn from(list: WeightedList<V,W>) -> Self {
+        list.data
     }
 }
 
@@ -324,16 +324,13 @@ impl<V, W: Weight> WeightedList<V,W>
     fn _unweight_index_(&self, weighted_index: W) -> usize
     {
         let mut t = W::zero();
-        let mut i = 0;
 
-        for item in &self.data {
+        for (i, item) in self.data.iter().enumerate() {
             t += item.weight;
 
             if t > weighted_index {
                 return i;
             }
-
-            i += 1;
         }
 
         panic!(
