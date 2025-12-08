@@ -1,6 +1,5 @@
 use std::{
     fmt::{self, Display},
-    iter::*,
     ops::*,
     slice,
 };
