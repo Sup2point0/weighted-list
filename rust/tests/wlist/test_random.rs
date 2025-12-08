@@ -136,6 +136,48 @@ use weighted_list::*;
     }
 }
 
+#[test] fn take_many_unique()
+{
+    let mut rng = rand::rng();
+
+    let mut list = wl();
+
+    list.take_random_values_unique().rng(&mut rng).count(3).call();
+    assert_eq!(
+        list,
+        wlist![
+            (1, str!("sup")),
+            (2, str!("nova")),
+            (4, str!("shard")),
+        ]
+    );
+
+    list.take_random_values_unique().rng(&mut rng).count(3).call();
+    assert_eq!(
+        list,
+        wlist![
+            (1, str!("nova")),
+            (3, str!("shard")),
+        ]
+    );
+
+    list.take_random_values_unique().rng(&mut rng).count(2).call();
+    assert_eq!(
+        list,
+        wlist![
+            (2, str!("shard")),
+        ]
+    );
+
+    let mut list = wll();
+    let l = list.len();
+    let n = list.total_values();
+
+    list.take_random_values_unique().rng(&mut rng).count(n).call();
+    assert_eq!( list.total_values(), n );
+    assert_eq!( list.len(), l - n as i32 );
+}
+
 #[test] fn shuffle()
 {
     let mut list = wl();
