@@ -136,46 +136,75 @@ use weighted_list::*;
     }
 }
 
+#[test] fn take_many()
+{
+    let trials = 50;
+    let mut rng = rand::rng();
+
+    let valid = vec!["sup", "nova", "shard"];
+    let mut results;
+
+    '_standard: {
+        let mut list = wl();
+        let count = list.len() as usize;
+
+        for _ in 0..trials {
+            results = list.take_random_values()
+                .rng(&mut rng)
+                .count(count)
+                .call();
+
+            for result in results {
+                assert!( valid.contains(&result.as_str()) );
+            }
+
+            assert_eq!( list.len(), 0 );
+        }
+    }
+}
+
 #[test] fn take_many_unique()
+{
+    let mut rng = rand::rng();
+
+    '_small: {
+        let mut list = wl();
+
+        list.take_random_values_unique().rng(&mut rng).count(3).call();
+        assert_eq!( list, wlist![(1, str!("sup")), (2, str!("nova")), (4, str!("shard"))] );
+
+        list.take_random_values_unique().rng(&mut rng).count(3).call();
+        assert_eq!( list, wlist![(1, str!("nova")), (3, str!("shard"))] );
+
+        list.take_random_values_unique().rng(&mut rng).count(2).call();
+        assert_eq!( list, wlist![(2, str!("shard"))] );
+    }
+
+    '_large: {
+        let mut list = wll();
+        let l = list.len();
+        let n = list.total_values();
+
+        list.take_random_values_unique().rng(&mut rng).count(n).call();
+        assert_eq!( list.total_values(), n );
+        assert_eq!( list.len(), l - n as i32 );
+    }
+}
+
+#[test] fn take_many_unique_decrement()
 {
     let mut rng = rand::rng();
 
     let mut list = wl();
 
-    list.take_random_values_unique().rng(&mut rng).count(3).call();
-    assert_eq!(
-        list,
-        wlist![
-            (1, str!("sup")),
-            (2, str!("nova")),
-            (4, str!("shard")),
-        ]
-    );
+    list.take_random_values_unique().rng(&mut rng).count(3).decrement(2).call();
+    assert_eq!( list, wlist![(1, str!("nova")), (3, str!("shard"))] );
 
-    list.take_random_values_unique().rng(&mut rng).count(3).call();
-    assert_eq!(
-        list,
-        wlist![
-            (1, str!("nova")),
-            (3, str!("shard")),
-        ]
-    );
+    list.take_random_values_unique().rng(&mut rng).count(3).decrement(2).call();
+    assert_eq!( list, wlist![(1, str!("shard"))] );
 
-    list.take_random_values_unique().rng(&mut rng).count(2).call();
-    assert_eq!(
-        list,
-        wlist![
-            (2, str!("shard")),
-        ]
-    );
-
-    let mut list = wll();
-    let l = list.len();
-    let n = list.total_values();
-
-    list.take_random_values_unique().rng(&mut rng).count(n).call();
-    assert_eq!( list.total_values(), n );
-    assert_eq!( list.len(), l - n as i32 );
+    list.take_random_values_unique().rng(&mut rng).count(3).decrement(2).call();
+    assert_eq!( list, el() );
 }
 
 #[test] fn shuffle()
