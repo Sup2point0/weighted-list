@@ -630,7 +630,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// assert_eq!(
     ///     *wl.remove_first_where(|item| item.weight > 2),
-    ///     wlist![(2, "sup"), 5, "shard")],
+    ///     wlist![(2, "sup"), (5, "shard")],
     /// )
     /// ```
     pub fn remove_first_where<F>(&mut self, predicate: F) -> &mut Self
