@@ -1,6 +1,6 @@
 [package]
 name = "weighted-list"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Sup#2.0"]
 edition = "2024"
 
