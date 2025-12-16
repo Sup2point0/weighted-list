@@ -291,48 +291,6 @@ impl<V, W: Weight> Extend<WeightedItem<V,W>> for WeightedList<V,W>
     }
 }
 
-// == INTERNAL == //
-impl<V, W: Weight> WeightedList<V,W>
-{
-    /// Convert a `weighted_index` to its unweighted equivalent in the underlying `Vec`. Does not panic on overflow and instead returns the `.len()` of the underlying `Vec`.
-    fn _unweight_index_nopanic_(&self, weighted_index: W) -> usize
-    {
-        let mut t = W::zero();
-        let mut i = 0;
-
-        for item in &self.data {
-            t += item.weight;
-
-            if t > weighted_index {
-                return i;
-            }
-
-            i += 1;
-        }
-
-        i
-    }
-
-    /// Convert a `weighted_index` to its unweighted equivalent in the underlying `Vec`. Panics on overflow.
-    fn _unweight_index_(&self, weighted_index: W) -> usize
-    {
-        let mut t = W::zero();
-
-        for (i, item) in self.data.iter().enumerate() {
-            t += item.weight;
-
-            if t > weighted_index {
-                return i;
-            }
-        }
-
-        panic!(
-            "index out of bounds: the len is {} but the index is {}",
-            self.len(), weighted_index
-        );
-    }
-}
-
 // == INDEXING == //
 impl<V, W: Weight> Index<W> for WeightedList<V,W>
 {
@@ -410,6 +368,18 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 
     /// Append an item to the end of the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.push_item(wl[0].clone()),
+    ///     wlist![(2, "sup"), (3, "nova"), (5, "shard"), (2, "sup")],
+    /// )
+    /// ```
     pub fn push_item(&mut self, item: WeightedItem<V,W>) -> &mut Self
     {
         self.data.push(item);
@@ -417,12 +387,36 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 
     /// Append a new item with `value` and `weight` to the end of the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.push_new_item(7, "cortex"),
+    ///     wlist![(2, "sup"), (3, "nova"), (5, "shard"), (7, "cortex")],
+    /// )
+    /// ```
     pub fn push_new_item(&mut self, weight: W, value: V) -> &mut Self
     {
         self.push_item(WeightedItem { weight, value })
     }
     
     /// Append a new item with `value` and a weight of `1` to the end of the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.push_value("elysion"),
+    ///     wlist![(2, "sup"), (3, "nova"), (5, "shard"), (1, "elysion")],
+    /// )
+    /// ```
     pub fn push_value(&mut self, value: V) -> &mut Self
     {
         self.push_item(WeightedItem::unit(value))
@@ -497,7 +491,11 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 
     /// Remove the entire item at `weighted_index` and return it.
-    pub fn remove(&mut self, weighted_index: W) -> WeightedItem<V,W>
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if `weighted_index` is out of bounds.
+    pub fn remove_at(&mut self, weighted_index: W) -> WeightedItem<V,W>
     {
         self.data.remove(self._unweight_index_(weighted_index))
     }
@@ -584,7 +582,103 @@ impl<V, W: Weight> WeightedList<V,W>
         out
     }
 
+    /// Find the first occurrence (from the left) of an item with `value`, and remove the entire item.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.remove_value_first(&"nova"),
+    ///     wlist![(2, "sup"), (5, "shard")],
+    /// )
+    /// ```
+    pub fn remove_value_first(&mut self, value: &V) -> &mut Self
+        where V: PartialEq
+    {
+        self.remove_first_where(|item| item.value == *value)
+    }
+
+    /// Find the last occurrence (from the right) of an item with `value`, and remove the entire item.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(0, "qi"), (1, "qi"), (2, "sup")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.remove_value_last(&"qi"),
+    ///     wlist![(0, "qi"), (2, "sup")],
+    /// )
+    /// ```
+    pub fn remove_value_last(&mut self, value: &V) -> &mut Self
+        where V: PartialEq
+    {
+        self.remove_last_where(|item| item.value == *value)
+    }
+
+    /// Find the first occurrence (from the left) of an item that matches `predicate`, and remove the entire item.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.remove_first_where(|item| item.weight > 2),
+    ///     wlist![(2, "sup"), 5, "shard")],
+    /// )
+    /// ```
+    pub fn remove_first_where<F>(&mut self, predicate: F) -> &mut Self
+        where F: FnMut(&WeightedItem<V,W>) -> bool
+    {
+        if let Some(idx) = self.iter().position(predicate) {
+            self.data.remove(idx);
+        }
+
+        self
+    }
+
+    /// Find the last occurrence (from the right) of an item that matches `predicate`, and remove the entire item.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.remove_last_where(|item| item.weight > 2),
+    ///     wlist![(2, "sup"), (3, "nova")],
+    /// );
+    /// ```
+    pub fn remove_last_where<F>(&mut self, predicate: F) -> &mut Self
+        where F: FnMut(&WeightedItem<V,W>) -> bool
+    {
+        if let Some(idx) = self.iter().rposition(predicate) {
+            self.data.remove(idx);
+        }
+
+        self
+    }
+
     /// Set the weight of all items to `0`.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.zero_all_weights(),
+    ///     wlist![(0, "sup"), (0, "nova"), (0, "shard")],
+    /// )
+    /// ```
     pub fn zero_all_weights(&mut self) -> &mut Self
     {
         for item in &mut self.data {
@@ -595,6 +689,18 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 
     /// Set the weight of all items to `weight`.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.set_all_weights(1),
+    ///     wlist![(1, "sup"), (1, "nova"), (1, "shard")],
+    /// )
+    /// ```
     pub fn set_all_weights(&mut self, weight: W) -> &mut Self
     {
         for item in &mut self.data {
@@ -610,19 +716,11 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// let mut wl = wlist![
-    ///     (2, "sup"),
-    ///     (3, "nova"),
-    ///     (5, "shard"),
-    /// ];
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
     /// 
     /// assert_eq!(
     ///     wl.normalised().ok(),
-    ///     Some(wlist![
-    ///         (0.2, "sup"),
-    ///         (0.3, "nova"),
-    ///         (0.5, "shard"),
-    ///     ])
+    ///     Some(wlist![(0.2, "sup"), (0.3, "nova"), (0.5, "shard")])
     /// );
     /// ```
     pub fn normalised(&mut self) -> Result<WeightedList<V, f64>, &str>
@@ -751,13 +849,46 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
 impl<V: Clone, W: Weight> WeightedList<V,W>
 {
     /// Decrement the weight of the item at `weighted_index` by `1`. If its weight becomes non-positive as a result, remove the entire item. Returns a clone of the item with its updated weight.
-    pub fn take_one(&mut self, weighted_index: W) -> WeightedItem<V,W>
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// wl.take_one_at(2);
+    /// assert_eq!( wl, wlist![(2, "sup"), (2, "nova"), (5, "shard")] );
+    /// 
+    /// wl.take_one_at(2);
+    /// assert_eq!( wl, wlist![(2, "sup"), (1, "nova"), (5, "shard")] );
+    /// 
+    /// wl.take_one_at(2);
+    /// assert_eq!( wl, wlist![(2, "sup"), (5, "shard")] );
+    /// ```
+    pub fn take_one_at(&mut self, weighted_index: W) -> WeightedItem<V,W>
     {
-        self.take_by(weighted_index, W::one())
+        self.take_by_at(W::one(), weighted_index)
     }
 
     /// Decrement the weight of the item at `weighted_index` by `decrement`. If its weight becomes non-positive as a result, remove the entire item. Returns a clone of the item with its updated weight.
-    pub fn take_by(&mut self, weighted_index: W, decrement: W) -> WeightedItem<V,W>
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if `weighted_index` is out of bounds.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// wl.take_by_at(2, 2);
+    /// assert_eq!( wl, wlist![(2, "sup"), (1, "nova"), (5, "shard")] );
+    /// 
+    /// wl.take_by_at(2, 2);
+    /// assert_eq!( wl, wlist![(2, "sup"), (5, "shard")]);
+    /// ```
+    pub fn take_by_at(&mut self, decrement: W, weighted_index: W) -> WeightedItem<V,W>
     {
         let idx = self._unweight_index_(weighted_index);
         let target = &mut self.data[idx];
@@ -773,9 +904,19 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
     }
 
     /// Remove the entire item at `weighted_index`.
-    pub fn take_entire(&mut self, weighted_index: W) -> WeightedItem<V,W>
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// wl.take_entire_at(3);
+    /// assert_eq!( wl, wlist![(2, "sup"), (5, "shard")] );
+    /// ```
+    pub fn take_entire_at(&mut self, weighted_index: W) -> WeightedItem<V,W>
     {
-        self.remove(weighted_index)
+        self.remove_at(weighted_index)
     }
 }
 
@@ -806,11 +947,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// let wl = wlist![
-    ///     (2, String::from("sup")),
-    ///     (3, String::from("nova")),
-    ///     (5, String::from("shard")),
-    /// ];
+    /// let wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
     /// 
     /// wl.select_random_value(&mut rand::rng());
     /// // could give:
@@ -831,11 +968,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// let wl = wlist![
-    ///     (2, String::from("sup")),
-    ///     (3, String::from("nova")),
-    ///     (5, String::from("shard")),
-    /// ];
+    /// let wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
     /// 
     /// wl.select_random_item(&mut rand::rng());
     /// // could give:
@@ -863,11 +996,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// let mut wl = wlist![
-    ///     (2, String::from("sup")),
-    ///     (3, String::from("nova")),
-    ///     (5, String::from("shard")),
-    /// ];
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
     /// 
     /// wl.take_one_random(&mut rand::rng());
     /// // could give:
@@ -887,11 +1016,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// let mut wl = wlist![
-    ///     (2, String::from("sup")),
-    ///     (3, String::from("nova")),
-    ///     (5, String::from("shard")),
-    /// ];
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
     /// 
     /// wl.take_by_random(&mut rand::rng(), 2);
     /// // could give:
@@ -905,7 +1030,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
         if self.data.is_empty() { return None }
 
         let idx = self._get_random_weighted_index_(rng)?;
-        let out = self.take_by(idx, decrement);
+        let out = self.take_by_at(decrement, idx);
 
         Some(out)
     }
@@ -916,11 +1041,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// let mut wl = wlist![
-    ///     (2, String::from("sup")),
-    ///     (3, String::from("nova")),
-    ///     (5, String::from("shard")),
-    /// ];
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
     /// 
     /// wl.take_entire_random(&mut rand::rng());
     /// // could give:
@@ -936,7 +1057,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
         if self.data.is_empty() { return None }
 
         let idx = self._get_random_weighted_index_(rng)?;
-        let out = self.take_entire(idx);
+        let out = self.take_entire_at(idx);
 
         Some(out)
     }
@@ -1206,11 +1327,7 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// let mut wl = wlist![
-    ///     (2, "sup"),
-    ///     (3, "nova"),
-    ///     (5, "shard"),
-    /// ];
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
     /// 
     /// wl.shuffle_weights(&mut rand::rng());
     /// 
@@ -1249,10 +1366,50 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
     }
 }
 
+// == INTERNAL == //
+impl<V, W: Weight> WeightedList<V,W>
+{
+    /// Convert a `weighted_index` to its unweighted equivalent in the underlying `Vec`. Does not panic on overflow and instead returns the `.len()` of the underlying `Vec`.
+    fn _unweight_index_nopanic_(&self, weighted_index: W) -> usize
+    {
+        let mut t = W::zero();
+        let mut i = 0;
 
-// == INTERNAL TESTS == //
-#[cfg(test)]
-mod tests
+        for item in &self.data {
+            t += item.weight;
+
+            if t > weighted_index {
+                return i;
+            }
+
+            i += 1;
+        }
+
+        i
+    }
+
+    /// Convert a `weighted_index` to its unweighted equivalent in the underlying `Vec`. Panics on overflow.
+    fn _unweight_index_(&self, weighted_index: W) -> usize
+    {
+        let mut t = W::zero();
+
+        for (i, item) in self.data.iter().enumerate() {
+            t += item.weight;
+
+            if t > weighted_index {
+                return i;
+            }
+        }
+
+        panic!(
+            "index out of bounds: the len is {} but the index is {}",
+            self.len(), weighted_index
+        );
+    }
+}
+
+
+#[cfg(test)] mod tests
 {
     use super::*;
 
