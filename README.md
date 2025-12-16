@@ -125,10 +125,11 @@ An immutable optimised variant `FrozenWeightedList` is also implemented, which p
 
 ## Features
 
-- Weighted randomised selection with a variety of constraints
+- Weighted randomised selection with constraints such as no-replacement, unique-only
+- Ergonomic interface targeted for each language
 - Utility methods to manipulate values and weights
 - In-place and pure variants of methods for flexibility
-- Conversions to and from a wide range of other data types
+- Conversions to and from other data types
 
 ### Future
 - Slice indexing[^slice]
@@ -155,12 +156,6 @@ I made this class for *weighted randomisation*, where each element in a collecti
 > [!Tip]
 > Walkthroughs and specimens for each language can be found in their respective folders.
 
-> Honestly, I don’t trust my code enough to publish it :P
-
-The project is not available as a package.[^package] Instead, just download the relevant files, or copy and paste the code directly.
-
-[^package]: I don’t think it’s a large enough project to warrant an entire package, when you could just copy and paste the code directly.
-
 ### Python
 All you need is the [`weightedlist.py`](python/source/weighted_list.py) file, which contains the `WeightedList` class with all the functionality. Simply import it, and you’re ready to go!
 
@@ -170,43 +165,17 @@ from weightedlist import WeightedList
 
 See [walkthrough](python/walkthrough.md) for a tutorial, or [examples](python/examples.md) for examples.
 
-<!--
-### Implementation
-A `WeightedList` works just like how a `list` does, except rather than storing the values themselves, it stores `WeightedItem` objects. The value and weight of each item can be accessed through the `value` and `weight` attributes, respectively. These are passed in as pairs when instantiating the list:
-
-```py
-wl = WeightedList(
-  (2, "sup"),
-  (7, "nova"),
-  (13, "shard"),
-  ...
-)
-```
-
-The `weight` of each item can be thought of as how many duplicates are stored (which would replicate the weighting mechanic):
-
-```py
->>> wl = WeightedList(sup = 2, nova = 7)
-
->>> wl[0].value
-'sup'
->>> wl[1].value
-'sup'
->>> wl[2].value
-'nova'
->>> wl[8].value
-'nova'
-
->>> wl.selects(7)
-['nova', 'sup', 'nova', 'nova', 'sup', 'nova', 'nova']
-# 'nova' has a higher change of being selected
-```
--->
-
 ### C#
 All the code is contained within the [`WeightedList.cs`](c-sharp/weighted-list/weighted-list.cs) file. You might also need the [`weighted-list.csproj`](c-sharp/weighted-list/weighted-list.csproj) file. If you want the entire solution, you can download the repo and extract the [`c-sharp/`](c-sharp/) folder.
 
 For a tutorial, see [walkthrough](c-sharp/walkthrough.md).
+
+### Rust
+`weighted-list` is now on [crates.io](https://crates.io/crates/weighted-list)! Add the crate to your Rust project by running:
+
+```bash
+> cargo add weighted-list
+```
 
 
 <br>
@@ -216,12 +185,39 @@ For a tutorial, see [walkthrough](c-sharp/walkthrough.md).
 
 | Language   | Version   | Status | Dependencies | Notes |
 | :--------- | :-------- | :----- | :----------- | :---- |
-| Python     | `>= 3.11` | Awaiting rewrite |
+| Python     | `>= 3.11` | Awaiting rewrite | None |
 | C#         | `12.0`    | Awaiting maintenance | None | Supports LINQ querying |
 | TypeScript |           | Under development | None |
 | Haskell    | `GHC2021` | Under development | None |
-| Rust       | `2024`    | Under development | `rand`, `num_traits`, `bon` |
+| Rust       | `2024`    | Unstable | `rand`, `num_traits`, `itertools`, `bon` |
 | Ruby       |           | Awaiting development |
+
+
+<br>
+
+
+## Implementation
+
+A `WeightedList` works similar to a regular list/array, except rather than storing raw values, it stores them inside `WeightedItem` objects. The value and weight of each item can be accessed through the `value` and `weight` attributes, respectively.
+
+`WeightedList` using *weighted* indexing. To illustrate with an example:
+
+```py
+wl = WeightedList((1, "qi"), (2, "sup"), (5, "shard"))
+
+assert wl[0].value == "qi"
+assert wl[1].value == "sup"
+assert wl[2].value == "sup"
+assert wl[3].value == "shard"
+assert wl[4].value == "shard"
+assert wl[5].value == "shard"
+assert wl[6].value == "shard"
+assert wl[7].value == "shard"
+
+assert wl[8]  # IndexError
+```
+
+In essence, you can think of each item as being repeated a number of times, equal to its weight.
 
 
 <br>
