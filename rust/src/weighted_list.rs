@@ -24,20 +24,41 @@ use crate::WeightedItem;
 /// 
 /// ```
 /// # use weighted_list::*;
-/// let list: WeightedList<String, i32> = wlist![
-///     (2, String::from("sup")),
-///     (3, String::from("nova")),
-///     (5, String::from("shard")),
+/// let wl: WeightedList<String, i32> = wlist![
+///     (2, "sup".to_string()),
+///     (3, "nova".to_string()),
+///     (5, "shard".to_string()),
 /// ];
 /// 
-/// for item in &list {
+/// for item in &wl {
 ///     println!("{item}");
 /// }
 /// 
-/// if let Some(result) = list.select_random_value(&mut rand::rng()) {
+/// if let Some(result) = wl.select_random_value(&mut rand::rng()) {
 ///     println!("{}", result);
 /// }
 /// ```
+/// 
+/// # Indexing
+/// 
+/// `WeightedList` uses *weighted* indexing; this is the key difference between it and a `Vec`. It's most easily explained with an example:
+/// 
+/// ```should_panic
+/// # use weighted_list::*;
+/// let wl = wlist![(1, "qi"), (2, "sup"), (5, "shard")];
+/// 
+/// let _ = wl[0]; // => WeightedItem { weight: 1, value: "qi" }
+/// let _ = wl[1]; // => WeightedItem { weight: 2, value: "sup" }
+/// let _ = wl[2]; // => WeightedItem { weight: 2, value: "sup" }
+/// let _ = wl[3]; // => WeightedItem { weight: 5, value: "shard" }
+/// let _ = wl[4]; // => WeightedItem { weight: 5, value: "shard" }
+/// let _ = wl[5]; // => WeightedItem { weight: 5, value: "shard" }
+/// let _ = wl[6]; // => WeightedItem { weight: 5, value: "shard" }
+/// let _ = wl[7]; // => WeightedItem { weight: 5, value: "shard" }
+/// let _ = wl[8]; // => panic - out of bounds!
+/// ```
+/// 
+/// In essence, each value is "copied" a number of times equal to its weight – this is what enables the weighted randomisation. But because the values are stored in `WeightedItem` objects, instead of actually being copied, larger weight values can be used without fear of performance impacts.
 /// 
 /// # Tips
 /// 
@@ -92,11 +113,13 @@ impl<V, W: Weight> WeightedList<V,W>
 /// 
 /// ```
 /// # use weighted_list::*;
-/// let list = wlist![
-///     (2, String::from("sup")),
-///     (3, String::from("nova")),
-///     (5, String::from("shard")),
+/// let wl = wlist![
+///     (2, "sup"),
+///     (3, "nova"),
+///     (5, "shard"),
 /// ];
+/// 
+/// let empty: WeightedList<(), usize> = wlist![];
 /// ```
 #[macro_export]
 macro_rules! wlist {
@@ -1096,9 +1119,9 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     /// ```
     /// # use weighted_list::*;
     /// let mut pool = wlist![
-    ///     (2, String::from("sup")),
-    ///     (3, String::from("nova")),
-    ///     (5, String::from("shard")),
+    ///     (2, "sup".to_string()),
+    ///     (3, "nova".to_string()),
+    ///     (5, "shard".to_string()),
     /// ];
     /// 
     /// let mut rng = rand::rng();
