@@ -1,6 +1,24 @@
 # Changelog
 
 
+## v0.3.0
+
+### Breaking
+- `WeightedList::remove()` renamed to `::remove_at()`
+- `WeightedList::take_one()` renamed to `::take_one_at()`
+- `WeightedList::take_by()` renamed to `::take_by_at()`
+- `WeightedList::take_entire()` renamed to `::take_entire_at()`
+- `WeightedList::take_by()` arguments reversed
+  - Was `(weighted_index, decrement)`, now `(decrement, weighted_index)`
+  - This aligns more intuitively with the expected order suggested by `take_by_at` (take *by* `decrement` *at* `weighted_index`)
+
+### New
+- `WeightedList::remove_value_first()` method
+- `WeightedList::remove_value_last()` method
+- `WeightedList::remove_first_where()` method
+- `WeightedList::remove_last_where()` method
+
+
 ## v0.2.0
 
 ### Breaking
@@ -14,7 +32,7 @@
 - `WeightedList::pruned()` method
 
 ### Fixes
-- Fix logic errors in random sampling methods
+- Fixed logic errors in random sampling methods
 
 
 ## v0.1.1

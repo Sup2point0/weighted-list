@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 use crate::*;
 use weighted_list::*;
 
@@ -18,11 +20,21 @@ use weighted_list::*;
     assert_eq!( list[9].value, "shard" );
 }
 
-#[test] fn iter_methods()
+#[test] fn iter()
 {
-    let mut list = wl();
+    let list = wl();
 
     for _ in list.iter() {}
+
+    assert_eq!(
+        list.iter().find(|item| item.weight == 2).unwrap(),
+        &wit!(2, str!("sup"))
+    );
+}
+
+#[test] fn iter_mut()
+{
+    let mut list = wl();
 
     for item in list.iter_mut() {
         item.weight += 1;
@@ -36,6 +48,10 @@ use weighted_list::*;
             (6, str!("shard")),
         ]
     );
+
+    list.iter_mut().map(|item| item.weight -= 1).collect_vec();
+
+    assert_eq!( list, wl() );
 }
 
 #[test] fn iter_sugar()
@@ -56,6 +72,4 @@ use weighted_list::*;
             (6, str!("shard")),
         ]
     );
-
-    for _ in list {}
 }

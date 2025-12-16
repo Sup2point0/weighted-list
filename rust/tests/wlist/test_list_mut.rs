@@ -98,14 +98,14 @@ use weighted_list::*;
     assert_eq!( *wl().insert_new_item(11, (1, str!("elysion"))), fourth );
 }
 
-#[test] fn remove()
+#[test] fn remove_at()
 {
     let orig = wl();
     let mut list = wl();
 
-    assert_eq!( list.remove(0), orig.items()[0] );
-    assert_eq!( list.remove(0), orig.items()[1] );
-    assert_eq!( list.remove(0), orig.items()[2] );
+    assert_eq!( list.remove_at(0), orig.items()[0] );
+    assert_eq!( list.remove_at(0), orig.items()[1] );
+    assert_eq!( list.remove_at(0), orig.items()[2] );
 }
 
 #[test] fn clear()
