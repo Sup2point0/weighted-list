@@ -77,13 +77,13 @@ let wl = wlist![
     (5, "shard"),
 ];
 
-wl[0]; // => WeightedItem { weight: 1, value: "qi" }
-wl[1]; // => WeightedItem { weight: 2, value: "sup" }
-wl[2]; // => WeightedItem { weight: 2, value: "sup" }
-wl[3]; // => WeightedItem { weight: 5, value: "shard" }
-wl[4]; // => WeightedItem { weight: 5, value: "shard" }
-wl[5]; // => WeightedItem { weight: 5, value: "shard" }
-wl[6]; // => WeightedItem { weight: 5, value: "shard" }
-wl[7]; // => WeightedItem { weight: 5, value: "shard" }
-wl[8]; // panic - out of bounds!
+let _ = wl[0]; // => WeightedItem { weight: 1, value: "qi" }
+let _ = wl[1]; // => WeightedItem { weight: 2, value: "sup" }
+let _ = wl[2]; // => WeightedItem { weight: 2, value: "sup" }
+let _ = wl[3]; // => WeightedItem { weight: 5, value: "shard" }
+let _ = wl[4]; // => WeightedItem { weight: 5, value: "shard" }
+let _ = wl[5]; // => WeightedItem { weight: 5, value: "shard" }
+let _ = wl[6]; // => WeightedItem { weight: 5, value: "shard" }
+let _ = wl[7]; // => WeightedItem { weight: 5, value: "shard" }
+let _ = wl[8]; // => panic - out of bounds!
 ```
