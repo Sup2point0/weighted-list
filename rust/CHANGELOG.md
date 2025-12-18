@@ -1,6 +1,12 @@
 # Changelog
 
 
+## v0.3.1
+
+### Fixes
+- Fixed `WeightedList::truncate()` implementation
+
+
 ## v0.3.0
 
 ### Breaking
