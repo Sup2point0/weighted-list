@@ -108,6 +108,29 @@ use weighted_list::*;
     assert_eq!( list.remove_at(0), orig.items()[2] );
 }
 
+#[test] fn truncate()
+{
+    assert_eq!( *el().truncate(0), el() );
+    assert_eq!( *el().truncate(1), el() );
+    assert_eq!( *el().truncate(10), el() );
+
+    assert_eq!( *wl().truncate(0), el() );
+    assert_eq!( *wl().truncate(1), wlist![(1, str!("sup"))] );
+    assert_eq!( *wl().truncate(2), wlist![(2, str!("sup"))] );
+    assert_eq!( *wl().truncate(3), wlist![(2, str!("sup")), (1, str!("nova"))] );
+    assert_eq!( *wl().truncate(4), wlist![(2, str!("sup")), (2, str!("nova"))] );
+    assert_eq!( *wl().truncate(5), wlist![(2, str!("sup")), (3, str!("nova"))] );
+    assert_eq!( *wl().truncate(6), wlist![(2, str!("sup")), (3, str!("nova")), (1, str!("shard"))] );
+
+    assert_eq!( *wl().truncate(wl().len()), wl() );
+}
+
+#[test] fn retain()
+{}
+
+#[test] fn retain_mut()
+{}
+
 #[test] fn clear()
 {
     assert_eq!( *wl().clear(), el() );
