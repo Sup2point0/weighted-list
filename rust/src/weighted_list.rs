@@ -523,18 +523,29 @@ impl<V, W: Weight> WeightedList<V,W>
         self.data.remove(self._unweight_index_(weighted_index))
     }
 
-    // UNTESTED
     pub fn truncate(&mut self, len: W) -> &mut Self
     {
+        if len == W::zero() {
+            return self.clear();
+        }
+
         let mut t = W::zero();
+        let mut n = 0;
         
-        for each in &mut self.data {
+        for (i, each) in self.iter_mut().enumerate() {
             t += each.weight;
 
-            if t > len {
-                each.weight = t - len;
+            if t >= len {
+                if t > len {
+                    each.weight += len - t;
+                }
+
+                n = i + 1;
+                break;
             }
         }
+
+        self.data.truncate(n);
 
         self
     }
