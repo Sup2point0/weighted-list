@@ -64,18 +64,14 @@ let words = descriptors.select_random_values()
     .call();
 
 if let Some(first) = words[0] && let Some(second) = words[1] {
-    println!("Rust is {} and {}", first, second);
+    println!("Rust is {first} and {second}");
     // => Rust is awesome and elegant
 }
 ```
 
 ### Indexing
 ```rust
-let wl = wlist![
-    (1, "qi"),
-    (2, "sup"),
-    (5, "shard"),
-];
+let wl = wlist![(1, "qi"), (2, "sup"), (5, "shard")];
 
 let _ = wl[0]; // => WeightedItem { weight: 1, value: "qi" }
 let _ = wl[1]; // => WeightedItem { weight: 2, value: "sup" }
