@@ -1106,7 +1106,7 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     /// 
     /// # Options
     /// 
-    /// ```ignore
+    /// ```compile_fail
     /// rng: RNG,
     /// count: usize,
     /// replace: Option<bool> = true,
