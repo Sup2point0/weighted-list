@@ -401,6 +401,29 @@ impl<'l, V, W: Weight> IntoIterator for &'l mut WeightedList<V,W>
     }
 }
 
+// == LIST QUERYING == //
+impl<V: Clone, W: Weight> WeightedList<V,W>
+{
+    /// Return a clone of the list with items sorted in ascending order of weights.
+    /// 
+    /// Orderings of items with equivalent weights is (currently) undefined behaviour.
+    pub fn sorted(&self) -> Self
+        where V: Eq, W: Ord
+    {
+        let mut out = self.clone();
+        out.sort();
+        out
+    }
+    
+    /// Return a clone of the list with items reversed.
+    pub fn reversed(&self) -> Self
+    {
+        let mut out = self.clone();
+        out.reverse();
+        out
+    }
+}
+
 // == LIST MUTATION == //
 impl<V, W: Weight> WeightedList<V,W>
 {
@@ -596,25 +619,20 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 }
 
-impl<V: Clone, W: Weight> WeightedList<V,W>
+// == SPECIALISED QUERYING == //
+impl<V, W: Weight> WeightedList<V,W>
 {
-    /// Return a clone of the list with items sorted in ascending order of weights.
-    /// 
-    /// Orderings of items with equivalent weights is (currently) undefined behaviour.
-    pub fn sorted(&self) -> Self
-        where V: Eq, W: Ord
+    /// Does any item in the list have a value equal to `value`?
+    pub fn contains_value(&self, value: &V) -> bool
+        where V: PartialEq
     {
-        let mut out = self.clone();
-        out.sort();
-        out
+        self.data.iter().any(|item| item.value == *value)
     }
     
-    /// Return a clone of the list with items reversed.
-    pub fn reversed(&self) -> Self
+    /// Does any item in the list have a weight equal to `weight`?
+    pub fn contains_weight(&self, weight: W) -> bool
     {
-        let mut out = self.clone();
-        out.reverse();
-        out
+        self.data.iter().any(|item| item.weight == weight)
     }
 }
 
