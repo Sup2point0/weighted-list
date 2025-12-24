@@ -21,7 +21,7 @@ pub enum Method {
 
 #[allow(dead_code)]
 pub fn test_binomial<V>(
-    wlist: &WeightedList<V, i32>,
+    wlist: &WList<V, i32>,
     method: Method,
 ) -> ()
     where V: Clone + Eq + std::fmt::Display,

@@ -8,7 +8,7 @@ use weighted_list::*;
 {
     let mut rng = rand::rng();
 
-    let list: WeightedList<String, i32> = wlist!(
+    let list = wlist!(
         (100, str!("sup")),
         (5, str!("woah"))
     );
