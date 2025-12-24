@@ -16,6 +16,9 @@ use crate::root::*;
 use crate::WeightedItem;
 
 
+pub type WList<V,W> = WeightedList<V,W>;
+
+
 /// A homogeneous list of weighted items with values of type `V` and weights of numerical type `W`.
 /// 
 /// Near-identical to `Vec<T>`, but stores `WeightedItem<V,W>` objects instead. You can think of it like a `Vec<WeightedItem<V,W>>`.
@@ -255,6 +258,13 @@ impl<V, W: Weight> WeightedList<V,W>
 }
 
 // == CONVERSIONS == //
+impl<V, W: Weight> From<WeightedList<V,W>> for Vec<WeightedItem<V,W>>
+{
+    fn from(list: WeightedList<V,W>) -> Self {
+        list.data
+    }
+}
+
 impl<V, W: Weight> FromIterator<WeightedItem<V,W>> for WeightedList<V,W>
 {
     fn from_iter<I>(items: I) -> Self

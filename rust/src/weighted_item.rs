@@ -5,6 +5,9 @@ use std::{
 use crate::root::*;
 
 
+pub type WItem<V,W> = WeightedItem<V,W>;
+
+
 /// An item in a `WeightedList`, with a `value` of type `V` and a `weight` of numerical type `W`.
 /// 
 /// For consistency and layout, `weight` always comes before `value` when ordering is relevant.
