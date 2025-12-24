@@ -157,24 +157,76 @@ macro_rules! wlist {
 impl<V, W: Weight> WeightedList<V,W>
 {
     /// Get an iterator over copies of the weights of each item in the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// 
+    /// for weight in wl.weights() {
+    ///     println!("{weight}");    // => 2, 3
+    /// }
+    /// 
+    /// assert_eq!( wl.weights().collect::<Vec<u32>>(), vec![2, 3] );
+    /// ```
     pub fn weights(&self) -> impl Iterator<Item = W>
     {
         self.data.iter().map(|item| item.weight)
     }
 
     /// Get an iterator over references to the values of each item in the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// 
+    /// for value in wl.values() {
+    ///     println!("{value}");    // => &"sup", &"nova"
+    /// }
+    /// 
+    /// assert_eq!( wl.values().collect::<Vec<&&str>>(), vec![&"sup", &"nova"] );
+    /// ```
     pub fn values(&self) -> impl Iterator<Item = &V>
     {
         self.data.iter().map(|item| &item.value)
     }
 
     /// Get a reference to the `Vec<>` of items in the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// 
+    /// for item in wl.items() {
+    ///     println!("({}, {})", item.weight, item.value);    // => (2, "sup"), (3, "nova")
+    /// }
+    /// ```
     pub fn items(&self) -> &Vec<WeightedItem<V,W>>
     {
         &self.data
     }
 
     /// Get an iterator over (weight, value) tuples representing each item in the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// 
+    /// for (weight, value) in wl.raw() {
+    ///     println!("({weight}, {value})");    // => (2, "sup"), (3, "nova")
+    /// }
+    /// 
+    /// assert_eq!( wl.raw().collect::<Vec<_>>(), vec![(2, &"sup"), (3, &"nova")] );
+    /// ```
+    /// 
+    /// # Notes
     /// 
     /// This satisfies the axiom:
     /// 
