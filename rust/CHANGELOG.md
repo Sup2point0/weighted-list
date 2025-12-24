@@ -1,6 +1,20 @@
 # Changelog
 
 
+## v0.4.0
+
+### New
+- `WList<V,W>` type alias for `WeightedList<V,W>`
+- `WItem<V,W>` type alias for `WeightedItem<V,W>`
+- `WeightedList` implements `FromIterator<(W,V)>`
+- `WeightedList::from_expanded()` method
+- `WeightedList::contains_value()` method
+- `WeightedList::contains_weight()` method
+
+### Fixes
+- Cleanup and test other `From<>` implementations
+
+
 ## v0.3.1
 
 ### Fixes
