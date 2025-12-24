@@ -105,6 +105,26 @@ impl<V, W: Weight> WeightedList<V,W>
             ).collect::<Vec<WeightedItem<V,W>>>()
         }
     }
+
+    /// Construct a `WeightedList` from an iterable of `value`s, merging duplicate values into single `WeightedItem`s.
+    pub fn from_expanded<I>(values: I) -> Self
+        where
+            I: IntoIterator<Item = V>,
+            V: PartialEq,
+    {
+        let mut out = WeightedList::new();
+
+        for value in values {
+            if let Some(existing) = out.iter_mut().find(|item| item.value == value) {
+                existing.weight += W::one();
+            }
+            else {
+                out.push_value(value);
+            }
+        }
+
+        out
+    }
 }
 
 /// Construct a `WeightedList` from the provided `(weight, value)` pairs.
