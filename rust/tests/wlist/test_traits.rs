@@ -2,6 +2,14 @@ use crate::*;
 // use weighted_list::*;
 
 
+#[test] fn clone() {
+    let list = wl();
+    let mut cloned = list.clone();
+    cloned.clear();
+    assert_ne!( list, cloned );
+}
+
+
 #[test] fn printing()
 {
     println!("\n");
