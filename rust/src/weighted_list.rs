@@ -242,7 +242,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self.data.is_empty()
     }
 
-    /// Do any items have a weight of `0`?
+    /// Do all items have a weight of `0`?
     pub fn is_zero(&self) -> bool
     {
         !self.is_empty()
