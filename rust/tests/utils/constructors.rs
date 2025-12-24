@@ -1,6 +1,6 @@
 use crate::str;
 
-use weighted_list::WeightedList;
+use weighted_list::WList;
 
 
 #[allow(dead_code)]
@@ -27,19 +27,19 @@ pub fn data_string(long: bool) -> Vec<(i32, String)>
 
 
 #[allow(dead_code)]
-pub fn el() -> WeightedList<String, i32>
+pub fn el() -> WList<String, i32>
 {
-    WeightedList::new()
+    WList::new()
 }
 
 #[allow(dead_code)]
-pub fn wl() -> WeightedList<String, i32>
+pub fn wl() -> WList<String, i32>
 {
-    WeightedList::init(data_string(false))
+    WList::init(data_string(false))
 }
 
 #[allow(dead_code)]
-pub fn wll() -> WeightedList<String, i32>
+pub fn wll() -> WList<String, i32>
 {
-    WeightedList::init(data_string(true))
+    WList::init(data_string(true))
 }

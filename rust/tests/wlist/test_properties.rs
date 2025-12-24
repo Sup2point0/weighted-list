@@ -10,8 +10,8 @@ use weighted_list::*;
 
 #[test] fn with_capacity()
 {
-    assert_eq!( WeightedList::<String, i32>::with_capacity(0).capacity(), 0 );
-    assert_eq!( WeightedList::<String, i32>::with_capacity(69).capacity(), 69 );
+    assert_eq!( WL::with_capacity(0).capacity(), 0 );
+    assert_eq!( WL::with_capacity(69).capacity(), 69 );
 }
 
 #[test] fn total_values()
