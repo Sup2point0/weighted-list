@@ -196,6 +196,21 @@ impl<V, W: Weight> WeightedList<V,W>
 
 impl<V, W: Weight + nums::PrimInt> WeightedList<V,W>
 {
+    /// Get an iterator over each value repeated a number of times equal to its weight.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// 
+    /// let mut test = vec![];
+    /// for value in wl.expanded() {
+    ///     test.push(*value);
+    /// }
+    /// 
+    /// assert_eq!( test, vec!["sup", "sup", "nova", "nova", "nova"] );
+    /// ```
     pub fn expanded(&self) -> impl Iterator<Item = &V>
     {
         self.data
@@ -229,6 +244,16 @@ impl<V, W: Weight> WeightedList<V,W>
     /// How many items/values are in the list?
     /// 
     /// Note that this is not equivalent to `.len()`, which is the total weights of all items in the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// 
+    /// assert_eq!( wl.total_values(), 2 );
+    /// assert_eq!( wl.len(), 5 );
+    /// ```
     pub fn total_values(&self) -> usize
     {
         self.data.len()
@@ -237,12 +262,38 @@ impl<V, W: Weight> WeightedList<V,W>
     /// Does the list contain no items?
     /// 
     /// Note that this returns `false` if the list contains items with weights of `0`.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let empty: WeightedList<(), usize> = wlist![];
+    /// assert_eq!( empty.is_empty(), true );
+    /// 
+    /// assert_eq!( wlist![(0, "qi")].is_empty(), false );
+    /// ```
     pub fn is_empty(&self) -> bool
     {
         self.data.is_empty()
     }
 
     /// Do all items have a weight of `0`?
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// assert_eq!( wlist![(0, "qi")].is_zero(), true );
+    /// assert_eq!( wlist![(1, "qi")].is_zero(), false );
+    /// assert_eq!( wlist![(0, "qi"), (0, "xi")].is_zero(), true );
+    /// assert_eq!( wlist![(0, "qi"), (1, "vi")].is_zero(), false );
+    /// 
+    /// let empty: WeightedList<(), usize> = wlist![];
+    /// assert_eq!( empty.is_zero(), false );
+    /// ```
+    /// 
+    /// # Notes
+    /// - Returns `false` if `.is_empty()` is `true`.
     pub fn is_zero(&self) -> bool
     {
         !self.is_empty()
@@ -250,6 +301,14 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 
     /// Do any items have a negative weight?
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// assert_eq!( wlist![(0, "qi"), ( 2, "sup")  ].has_negative_weights(), false );
+    /// assert_eq!( wlist![(0, "qi"), (-1, "aleph")].has_negative_weights(), true );
+    /// ```
     pub fn has_negative_weights(&self) -> bool
     {
         !self.is_empty()
