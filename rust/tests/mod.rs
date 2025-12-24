@@ -5,7 +5,7 @@ pub use utils::*;
 mod wlist {
     mod test_all;
 
-    mod test_constructors;
+    mod test_init;
 
     mod test_accessors;
 
