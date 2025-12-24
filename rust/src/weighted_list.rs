@@ -275,6 +275,15 @@ impl<V, W: Weight> FromIterator<WeightedItem<V,W>> for WeightedList<V,W>
     }
 }
 
+impl<V, W: Weight> FromIterator<(W,V)> for WeightedList<V,W>
+{
+    fn from_iter<I>(pairs: I) -> Self
+        where I: IntoIterator<Item = (W,V)>
+    {
+        Self::init(pairs)
+    }
+}
+
 impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
 {
     fn from(vec: Vec<WeightedItem<V,W>>) -> Self {
@@ -282,10 +291,17 @@ impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
     }
 }
 
-impl<V, W: Weight> From<WeightedList<V,W>> for Vec<WeightedItem<V,W>>
+impl<V, W: Weight> From<Vec<(W,V)>> for WeightedList<V,W>
 {
-    fn from(list: WeightedList<V,W>) -> Self {
-        list.data
+    fn from(vec: Vec<(W,V)>) -> Self {
+        Self::init(vec.into_iter())
+    }
+}
+
+impl<V, W: Weight, const N: usize> From<[(W,V); N]> for WeightedList<V,W>
+{
+    fn from(pairs: [(W,V); N]) -> Self {
+        Self::init(pairs)
     }
 }
 
