@@ -1173,14 +1173,13 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     /// ```compile_fail
     /// rng: RNG,
     /// count: usize,
-    /// replace: Option<bool> = true,
-    ///     decrement: Option<W> = 1,
-    /// unique: Option<bool> = false,
+    /// replace: bool = true,
+    ///     decrement: W = 1,
+    /// unique: bool = false,
     /// ```
     /// 
     /// - `count`: How many values to select.
-    /// - `replace`: If `true`, items do not have their weight decremented after selection, and infinite values can be selected. If `false`, items have their weight decremented after selection.
-    ///   - This means at most `self.len()` values will be returned.
+    /// - `replace`: If `true`, items do not have their weight decremented after selection, and infinite values can be selected. If `false`, items have their weight decremented after selection – this would mean at most `self.len()` values are returned.
     /// - `decrement`: How much to decrement weights by if `replace` is `false`.
     /// - `unique`: If `true`, only distinct values will be returned.
     ///   - `replace` becomes irrelevant in this case.
@@ -1332,7 +1331,9 @@ impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
         None
     }
 
-    /// Take `count` values using weighted randomisation.
+    /// Take `count` unique values using weighted randomisation.
+    ///
+    /// This method is separate to `.take_random_values` due to having more restrictive trait bounds on `V` and using a different algorithm with heavier performance.
     #[builder]
     pub fn take_random_values_unique<RNG>(&mut self,
         rng: &mut RNG,
@@ -1356,8 +1357,7 @@ impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
             }
         );
         
-        loop
-        {
+        loop {
             n += 1;
             if n > count || self.data.is_empty() { break }
 
@@ -1378,8 +1378,9 @@ impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
             })()
             {
                 seen.insert(value.clone());
-                out.push(value.clone());
+                out.push(value);
 
+                /* Yeah, the double traversal is horrific, but I can’t see any other way... we’ve got to discount *all* duplicates of the value we pick */
                 l = self.data.iter()
                     .filter_map(
                         |item| {
