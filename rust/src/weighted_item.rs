@@ -12,7 +12,7 @@ pub type WItem<V,W> = WeightedItem<V,W>;
 /// 
 /// For consistency and layout, `weight` always comes before `value` when ordering is relevant.
 /// 
-/// You should rarely find yourself constructing a [`WeightedItem`] by hand – instead, you'll usually interact with existing instances from a [`WeightedList`].
+/// You should rarely find yourself constructing a [`WeightedItem`] by hand – instead, you'll usually interact with existing instances from a [`WeightedList`](crate::WeightedList).
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct WeightedItem<V, W: Weight>
 {

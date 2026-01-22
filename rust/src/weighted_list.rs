@@ -85,6 +85,7 @@ pub struct WeightedList<V,
 }
 
 // == CONSTRUCTORS == //
+/// Methods for constructing a [`WeightedList`].
 impl<V, W: Weight> WeightedList<V,W>
 {
     /// Construct an empty list.
@@ -282,6 +283,7 @@ impl<V, W: Weight + nums::PrimInt> WeightedList<V,W>
 }
 
 // == PROPERTIES == //
+/// Methods for computing properties of the list.
 impl<V, W: Weight> WeightedList<V,W>
 {
     /// Sum the weights of all items in the list.
@@ -538,6 +540,7 @@ impl<'l, V, W: Weight> IntoIterator for &'l mut WeightedList<V,W>
 }
 
 // == LIST QUERYING == //
+/// Methods specialised from `Vec<>` for querying the list.
 impl<V: Clone, W: Weight> WeightedList<V,W>
 {
     /// Return a clone of the list with items sorted in ascending order of weights.
@@ -561,6 +564,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
 }
 
 // == LIST MUTATION == //
+/// Methods specialised from `Vec<>` for mutating the list.
 impl<V, W: Weight> WeightedList<V,W>
 {
     pub fn reserve(&mut self, additional: usize) -> &mut Self
@@ -756,6 +760,7 @@ impl<V, W: Weight> WeightedList<V,W>
 }
 
 // == SPECIALISED QUERYING == //
+/// Special [`WeightedList`]-specific methods for querying the list.
 impl<V, W: Weight> WeightedList<V,W>
 {
     /// Does any item in the list have a value equal to `value`?
@@ -773,6 +778,7 @@ impl<V, W: Weight> WeightedList<V,W>
 }
 
 // == SPECIALISED MUTATION == //
+/// Special [`WeightedList`]-specific methods for mutating the list.
 impl<V, W: Weight> WeightedList<V,W>
 {
     /// Remove all items with non-positive weight.
@@ -965,6 +971,7 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 }
 
+/// Methods for merging items, which require `V: PartialEq` to check for duplicates.
 impl<V: PartialEq, W: Weight> WeightedList<V,W>
 {
     /// Merge an item into the list. If an item with the same value already exists, add the weight of the new item to the existing item. Otherwise, append the new item to the list.
@@ -1057,6 +1064,7 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
     }
 }
 
+/// Methods for taking items, which require `V: Clone` to create a new value without removing the old one.
 impl<V: Clone, W: Weight> WeightedList<V,W>
 {
     /// Decrement the weight of the item at `weighted_index` by `1`. If its weight becomes non-positive as a result, remove the entire item. Returns a clone of the item with its updated weight.
@@ -1132,6 +1140,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
 }
 
 // == RANDOMISATION == //
+/// Methods for out-of-place random sampling from a list.
 impl<V, W: Weight> WeightedList<V,W>
 {
     fn _get_random_weighted_index_up_to_<RNG>(&self, rng: &mut RNG, upper: W) -> Option<W>
@@ -1199,6 +1208,7 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 }
 
+/// Methods for in-place random sampling from a list, decreasing weights of items that are chosen.
 impl<V: Clone, W: Weight> WeightedList<V,W>
 {
     /// Select a random item from the list using weighted randomisation, and decrement its weight by `1`.
@@ -1274,6 +1284,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
     }
 }
 
+/// Random sampling methods which use the bon builder syntax.
 #[bon]
 impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
 {
@@ -1509,6 +1520,7 @@ impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
     }
 }
 
+/// Methods for shuffling data.
 impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
 {
     /// Shuffle the order of items in the list (in-place).
