@@ -16,7 +16,7 @@ use weighted_list::*;
 
 #[test] fn items()
 {
-    let e: [WeightedItem<String, i32>; 0] = [];
+    let e: [WeightedItem<String, u32>; 0] = [];
     assert!( el().items().eq(&e) );
 
     assert!( wl().items().eq(&[
@@ -28,7 +28,7 @@ use weighted_list::*;
 
 #[test] fn raw()
 {
-    let e: [(i32, &String); 0] = [];
+    let e: [(u32, &String); 0] = [];
     assert!( el().raw().eq(e) );
 
     assert!(

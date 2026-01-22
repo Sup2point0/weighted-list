@@ -7,7 +7,6 @@ use weighted_list::*;
     assert_eq!( *el().prune(), el() );
     assert_eq!( *wl().prune(), wl() );
     assert_eq!( *wlist![(0, str!("sup"))].prune(), el() );
-    assert_eq!( *wlist![(-1, str!("sup"))].prune(), el() );
 }
 
 #[test] fn set_weights()

@@ -54,7 +54,7 @@ use weighted_list::*;
     assert_eq!( WList::from(data_string(false)), wl() );
 
     // From [(W, V); N]
-    let e: [(i32, String); 0] = [];
+    let e: [(u32, String); 0] = [];
     assert_eq!( WList::from(e), el() );
 
     assert_eq!(
@@ -70,7 +70,7 @@ use weighted_list::*;
 #[test] fn from_iter_pairs()
 {
     // FromIterator Vec<(W, V)>
-    let vec: Vec<(i32, String)> = vec![];
+    let vec: Vec<(u32, String)> = vec![];
     assert_eq!( WL::from_iter(vec), el() );
 
     assert_eq!(
@@ -83,7 +83,7 @@ use weighted_list::*;
     );
 
     // FromIterator [(W, V); N]
-    let array: [(i32, String); 0] = [];
+    let array: [(u32, String); 0] = [];
     assert_eq!( WL::from_iter(array), el() );
 
     assert_eq!(

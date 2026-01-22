@@ -21,14 +21,14 @@ pub enum Method {
 
 #[allow(dead_code)]
 pub fn test_binomial<V>(
-    wlist: &WList<V, i32>,
+    wlist: &WList<V, u32>,
     method: Method,
 ) -> ()
     where V: Clone + Eq + std::fmt::Display,
 {
     let mut rng = rand::rng();
 
-    let mut test_binomial_single = |item: &WeightedItem<V, i32>| {
+    let mut test_binomial_single = |item: &WeightedItem<V, u32>| {
         let value = &item.value;
 
         let prob = match method {

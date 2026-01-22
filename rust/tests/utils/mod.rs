@@ -7,8 +7,8 @@ pub mod stats;
 use weighted_list::*;
 
 
-pub type WL = WeightedList<String, i32>;
-pub type WI = WeightedItem<String, i32>;
+pub type WL = WeightedList<String, u32>;
+pub type WI = WeightedItem<String, u32>;
 
 
 #[macro_export]

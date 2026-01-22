@@ -4,7 +4,7 @@ use weighted_list::WList;
 
 
 #[allow(dead_code)]
-pub fn data_string(long: bool) -> Vec<(i32, String)>
+pub fn data_string(long: bool) -> Vec<(u32, String)>
 {
     [
         vec![
@@ -27,19 +27,19 @@ pub fn data_string(long: bool) -> Vec<(i32, String)>
 
 
 #[allow(dead_code)]
-pub fn el() -> WList<String, i32>
+pub fn el() -> WList<String, u32>
 {
     WList::new()
 }
 
 #[allow(dead_code)]
-pub fn wl() -> WList<String, i32>
+pub fn wl() -> WList<String, u32>
 {
     WList::from(data_string(false))
 }
 
 #[allow(dead_code)]
-pub fn wll() -> WList<String, i32>
+pub fn wll() -> WList<String, u32>
 {
     WList::from(data_string(true))
 }

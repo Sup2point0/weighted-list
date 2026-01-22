@@ -187,7 +187,7 @@ use weighted_list::*;
 
         list.take_random_values_unique().rng(&mut rng).count(n).call();
         assert_eq!( list.total_values(), n );
-        assert_eq!( list.len(), l - n as i32 );
+        assert_eq!( list.len(), l - n as u32 );
     }
 }
 
