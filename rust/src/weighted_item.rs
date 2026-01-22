@@ -11,9 +11,9 @@ use crate::root::*;
 pub type WItem<V,W> = WeightedItem<V,W>;
 
 
-/// An item in a [`WeightedList`], with a `value` of type `V` and a `weight` of numerical type `W`.
+/// An item in a [`WeightedList`](crate::WeightedList), with a `value` of type `V` and a `weight` of numerical type `W`.
 /// 
-/// For consistency and layout, `weight` always comes before `value` when ordering is relevant.
+/// For consistency and layout, `weight` always comes before `value` when ordering is relevant. Methods and conversions will expect `(W, V)`, not `(V, W)`.
 /// 
 /// You should rarely find yourself constructing a [`WeightedItem`] by hand – instead, you'll usually interact with existing instances from a [`WeightedList`](crate::WeightedList).
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
@@ -21,8 +21,9 @@ pub struct WeightedItem<V, W: Weight>
 {
     /// The weight of the item. A positive number. `0` is technically valid, but not advised.
     /// 
-    /// > [!Note]
-    /// > `num_traits::Unsigned` is not enforced because this is incompatible with non-integer `W` (`f32`, `f64`, etc.) which are always signed.
+    /// # Notes
+    /// 
+    /// - `num_traits::Unsigned` is not enforced because this is incompatible with non-integer `W` (`f32`, `f64`, etc.) which are always signed.
     pub weight: W,
 
     /// The value stored in the item.

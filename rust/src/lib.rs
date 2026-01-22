@@ -1,6 +1,6 @@
 //! A list implementation for weighted randomisation.
 //! 
-//! This crate provides the [`WeightedList<V,W>`](WeightedList) struct, which stores values with an assigned weight. When randomly selecting items, those with a higher weight are more likely to be chosen.
+//! This crate provides the [`WeightedList<V,W>`](WeightedList) struct, which stores values each with assigned weights. When randomly selecting items, those with a higher weight are more likely to be chosen.
 //! 
 //! ## Example
 //! 

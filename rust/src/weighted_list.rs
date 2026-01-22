@@ -1,5 +1,6 @@
 use std::{
-    fmt,
+    fmt::{self, Debug, Display},
+    hash::Hash,
     iter,
     ops::*,
 };
@@ -245,7 +246,10 @@ impl<V, W: Weight> Extend<WeightedItem<V,W>> for WeightedList<V,W>
     }
 }
 
-impl<V: fmt::Display, W: Weight + fmt::Display> fmt::Display for WeightedList<V,W>
+impl<V, W: Weight> Display for WeightedList<V,W>
+    where
+        V: Display,
+        W: Display,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result
     {            
@@ -342,7 +346,8 @@ impl<V, W: Weight> WeightedList<V,W>
     ///     println!("{weight}");    // => 2, 3
     /// }
     /// 
-    /// assert_eq!( wl.weights().collect::<Vec<u32>>(), vec![2, 3] );
+    /// let weights = wl.weights().collect::<Vec<u32>>();
+    /// assert_eq!(weights, vec![2, 3]);
     /// ```
     pub fn weights(&self) -> impl Iterator<Item = W>
     {
@@ -361,7 +366,8 @@ impl<V, W: Weight> WeightedList<V,W>
     ///     println!("{value}");    // => &"sup", &"nova"
     /// }
     /// 
-    /// assert_eq!( wl.values().collect::<Vec<&&str>>(), vec![&"sup", &"nova"] );
+    /// let values = wl.values().collect::<Vec<&&str>>();
+    /// assert_eq!(values, vec![&"sup", &"nova"]);
     /// ```
     pub fn values(&self) -> impl Iterator<Item = &V>
     {
@@ -397,22 +403,18 @@ impl<V, W: Weight> WeightedList<V,W>
     ///     println!("({weight}, {value})");    // => (2, "sup"), (3, "nova")
     /// }
     /// 
-    /// assert_eq!( wl.raw().collect::<Vec<_>>(), vec![(2, &"sup"), (3, &"nova")] );
+    /// let raw = wl.raw().collect::<Vec<_>>();
+    /// assert_eq!(raw, vec![(2, &"sup"), (3, &"nova")]);
     /// ```
     /// 
     /// # Notes
     /// 
-    /// This satisfies the axiom:
+    /// This function acts essentially like an "un-constructor", giving back the tuples you usually use to construct a [`WeightedList`]:
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// let wl = wlist![(2, "sup"), (3, "nova")];
-    /// let rl = WeightedList::from_iter(wl.raw());
-    /// 
-    /// for (left, right) in std::iter::zip(wl.clone(), rl.clone()) {
-    ///     assert_eq!(left.weight, right.weight);
-    ///     assert_eq!(left.value, *right.value);
-    /// }
+    /// let wl = WeightedList::from([(2, "sup"), (3, "nova")]);
+    /// let rl = wl.raw();    // => [(2, &"sup"), (3, &"nova")]
     /// ```
     pub fn raw(&self) -> impl Iterator<Item = (W,&V)>
     {
@@ -420,7 +422,9 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 }
 
-impl<V, W: Weight + nums::PrimInt> WeightedList<V,W>
+impl<V, W: Weight> WeightedList<V,W>
+    where
+        W: nums::PrimInt
 {
     /// Get an iterator over each value in the list, repeated a number of times equal to its weight.
     /// 
@@ -435,8 +439,12 @@ impl<V, W: Weight + nums::PrimInt> WeightedList<V,W>
     ///     test.push(*value);
     /// }
     /// 
-    /// assert_eq!( test, vec!["sup", "sup", "nova", "nova", "nova"] );
+    /// assert_eq!(test, vec!["sup", "sup", "nova", "nova", "nova"]);
     /// ```
+    /// 
+    /// # Notes
+    /// 
+    /// - Since repeating an entity a non-integer number of times is undefined, this requires `W` to be an integer type.
     pub fn expanded(&self) -> impl Iterator<Item = &V>
     {
         self.data
@@ -478,8 +486,8 @@ impl<V, W: Weight> WeightedList<V,W>
     /// # use weighted_list::*;
     /// let wl = wlist![(2, "sup"), (3, "nova")];
     /// 
-    /// assert_eq!( wl.total_values(), 2 );
-    /// assert_eq!( wl.len(), 5 );
+    /// assert_eq!(wl.total_values(), 2);
+    /// assert_eq!(wl.len(), 5);
     /// ```
     pub fn total_values(&self) -> usize
     {
@@ -495,9 +503,9 @@ impl<V, W: Weight> WeightedList<V,W>
     /// ```
     /// # use weighted_list::*;
     /// let empty: WeightedList<(), usize> = wlist![];
-    /// assert_eq!( empty.is_empty(), true );
+    /// assert_eq!(empty.is_empty(), true);
     /// 
-    /// assert_eq!( wlist![(0, "qi")].is_empty(), false );
+    /// assert_eq!(wlist![(0, "qi")].is_empty(), false);
     /// ```
     pub fn is_empty(&self) -> bool
     {
@@ -510,13 +518,13 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// assert_eq!( wlist![(0, "qi")].is_zero(), true );
-    /// assert_eq!( wlist![(1, "qi")].is_zero(), false );
-    /// assert_eq!( wlist![(0, "qi"), (0, "xi")].is_zero(), true );
-    /// assert_eq!( wlist![(0, "qi"), (1, "vi")].is_zero(), false );
+    /// assert_eq!(wlist![(0, "qi")].is_zero(), true);
+    /// assert_eq!(wlist![(1, "qi")].is_zero(), false);
+    /// assert_eq!(wlist![(0, "qi"), (0, "xi")].is_zero(), true);
+    /// assert_eq!(wlist![(0, "qi"), (1, "vi")].is_zero(), false);
     /// 
     /// let empty: WeightedList<(), usize> = wlist![];
-    /// assert_eq!( empty.is_zero(), false );
+    /// assert_eq!(empty.is_zero(), false);
     /// ```
     /// 
     /// # Notes
@@ -533,9 +541,13 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// assert_eq!( wlist![(0, "qi"), ( 2, "sup")  ].has_negative_weights(), false );
-    /// assert_eq!( wlist![(0, "qi"), (-1, "aleph")].has_negative_weights(), true );
+    /// assert_eq!(wlist![(0, "qi"), ( 2, "sup")  ].has_negative_weights(), false);
+    /// assert_eq!(wlist![(0, "qi"), (-1, "aleph")].has_negative_weights(), true);
     /// ```
+    /// 
+    /// # Notes
+    /// 
+    /// - If you only need integer weights, you should probably use an unsigned type like `u32` to ensure weights are never negative.
     pub fn has_negative_weights(&self) -> bool
     {
         !self.is_empty()
@@ -545,7 +557,9 @@ impl<V, W: Weight> WeightedList<V,W>
 
 // == LIST QUERYING == //
 /// Methods specialised from `Vec<>` for querying the list.
-impl<V: Clone, W: Weight> WeightedList<V,W>
+impl<V, W: Weight> WeightedList<V,W>
+    where
+        V: Clone
 {
     /// Return a clone of the list with items sorted in ascending order of weights.
     /// 
@@ -710,8 +724,25 @@ impl<V, W: Weight> WeightedList<V,W>
         self.data.remove(self._unweight_index_(weighted_index))
     }
 
+    /// Remove elements from the end of the list, such that [`self.len()`](Self::len) == `len`. The last element may have its weight decreased.
+    /// 
+    /// # Usage
+    /// 
+    /// ```rust
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// wl.truncate(5);
+    /// assert_eq!(wl, wlist![(2, "sup"), (3, "nova")]);
+    /// 
+    /// wl.truncate(3);
+    /// assert_eq!(wl, wlist![(2, "sup"), (1, "nova")]);
+    /// 
+    /// wl.truncate(0);
+    /// assert_eq!(wl, wlist![]);
+    /// ```
     pub fn truncate(&mut self, len: W) -> &mut Self
-        where W: fmt::Debug
+        where W: Debug
     {
         if len == W::zero() {
             return self.clear();
@@ -976,8 +1007,12 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 }
 
-/// Methods for merging items, which require `V: PartialEq` to check for duplicates.
-impl<V: PartialEq, W: Weight> WeightedList<V,W>
+/// Methods for merging items into the list.
+/// 
+/// This involves comparing item values to check for duplicates, hence requiring `V: PartialEq`.
+impl<V, W: Weight> WeightedList<V,W>
+    where
+        V: PartialEq
 {
     /// Merge an item into the list. If an item with the same value already exists, add the weight of the new item to the existing item. Otherwise, append the new item to the list.
     /// 
@@ -1069,8 +1104,12 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
     }
 }
 
-/// Methods for taking items, which require `V: Clone` to create a new value without removing the old one.
-impl<V: Clone, W: Weight> WeightedList<V,W>
+/// Methods for taking items from the list.
+/// 
+/// This involves returning values without removing the existing one, hence requiring `V: Clone`.
+impl<V, W: Weight> WeightedList<V,W>
+    where
+        V: Clone
 {
     /// Decrement the weight of the item at `weighted_index` by `1`. If its weight becomes non-positive as a result, remove the entire item. Returns a clone of the item with its updated weight.
     /// 
@@ -1214,7 +1253,9 @@ impl<V, W: Weight> WeightedList<V,W>
 }
 
 /// Methods for in-place random sampling from a list, decreasing weights of items that are chosen.
-impl<V: Clone, W: Weight> WeightedList<V,W>
+impl<V, W: Weight> WeightedList<V,W>
+    where
+        V: Clone
 {
     /// Select a random item from the list using weighted randomisation, and decrement its weight by `1`.
     /// 
@@ -1291,7 +1332,9 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
 
 /// Random sampling methods which use the bon builder syntax.
 #[bon]
-impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
+impl<V, W: Weight> WeightedList<V,W>
+    where
+        V: Clone + Eq
 {
     /// Select `count` values using weighted randomisation.
     /// 
@@ -1435,7 +1478,9 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
 }
 
 #[bon]
-impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
+impl<V, W: Weight> WeightedList<V,W>
+    where
+        V: Clone + Eq + Hash
 {
     /// Variant of `._unweighted_index_()` for mutating random selection with unique outputs.
     fn _unweight_index_skipping_(&self,
@@ -1526,7 +1571,9 @@ impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
 }
 
 /// Methods for shuffling data.
-impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
+impl<V, W: Weight> WeightedList<V,W>
+    where
+        V: Clone,
 {
     /// Shuffle the order of items in the list (in-place).
     pub fn shuffle_items<RNG>(&mut self, rng: &mut RNG) -> &mut Self
