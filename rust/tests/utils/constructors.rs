@@ -35,11 +35,11 @@ pub fn el() -> WList<String, i32>
 #[allow(dead_code)]
 pub fn wl() -> WList<String, i32>
 {
-    WList::init(data_string(false))
+    WList::from(data_string(false))
 }
 
 #[allow(dead_code)]
 pub fn wll() -> WList<String, i32>
 {
-    WList::init(data_string(true))
+    WList::from(data_string(true))
 }

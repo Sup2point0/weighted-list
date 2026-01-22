@@ -100,20 +100,6 @@ impl<V, W: Weight> WeightedList<V,W>
         Self { data: Vec::with_capacity(capacity) }
     }
 
-    /// Construct a [`WeightedList`] from an iterable of `(weight, value)` pairs.
-    pub fn init<I>(pairs: I) -> Self
-        where I: IntoIterator<Item = (W, V)>
-    {
-        Self {
-            data:
-                pairs.into_iter()
-                    .map(
-                        |(weight, value)| WeightedItem::new(weight, value)
-                    )
-                    .collect::<Vec<_>>()
-        }
-    }
-
     /// Construct a [`WeightedList`] from an iterable of `value`s, merging duplicate values into single [`WeightedItem`]s.
     /// 
     /// Note that this has $O(n^2)$ time complexity.
@@ -153,15 +139,188 @@ impl<V, W: Weight> WeightedList<V,W>
 /// ```
 #[macro_export]
 macro_rules! wlist {
-    ($( $item:expr ),* $(,)?) =>
+    () => { WeightedList::new() };
+
+    ($( ($weight:expr, $value:expr) ),* $(,)?) =>
     {
-        WeightedList::init([
-            $( $item, )*
-        ])
+        WeightedList::from_iter(
+            [
+                $( ($weight, $value), )*
+            ].into_iter()
+        )
     };
 }
 
+// == CONVERSIONS FROM == //
+impl<V, W: Weight> FromIterator<(W,V)> for WeightedList<V,W> {
+    fn from_iter<I>(pairs: I) -> Self
+        where I: IntoIterator<Item = (W,V)>
+    {
+        Self {
+            data:
+                pairs.into_iter()
+                    .map(
+                        |(weight, value)| WeightedItem::new(weight, value)
+                    )
+                    .collect::<Vec<_>>()
+        }
+    }
+}
+impl<V, W: Weight> FromIterator<WeightedItem<V,W>> for WeightedList<V,W>
+{
+    fn from_iter<I>(items: I) -> Self
+        where I: IntoIterator<Item = WeightedItem<V,W>>
+    {
+        let mut data = vec![];
+
+        for item in items {
+            data.push(item);
+        }
+
+        Self { data }
+    }
+}
+
+impl<V, W: Weight> From<Vec<(W,V)>> for WeightedList<V,W> {
+    fn from(pairs: Vec<(W,V)>) -> Self {
+        Self::from_iter(pairs.into_iter())
+    }
+}
+impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
+    fn from(data: Vec<WeightedItem<V,W>>) -> Self {
+        Self { data }
+    }
+}
+
+impl<V, W: Weight, const N: usize> From<[(W,V); N]> for WeightedList<V,W> {
+    fn from(pairs: [(W,V); N]) -> Self {
+        pairs.into_iter().collect()
+    }
+}
+impl<V, W: Weight, const N: usize> From<[WeightedItem<V,W>; N]> for WeightedList<V,W> {
+    fn from(pairs: [WeightedItem<V,W>; N]) -> Self {
+        pairs.into_iter().collect()
+    }
+}
+
+// == CONVERSIONS TO == //
+impl<V, W: Weight> From<WeightedList<V,W>> for Vec<WeightedItem<V,W>> {
+    fn from(list: WeightedList<V,W>) -> Self {
+        list.data
+    }
+}
+
+impl<V, W: Weight> AsRef<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
+    fn as_ref(&self) -> &Vec<WeightedItem<V,W>> {
+        &self.data
+    }
+}
+
+impl<V, W: Weight> Deref for WeightedList<V,W> {
+    type Target = [WeightedItem<V,W>];
+
+    fn deref(&self) -> &Self::Target {
+        self.data.deref()
+    }
+}
+impl<V, W: Weight> DerefMut for WeightedList<V,W> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.data.deref_mut()
+    }
+}
+
+// == TRAIT IMPLEMENTATIONS == //
+impl<V, W: Weight> Extend<WeightedItem<V,W>> for WeightedList<V,W>
+{
+    fn extend<T>(&mut self, iter: T)
+        where T: IntoIterator<Item = WeightedItem<V,W>>
+    {
+        for item in iter {
+            self.push_item(item);
+        }
+    }
+}
+
+impl<V: fmt::Display, W: Weight + fmt::Display> fmt::Display for WeightedList<V,W>
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result
+    {            
+        write!(f,
+            "WeightedList[{}]",
+            self.data.iter().map(|item| item.to_string()).join(", ")
+        )
+    }
+}
+
+// == INDEXING == //
+impl<V, W: Weight> Index<W> for WeightedList<V,W>
+{
+    type Output = WeightedItem<V,W>;
+
+    fn index(&self, weighted_index: W) -> &Self::Output
+    {
+        let mut t = W::zero();
+
+        for item in &self.data {
+            t += item.weight;
+
+            if t > weighted_index {
+                return item;
+            }
+        };
+
+        panic!("index out of bounds: the len is {} but the index is {weighted_index}", self.len());
+    }
+}
+
+impl<V, W: Weight> IndexMut<W> for WeightedList<V,W>
+{
+    fn index_mut(&mut self, weighted_index: W) -> &mut Self::Output
+    {
+        let idx = self._unweight_index_(weighted_index);
+        &mut self.data[idx]
+    }
+}
+
+// == ITERATION == //
+impl<V, W: Weight> IntoIterator for WeightedList<V,W>
+{
+    type Item = WeightedItem<V,W>;
+    type IntoIter = <Vec<Self::Item> as IntoIterator>::IntoIter;
+
+    /// ```compile_fail
+    /// # use weighted_list::*;
+    /// let list = wlist![]
+    /// for _ in list {}
+    /// list;  // compile error
+    /// ```
+    fn into_iter(self) -> Self::IntoIter {
+        self.data.into_iter()
+    }
+}
+
+impl<'l, V, W: Weight> IntoIterator for &'l WeightedList<V,W>
+{
+    type Item = &'l WeightedItem<V,W>;
+    type IntoIter = std::slice::Iter<'l, WeightedItem<V,W>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.data.iter()
+    }
+}
+
+impl<'l, V, W: Weight> IntoIterator for &'l mut WeightedList<V,W>
+{
+    type Item = &'l mut WeightedItem<V,W>;
+    type IntoIter = std::slice::IterMut<'l, WeightedItem<V,W>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.data.iter_mut()
+    }
+}
+
 // == ACCESSORS == //
+/// Methods for accessing data of the list.
 impl<V, W: Weight> WeightedList<V,W>
 {
     /// Get an iterator over the weights of each item in the list.
@@ -241,7 +400,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// ```
     /// # use weighted_list::*;
     /// let wl = wlist![(2, "sup"), (3, "nova")];
-    /// let rl = WeightedList::init(wl.raw());
+    /// let rl = WeightedList::from_iter(wl.raw());
     /// 
     /// for (left, right) in std::iter::zip(wl.clone(), rl.clone()) {
     ///     assert_eq!(left.weight, right.weight);
@@ -374,168 +533,6 @@ impl<V, W: Weight> WeightedList<V,W>
     {
         !self.is_empty()
         && self.data.iter().any(|item| item.weight < W::zero())
-    }
-}
-
-// == CONVERSIONS == //
-impl<V, W: Weight> From<WeightedList<V,W>> for Vec<WeightedItem<V,W>> {
-    fn from(list: WeightedList<V,W>) -> Self {
-        list.data
-    }
-}
-
-impl<V, W: Weight> FromIterator<WeightedItem<V,W>> for WeightedList<V,W>
-{
-    fn from_iter<I>(items: I) -> Self
-        where I: IntoIterator<Item = WeightedItem<V,W>>
-    {
-        // TODO benchmark
-        // Self {
-        //     data: items.into_iter().collect::<Vec<WeightedItem<V,W>>>()
-        // }
-
-        let mut data = vec![];
-
-        for item in items {
-            data.push(item);
-        }
-
-        Self { data }
-    }
-}
-
-impl<V, W: Weight> FromIterator<(W,V)> for WeightedList<V,W> {
-    fn from_iter<I>(pairs: I) -> Self
-        where I: IntoIterator<Item = (W,V)>
-    {
-        Self::init(pairs)
-    }
-}
-
-impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
-    fn from(vec: Vec<WeightedItem<V,W>>) -> Self {
-        Self { data: vec }
-    }
-}
-impl<V, W: Weight> From<Vec<(W,V)>> for WeightedList<V,W> {
-    fn from(vec: Vec<(W,V)>) -> Self {
-        Self::init(vec.into_iter())
-    }
-}
-
-impl<V, W: Weight, const N: usize> From<[(W,V); N]> for WeightedList<V,W> {
-    fn from(pairs: [(W,V); N]) -> Self {
-        Self::init(pairs)
-    }
-}
-
-impl<V, W: Weight> AsRef<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
-    fn as_ref(&self) -> &Vec<WeightedItem<V,W>> {
-        &self.data
-    }
-}
-
-impl<V, W: Weight> Deref for WeightedList<V,W> {
-    type Target = [WeightedItem<V,W>];
-
-    fn deref(&self) -> &Self::Target {
-        self.data.deref()
-    }
-}
-
-impl<V, W: Weight> DerefMut for WeightedList<V,W> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        self.data.deref_mut()
-    }
-}
-
-// == TRAITS == //
-impl<V: fmt::Display, W: Weight + fmt::Display> fmt::Display for WeightedList<V,W>
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result
-    {            
-        write!(f,
-            "WeightedList[{}]",
-            self.data.iter().map(|item| item.to_string()).join(", ")
-        )
-    }
-}
-
-impl<V, W: Weight> Extend<WeightedItem<V,W>> for WeightedList<V,W>
-{
-    fn extend<T>(&mut self, iter: T)
-        where T: IntoIterator<Item = WeightedItem<V,W>>
-    {
-        for item in iter {
-            self.push_item(item);
-        }
-    }
-}
-
-// == INDEXING == //
-impl<V, W: Weight> Index<W> for WeightedList<V,W>
-{
-    type Output = WeightedItem<V,W>;
-
-    fn index(&self, weighted_index: W) -> &Self::Output
-    {
-        let mut t = W::zero();
-
-        for item in &self.data {
-            t += item.weight;
-
-            if t > weighted_index {
-                return item;
-            }
-        };
-
-        panic!("index out of bounds: the len is {} but the index is {weighted_index}", self.len());
-    }
-}
-
-impl<V, W: Weight> IndexMut<W> for WeightedList<V,W>
-{
-    fn index_mut(&mut self, weighted_index: W) -> &mut Self::Output
-    {
-        let idx = self._unweight_index_(weighted_index);
-        &mut self.data[idx]
-    }
-}
-
-// == ITERATION == //
-impl<V, W: Weight> IntoIterator for WeightedList<V,W>
-{
-    type Item = WeightedItem<V,W>;
-    type IntoIter = <Vec<Self::Item> as IntoIterator>::IntoIter;
-
-    /// ```compile_fail
-    /// # use weighted_list::*;
-    /// let list = wlist![]
-    /// for _ in list {}
-    /// list;  // compile error
-    /// ```
-    fn into_iter(self) -> Self::IntoIter {
-        self.data.into_iter()
-    }
-}
-
-impl<'l, V, W: Weight> IntoIterator for &'l WeightedList<V,W>
-{
-    type Item = &'l WeightedItem<V,W>;
-    type IntoIter = std::slice::Iter<'l, WeightedItem<V,W>>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.data.iter()
-    }
-}
-
-impl<'l, V, W: Weight> IntoIterator for &'l mut WeightedList<V,W>
-{
-    type Item = &'l mut WeightedItem<V,W>;
-    type IntoIter = std::slice::IterMut<'l, WeightedItem<V,W>>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.data.iter_mut()
     }
 }
 

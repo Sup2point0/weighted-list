@@ -10,11 +10,6 @@ use weighted_list::*;
     let _: WL = wl();
     let _: WL = wll();
 
-    let _: WList<bool, f64> = WList::init([
-        (2.0, false),
-        (4.2, true)
-    ]);
-
     let list: WL = WList::with_capacity(42);
     assert!( list.capacity() >= 42 );
 }
@@ -51,8 +46,6 @@ use weighted_list::*;
 
 #[test] fn from_iterator()
 {
-
-    
 }
 
 #[test] fn from_pairs()
@@ -61,7 +54,8 @@ use weighted_list::*;
     assert_eq!( WList::from(data_string(false)), wl() );
 
     // From [(W, V); N]
-    assert_eq!( WList::from([]), el() );
+    let e: [(i32, String); 0] = [];
+    assert_eq!( WList::from(e), el() );
 
     assert_eq!(
         WList::from([
