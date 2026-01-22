@@ -1,6 +1,13 @@
 # Changelog
 
 
+## v0.4.1
+
+### Fixes
+- Add links to documentation
+- Correct documentation of `WeightedList::is_zero`
+
+
 ## v0.4.0
 
 ### New
@@ -18,7 +25,7 @@
 ## v0.3.1
 
 ### Fixes
-- Fixed `WeightedList::truncate()` implementation
+- Fix `WeightedList::truncate()` implementation
 
 
 ## v0.3.0
@@ -30,7 +37,7 @@
 - `WeightedList::take_entire()` renamed to `::take_entire_at()`
 - `WeightedList::take_by()` arguments reversed
   - Was `(weighted_index, decrement)`, now `(decrement, weighted_index)`
-  - This aligns more intuitively with the expected order suggested by `take_by_at` (take *by* `decrement` *at* `weighted_index`)
+  - This aligns more intuitively with the expected order implied by `take_by_at` (take *by* `decrement` *at* `weighted_index`)
 
 ### New
 - `WeightedList::remove_value_first()` method

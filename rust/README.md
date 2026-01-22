@@ -2,7 +2,7 @@
 
 A vector implementation for weighted randomisation.
 
-Implements the `WeightedList` struct, an ordered collection of `WeightedItem`s, which hold a `value` and `weight`. Indexing and random selection takes the weight of items into consideration, such that items with greater weights are more likely to be selected.
+This crate implements the `WeightedList` struct, an ordered collection of `WeightedItem`s, which hold a `value` and `weight`. Indexing and random selection takes the weight of items into consideration, such that items with greater weights are more likely to be selected.
 
 
 ## Usage
@@ -83,3 +83,9 @@ let _ = wl[6]; // => WeightedItem { weight: 5, value: "shard" }
 let _ = wl[7]; // => WeightedItem { weight: 5, value: "shard" }
 let _ = wl[8]; // => panic - out of bounds!
 ```
+
+
+## Future Features
+
+- immutable `FrozenWeightedList` variant
+- slice indexing
