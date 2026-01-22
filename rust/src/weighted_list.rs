@@ -22,7 +22,7 @@ pub type WList<V,W> = WeightedList<V,W>;
 
 /// A homogeneous list of weighted items with values of type `V` and weights of numerical type `W`.
 /// 
-/// Near-identical to `Vec<T>`, but stores `WeightedItem<V,W>` objects instead. You can think of it like a `Vec<WeightedItem<V,W>>`.
+/// Near-identical to `Vec<T>`, but stores [`WeightedItem<V,W>`](WeightedItem) objects instead. You can think of it like a `Vec<WeightedItem<V,W>>`.
 /// 
 /// # Usage
 /// 
@@ -704,6 +704,7 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 
     pub fn truncate(&mut self, len: W) -> &mut Self
+        where W: fmt::Debug
     {
         if len == W::zero() {
             return self.clear();
@@ -717,7 +718,7 @@ impl<V, W: Weight> WeightedList<V,W>
 
             if t >= len {
                 if t > len {
-                    each.weight += len - t;
+                    each.weight -= t - len;
                 }
 
                 n = i + 1;
@@ -1109,12 +1110,12 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
         let idx = self._unweight_index_(weighted_index);
         let target = &mut self.data[idx];
 
-        target.weight -= decrement;
-
-        if target.weight <= W::zero() {
+        if decrement >= target.weight {
+            target.weight = W::zero();
             self.data.remove(idx)
         }
         else {
+            target.weight -= decrement;
             target.clone()
         }
     }
@@ -1489,10 +1490,10 @@ impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
                 let target = &mut self.data[idx];
                 let value = target.value.clone();
 
-                target.weight -= decrement;
-
-                if target.weight <= W::zero() {
+                if decrement >= target.weight {
                     self.data.remove(idx);
+                } else {
+                    target.weight -= decrement;
                 }
 
                 Some(value)
