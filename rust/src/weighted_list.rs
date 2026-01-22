@@ -4,7 +4,7 @@ use std::{
     ops::*,
 };
 
-use bon::{bon};
+use bon::bon;
 use itertools::Itertools;
 use num_traits as nums;
 use rand::{
@@ -16,6 +16,7 @@ use crate::root::*;
 use crate::WeightedItem;
 
 
+/// A shorthand for [`WeightedList`].
 pub type WList<V,W> = WeightedList<V,W>;
 
 
@@ -27,7 +28,7 @@ pub type WList<V,W> = WeightedList<V,W>;
 /// 
 /// ```
 /// # use weighted_list::*;
-/// let wl: WeightedList<String, i32> = wlist![
+/// let wl: WeightedList<String, u32> = wlist![
 ///     (2, "sup".to_string()),
 ///     (3, "nova".to_string()),
 ///     (5, "shard".to_string()),
@@ -38,7 +39,7 @@ pub type WList<V,W> = WeightedList<V,W>;
 /// }
 /// 
 /// if let Some(result) = wl.select_random_value(&mut rand::rng()) {
-///     println!("{}", result);
+///     println!("{result}");
 /// }
 /// ```
 /// 
@@ -61,7 +62,7 @@ pub type WList<V,W> = WeightedList<V,W>;
 /// let _ = wl[8]; // => panic - out of bounds!
 /// ```
 /// 
-/// In essence, each value is "copied" a number of times equal to its weight – this is what enables the weighted randomisation. But because the values are stored in `WeightedItem` objects, instead of actually being copied, larger weight values can be used without fear of performance impacts.
+/// In essence, each value is "copied" a number of times equal to its weight – this is what enables the weighted randomisation. But because the values are stored in [`WeightedItem`] objects, instead of actually being copied, larger weight values can be used without fear of performance impacts.
 /// 
 /// # Tips
 /// 
@@ -76,8 +77,9 @@ pub type WList<V,W> = WeightedList<V,W>;
 ///     .prune()
 ///     .len();
 /// ```
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
-pub struct WeightedList<V, W: Weight>
+#[derive(Clone, Hash, PartialEq, Eq, Default, Debug)]
+pub struct WeightedList<V,
+    W: Weight>
 {
     data: Vec<WeightedItem<V,W>>
 }
@@ -85,31 +87,35 @@ pub struct WeightedList<V, W: Weight>
 // == CONSTRUCTORS == //
 impl<V, W: Weight> WeightedList<V,W>
 {
-    /// Construct an empty `WeightedList`.
+    /// Construct an empty list.
     pub fn new() -> Self
     {
         Self { data: Vec::new() }
     }
 
-    /// Construct an empty `WeightedList` with the specified capacity.
+    /// Construct an empty list with the specified capacity.
     pub fn with_capacity(capacity: usize) -> Self
     {
         Self { data: Vec::with_capacity(capacity) }
     }
 
-    /// Construct a `WeightedList` from an iterable of `(weight, value)` pairs.
-    pub fn init<I>(items: I) -> Self
+    /// Construct a [`WeightedList`] from an iterable of `(weight, value)` pairs.
+    pub fn init<I>(pairs: I) -> Self
         where I: IntoIterator<Item = (W, V)>
     {
         Self {
-            data: items.into_iter().map(
-                |(weight, value)|
-                WeightedItem::new(weight, value)
-            ).collect::<Vec<WeightedItem<V,W>>>()
+            data:
+                pairs.into_iter()
+                    .map(
+                        |(weight, value)| WeightedItem::new(weight, value)
+                    )
+                    .collect::<Vec<_>>()
         }
     }
 
-    /// Construct a `WeightedList` from an iterable of `value`s, merging duplicate values into single `WeightedItem`s.
+    /// Construct a [`WeightedList`] from an iterable of `value`s, merging duplicate values into single [`WeightedItem`]s.
+    /// 
+    /// Note that this has $O(n^2)$ time complexity.
     pub fn from_expanded<I>(values: I) -> Self
         where
             I: IntoIterator<Item = V>,
@@ -130,7 +136,7 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 }
 
-/// Construct a `WeightedList` from the provided `(weight, value)` pairs.
+/// Construct a [`WeightedList`] from the provided `(weight, value)` pairs.
 /// 
 /// # Usage
 /// 
@@ -146,7 +152,8 @@ impl<V, W: Weight> WeightedList<V,W>
 /// ```
 #[macro_export]
 macro_rules! wlist {
-    ( $( $item: expr ),* $(,)? ) => {
+    ($( $item:expr ),* $(,)?) =>
+    {
         WeightedList::init([
             $( $item, )*
         ])
@@ -156,7 +163,7 @@ macro_rules! wlist {
 // == ACCESSORS == //
 impl<V, W: Weight> WeightedList<V,W>
 {
-    /// Get an iterator over copies of the weights of each item in the list.
+    /// Get an iterator over the weights of each item in the list.
     /// 
     /// # Usage
     /// 
@@ -175,7 +182,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self.data.iter().map(|item| item.weight)
     }
 
-    /// Get an iterator over references to the values of each item in the list.
+    /// Get an iterator over the values of each item in the list.
     /// 
     /// # Usage
     /// 
@@ -248,7 +255,7 @@ impl<V, W: Weight> WeightedList<V,W>
 
 impl<V, W: Weight + nums::PrimInt> WeightedList<V,W>
 {
-    /// Get an iterator over each value repeated a number of times equal to its weight.
+    /// Get an iterator over each value in the list, repeated a number of times equal to its weight.
     /// 
     /// # Usage
     /// 
@@ -281,8 +288,8 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// # Notes
     /// 
-    /// - This is not the number of items in the list – use `.total_values()` for that.
-    /// - `len() == 0` does not imply the list is empty – items may have zero or negative weights! To check if the list is empty, use `.is_empty()` instead.
+    /// - This is not the number of items in the list – use [`.total_values()`](Self::total_values) for that.
+    /// - `self.len() == 0` does not imply the list is empty – items may have zero or negative weights! To check if the list is empty, use [`.is_empty()`](Self::is_empty) instead.
     pub fn len(&self) -> W
     {
         self.data.iter().map(|item| item.weight).sum()
@@ -295,7 +302,7 @@ impl<V, W: Weight> WeightedList<V,W>
 
     /// How many items/values are in the list?
     /// 
-    /// Note that this is not equivalent to `.len()`, which is the total weights of all items in the list.
+    /// Note that this is not equivalent to [`self.len()`](Self::len), which is the total weights of all items in the list.
     /// 
     /// # Usage
     /// 
@@ -369,8 +376,7 @@ impl<V, W: Weight> WeightedList<V,W>
 }
 
 // == CONVERSIONS == //
-impl<V, W: Weight> From<WeightedList<V,W>> for Vec<WeightedItem<V,W>>
-{
+impl<V, W: Weight> From<WeightedList<V,W>> for Vec<WeightedItem<V,W>> {
     fn from(list: WeightedList<V,W>) -> Self {
         list.data
     }
@@ -396,8 +402,7 @@ impl<V, W: Weight> FromIterator<WeightedItem<V,W>> for WeightedList<V,W>
     }
 }
 
-impl<V, W: Weight> FromIterator<(W,V)> for WeightedList<V,W>
-{
+impl<V, W: Weight> FromIterator<(W,V)> for WeightedList<V,W> {
     fn from_iter<I>(pairs: I) -> Self
         where I: IntoIterator<Item = (W,V)>
     {
@@ -405,36 +410,30 @@ impl<V, W: Weight> FromIterator<(W,V)> for WeightedList<V,W>
     }
 }
 
-impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
-{
+impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
     fn from(vec: Vec<WeightedItem<V,W>>) -> Self {
         Self { data: vec }
     }
 }
-
-impl<V, W: Weight> From<Vec<(W,V)>> for WeightedList<V,W>
-{
+impl<V, W: Weight> From<Vec<(W,V)>> for WeightedList<V,W> {
     fn from(vec: Vec<(W,V)>) -> Self {
         Self::init(vec.into_iter())
     }
 }
 
-impl<V, W: Weight, const N: usize> From<[(W,V); N]> for WeightedList<V,W>
-{
+impl<V, W: Weight, const N: usize> From<[(W,V); N]> for WeightedList<V,W> {
     fn from(pairs: [(W,V); N]) -> Self {
         Self::init(pairs)
     }
 }
 
-impl<V, W: Weight> AsRef<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
-{
+impl<V, W: Weight> AsRef<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
     fn as_ref(&self) -> &Vec<WeightedItem<V,W>> {
         &self.data
     }
 }
 
-impl<V, W: Weight> Deref for WeightedList<V,W>
-{
+impl<V, W: Weight> Deref for WeightedList<V,W> {
     type Target = [WeightedItem<V,W>];
 
     fn deref(&self) -> &Self::Target {
@@ -442,8 +441,7 @@ impl<V, W: Weight> Deref for WeightedList<V,W>
     }
 }
 
-impl<V, W: Weight> DerefMut for WeightedList<V,W>
-{
+impl<V, W: Weight> DerefMut for WeightedList<V,W> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.data.deref_mut()
     }
@@ -452,7 +450,8 @@ impl<V, W: Weight> DerefMut for WeightedList<V,W>
 // == TRAITS == //
 impl<V: fmt::Display, W: Weight + fmt::Display> fmt::Display for WeightedList<V,W>
 {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {            
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result
+    {            
         write!(f,
             "WeightedList[{}]",
             self.data.iter().map(|item| item.to_string()).join(", ")
@@ -660,7 +659,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
-    /// Reverse the order of items in the list.
+    /// Reverse the order of items in the list (in-place).
     pub fn reverse(&mut self) -> &mut Self
     {
         self.data.reverse();
@@ -730,7 +729,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
-    /// Retain only items that fulfil the predicate.
+    /// Retain only items that fulfil `predicate``.
     pub fn retain<F>(&mut self, predicate: F) -> &mut Self
         where F: FnMut(&WeightedItem<V,W>) -> bool
     {
@@ -738,7 +737,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
-    /// Retain only items that fulfil the predicate, passing a mutable reference to the predicate.
+    /// Retain only items that fulfil `predicate``, passing a mutable reference to the predicate.
     pub fn retain_mut<F>(&mut self, predicate: F) -> &mut Self
         where F: FnMut(&mut WeightedItem<V,W>) -> bool
     {
@@ -746,9 +745,9 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
-    /// Clear the list, removing all items.
+    /// Clear the list, removing all items (in-place).
     /// 
-    /// If you'd like to set the weights of all items to `0`, you can use `.zero_all_weights()`.
+    /// If you'd like to set the weights of all items to `0`, you can use [`.zero_all_weights()`](Self::zero_all_weights).
     pub fn clear(&mut self) -> &mut Self
     {
         self.data.clear();
@@ -783,6 +782,9 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
+    /// Return a clone of the list with all items having a non-positive weight removed.
+    /// 
+    /// Out-of-place version of [`.prune()`](Self::prune).
     pub fn pruned(&self) -> Self
         where V: Clone
     {
@@ -829,7 +831,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self.remove_last_where(|item| item.value == *value)
     }
 
-    /// Find the first occurrence (from the left) of an item that matches `predicate`, and remove the entire item.
+    /// Find the first occurrence (from the left) of an item that fulfils `predicate`, and remove the entire item.
     /// 
     /// # Usage
     /// 
@@ -852,7 +854,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
-    /// Find the last occurrence (from the right) of an item that matches `predicate`, and remove the entire item.
+    /// Find the last occurrence (from the right) of an item that fulfils `predicate`, and remove the entire item.
     /// 
     /// # Usage
     /// 
@@ -965,11 +967,11 @@ impl<V, W: Weight> WeightedList<V,W>
 
 impl<V: PartialEq, W: Weight> WeightedList<V,W>
 {
-    /// Merge a `WeightedItem` into the list. If an item with the same value already exists, add the weight of the new item to the existing item. Otherwise, append the new item to the list.
+    /// Merge an item into the list. If an item with the same value already exists, add the weight of the new item to the existing item. Otherwise, append the new item to the list.
     /// 
     /// # Tips
     /// 
-    /// - Use this method when you already have an existing `WeightedItem` instance. If you're going to construct a new `WeightedItem`, `.merge_new_item()` will be more convenient.
+    /// - Use this method when you already have an existing [`WeightedItem`] instance. If you're going to construct a new [`WeightedItem`], [`.merge_new_item()`](Self::merge_new_item) is probably more convenient.
     /// 
     /// # Usage
     /// 
@@ -1001,7 +1003,7 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
 
     /// Merge a new item with `value` and `weight` into the list.
     /// 
-    /// See `.merge_item()` for details.
+    /// See [`.merge_item()`](Self::merge_item) for details.
     pub fn merge_new_item(&mut self, weight: W, value: V) -> &mut Self
     {
         self.merge_item(WeightedItem { weight, value })
@@ -1009,7 +1011,7 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
 
     /// Merge a new item with `value` and a weight of `1` into the list.
     /// 
-    /// See `.merge_item()` for details.
+    /// See [`.merge_item()`](Self::merge_item) for details.
     pub fn merge_value(&mut self, value: V) -> &mut Self
     {
         self.merge_item(WeightedItem::unit(value))
@@ -1017,7 +1019,7 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
 
     /// Merge the items of `other` into `self`, leaving `other` empty.
     /// 
-    /// See `.merge_item()` for details.
+    /// See [`.merge_item()`](Self::merge_item) for details.
     pub fn merge_with(&mut self, other: WeightedList<V,W>) -> &mut Self
     {
         for item in other {
@@ -1027,7 +1029,7 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
         self
     }
 
-    /// Merge any duplicate items in the list.
+    /// Merge any items in the list with duplicate values by combining their weights with the first instance.
     /// 
     /// # Usage
     /// 
@@ -1290,12 +1292,12 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     /// ```
     /// 
     /// - `count`: How many values to select.
-    /// - `replace`: If `true`, items do not have their weight decremented after selection, and infinite values can be selected. If `false`, items have their weight decremented after selection – this would mean at most `self.len()` values are returned.
-    /// - `decrement`: How much to decrement weights by if `replace` is `false`.
-    /// - `unique`: If `true`, only distinct values will be returned.
+    /// - `replace` (optional): If `true`, items do not have their weight decremented after selection, and infinite values can be selected. If `false`, items have their weight decremented after selection – this would mean at most [`self.len()`](Self::len) values are returned.
+    /// - `decrement` (optional): How much to decrement weights by if `replace` is `false`.
+    /// - `unique` (optional): If `true`, only distinct values will be returned.
     ///   - `replace` becomes irrelevant in this case.
     ///   - This uses `Eq` equality comparison.
-    ///   - This means at most `self.total_values()` values will be returned.
+    ///   - This means at most [`self.total_values()`](Self::total_values) values will be returned.
     /// 
     /// # Usage
     /// 
@@ -1509,7 +1511,7 @@ impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
 
 impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
 {
-    /// Shuffle the order of items in the list in-place.
+    /// Shuffle the order of items in the list (in-place).
     pub fn shuffle_items<RNG>(&mut self, rng: &mut RNG) -> &mut Self
         where RNG: Rng + ?Sized
     {
@@ -1519,7 +1521,7 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
 
     /// Return a clone with the order of items shuffled.
     /// 
-    /// Out-of-place version of `.shuffle_items()`.
+    /// Out-of-place version of [`.shuffle_items()`](Self::shuffle_items).
     pub fn shuffled_items<RNG>(&self, rng: &mut RNG) -> Self
         where RNG: Rng + ?Sized
     {
@@ -1529,7 +1531,7 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
         out
     }
 
-    /// Shuffle the pairings of (weight, value) for items in the list, in-place.
+    /// Shuffle the pairings of (weight, value) for items in the list (in-place).
     /// 
     /// Values remain in the same order, while weights are re-assigned.
     /// 
@@ -1565,7 +1567,7 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
 
     /// Return a clone of the list with (weight, value) pairings shuffled.
     /// 
-    /// Out-of-place version of `.shuffle_weights()`.
+    /// Out-of-place version of [`.shuffle_weights()`](Self::shuffle_weights).
     pub fn shuffled_weights<RNG>(&self, rng: &mut RNG) -> Self
         where RNG: Rng + ?Sized
     {
@@ -1579,7 +1581,7 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
 // == INTERNAL == //
 impl<V, W: Weight> WeightedList<V,W>
 {
-    /// Convert a `weighted_index` to its unweighted equivalent in the underlying `Vec`. Does not panic on overflow and instead returns the `.len()` of the underlying `Vec`.
+    /// Convert a `weighted_index` to its unweighted equivalent in the underlying `Vec<>`. Does not panic on overflow and instead returns `Vec::len()`.
     fn _unweight_index_nopanic_(&self, weighted_index: W) -> usize
     {
         let mut t = W::zero();
@@ -1598,7 +1600,7 @@ impl<V, W: Weight> WeightedList<V,W>
         i
     }
 
-    /// Convert a `weighted_index` to its unweighted equivalent in the underlying `Vec`. Panics on overflow.
+    /// Convert a `weighted_index` to its unweighted equivalent in the underlying `Vec<>`. Panics on overflow.
     fn _unweight_index_(&self, weighted_index: W) -> usize
     {
         let mut t = W::zero();
