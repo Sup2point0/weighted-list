@@ -8,15 +8,15 @@ use crate::root::*;
 pub type WItem<V,W> = WeightedItem<V,W>;
 
 
-/// An item in a `WeightedList`, with a `value` of type `V` and a `weight` of numerical type `W`.
+/// An item in a [`WeightedList`], with a `value` of type `V` and a `weight` of numerical type `W`.
 /// 
 /// For consistency and layout, `weight` always comes before `value` when ordering is relevant.
 /// 
-/// You should rarely find yourself constructing a `WeightedItem` by hand – instead, you'll usually interact with existing instances from a `WeightedList`.
+/// You should rarely find yourself constructing a [`WeightedItem`] by hand – instead, you'll usually interact with existing instances from a [`WeightedList`].
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct WeightedItem<V, W: Weight>
 {
-    /// The weight of the item. A non-negative number. `0` is technically valid, but not advised.
+    /// The weight of the item. A positive number. `0` is technically valid, but not advised.
     pub weight: W,
 
     /// The value stored in the item.
@@ -26,7 +26,7 @@ pub struct WeightedItem<V, W: Weight>
 // == CONSTRUCTORS == //
 impl<V, W: Weight> WeightedItem<V,W>
 {
-    /// Construct a `WeightedItem` with `value` and a weight of `1`.
+    /// Construct an item with `value` and a weight of `1`.
     pub fn unit(value: V) -> Self
     {
         Self {
@@ -35,20 +35,20 @@ impl<V, W: Weight> WeightedItem<V,W>
         }
     }
 
-    /// Construct a `WeightedItem` with `value` and `weight`.
+    /// Construct an item with `value` and `weight`.
     pub fn new(weight: W, value: V) -> Self
     {
         Self { weight, value }
     }
 
-    /// Construct a `WeightedItem` from a `(weight, value)` pair.
+    /// Construct an item from a `(weight, value)` pair.
     pub fn from((weight, value): (W, V)) -> Self
     {
         Self { weight, value }
     }
 }
 
-/// Construct a `WeightedItem` from a `(weight, value)` pair.
+/// Construct a [`WeightedItem`] from a `(weight, value)` pair.
 /// 
 /// # Usage
 /// 
@@ -86,7 +86,7 @@ impl<V: Eq, W: Weight + Ord> Ord for WeightedItem<V,W>
     fn cmp(&self, other: &Self) -> std::cmp::Ordering
     {
         self.weight.cmp(&other.weight)
-        // .then(self.value.cmp(&other.value))
+            // .then(self.value.cmp(&other.value))  // TODO FIXME
     }
 }
 
