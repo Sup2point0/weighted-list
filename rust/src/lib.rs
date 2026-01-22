@@ -31,6 +31,9 @@
 //! For more detailed guidance on how to use the struct, see [`WeightedList`].
 
 mod root;
+pub use root::{
+    Weight,
+};
 
 mod weighted_item;
 pub use weighted_item::{

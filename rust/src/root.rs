@@ -1,25 +1,23 @@
-use std::{
-    fmt,
-    iter::*,
-};
+use std::*;
 
 use num_traits as nums;
 
 
+/// Any general numerical type, such as `u32`, `usize`, `f64`. The type `W` of item weights in a [`WeightedList<V,W>`](crate::WeightedList) implement this trait.
 pub trait Weight:
-    nums::NumAssign
+    Copy
+    + nums::NumAssign
     + nums::NumCast
-    + Copy
     + PartialOrd
-    + Sum
-    + fmt::Display
+    + iter::Sum
+    + fmt::Debug
 {}
 
 impl<Type> Weight for Type where Type:
-    nums::NumAssign
+    Copy
+    + nums::NumAssign
     + nums::NumCast
-    + Copy
     + PartialOrd
-    + Sum
-    + fmt::Display
+    + iter::Sum
+    + fmt::Debug
 {}
