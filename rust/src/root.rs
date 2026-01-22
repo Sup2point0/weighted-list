@@ -5,7 +5,7 @@ use num_traits as nums;
 
 /// Any general numerical type, such as `u32`, `usize`, `f64`. The type `W` of item weights in a [`WeightedList<V,W>`](crate::WeightedList) implement this trait.
 pub trait Weight:
-    Copy
+      Copy
     + nums::NumAssign
     + nums::NumCast
     + PartialOrd
@@ -14,7 +14,7 @@ pub trait Weight:
 {}
 
 impl<Type> Weight for Type where Type:
-    Copy
+      Copy
     + nums::NumAssign
     + nums::NumCast
     + PartialOrd

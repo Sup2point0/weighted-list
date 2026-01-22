@@ -5,6 +5,9 @@ use std::{
 use crate::root::*;
 
 
+/// A shorthand for [`WeightedItem`].
+/// 
+/// If you refer to [`WeightedItem`] prolifically in your code, you may wish to use this for brevity. Otherwise, the full [`WeightedItem`] is recommended for clarity.
 pub type WItem<V,W> = WeightedItem<V,W>;
 
 

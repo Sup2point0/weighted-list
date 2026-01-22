@@ -17,6 +17,8 @@ use crate::WeightedItem;
 
 
 /// A shorthand for [`WeightedList`].
+/// 
+/// If you refer to [`WeightedList`] prolifically in your code, you may wish to use this for brevity. Otherwise, the full [`WeightedList`] is recommended for clarity.
 pub type WList<V,W> = WeightedList<V,W>;
 
 
@@ -66,6 +68,8 @@ pub type WList<V,W> = WeightedList<V,W>;
 /// 
 /// # Tips
 /// 
+/// - If you only need integer weights, use unsigned types like `u32` to enforce non-negative item weights.
+///   - If you really want to, you can use `NonZero<u32>` to further ensure item weights are valid.
 /// - Most methods return `&Self` or `&mut Self`, allowing you to chain methods. Here's a contrived example:
 /// 
 /// ```
@@ -269,7 +273,10 @@ impl<V, W: Weight> Index<W> for WeightedList<V,W>
             }
         };
 
-        panic!("index out of bounds: the len is {} but the index is {weighted_index}", self.len());
+        panic!(
+            "index out of bounds: the len is {:?} but the index is {:?}",
+            self.len(), weighted_index
+        );
     }
 }
 
@@ -1624,7 +1631,7 @@ impl<V, W: Weight> WeightedList<V,W>
         }
 
         panic!(
-            "index out of bounds: the len is {} but the index is {}",
+            "index out of bounds: the len is {:?} but the index is {:?}",
             self.len(), weighted_index
         );
     }
