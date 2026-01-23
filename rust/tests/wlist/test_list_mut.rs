@@ -101,11 +101,13 @@ use weighted_list::*;
 #[test] fn remove_at()
 {
     let orig = wl();
+    let orig = orig.items();
+    
     let mut list = wl();
 
-    assert_eq!( list.remove_at(0), orig.items()[0] );
-    assert_eq!( list.remove_at(0), orig.items()[1] );
-    assert_eq!( list.remove_at(0), orig.items()[2] );
+    assert_eq!( list.remove_at(0), *orig[0] );
+    assert_eq!( list.remove_at(0), *orig[1] );
+    assert_eq!( list.remove_at(0), *orig[2] );
 }
 
 #[test] fn truncate()

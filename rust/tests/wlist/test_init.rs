@@ -116,16 +116,19 @@ use weighted_list::*;
     assert_eq!( WList::from(wl()), wl() );
     
     // From Vec<WItem<V,W>>
-    assert_eq!( WList::from(wl().items().clone()), wl() );
+    let vec = Vec::from(wl());
+    assert_eq!( WList::from(vec), wl() );
 }
 
 #[test] fn from_iter_items()
 {
     // FromIterator WList<V,W>
-    assert_eq!( WList::from_iter(wl()), wl() );
+    assert_eq!( wl().into_iter().collect::<WL>(), wl() );
     
     // FromIterator Vec<WItem<V,W>>
-    assert_eq!( WList::from_iter(wl().items().clone()), wl() );
+    let list = wl();
+    let iter = list.items().into_iter().map(|item| item.clone());
+    assert_eq!( iter.collect::<WL>(), wl() );
 }
 
 #[test] fn asref_vec()

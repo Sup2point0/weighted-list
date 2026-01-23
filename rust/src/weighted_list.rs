@@ -65,7 +65,7 @@ pub type WList<V,W> = WeightedList<V,W>;
 /// let _ = wl[8]; // => panic - out of bounds!
 /// ```
 /// 
-/// In essence, each value is "copied" a number of times equal to its weight – this is what enables the weighted randomisation. But because the values are stored in [`WeightedItem`] objects, instead of actually being copied, larger weight values can be used without fear of performance impacts.
+/// In essence, each value is "copied" a number of times equal to its weight – this is what enables the weighted randomisation. But because the values are stored in [`WeightedItem`] objects, instead of actually being duplicated, larger weight values can be used without fear of performance impacts.
 /// 
 /// # Tips
 /// 
@@ -188,7 +188,7 @@ impl<V, W: Weight> FromIterator<WeightedItem<V,W>> for WeightedList<V,W>
 
 impl<V, W: Weight> From<Vec<(W,V)>> for WeightedList<V,W> {
     fn from(pairs: Vec<(W,V)>) -> Self {
-        Self::from_iter(pairs.into_iter())
+        pairs.into_iter().collect()
     }
 }
 impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
@@ -398,6 +398,20 @@ impl<V, W: Weight> WeightedList<V,W>
     /// assert_eq!(items[0].value, "sup");
     /// assert_eq!(items[1].value, "nova");
     /// ```
+    /// 
+    /// # Tips
+    /// 
+    /// - This may be helpful for [non-weighted indexing](WeightedList#indexing).
+    /// - If you'd like a vector of owned [`WeightedItem`](WeightedItem)s, [`WeightedList`](WeightedList) implements `Into<Vec>`:
+    /// 
+    /// ```rust
+    /// # use weighted_list::*;
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// let items = Vec::from(wl);
+    /// 
+    /// assert_eq!(items[0].value, "sup");
+    /// assert_eq!(items[1].value, "nova");
+    /// ```
     pub fn items(&self) -> Vec<&WeightedItem<V,W>>
     {
         self.data.iter().collect_vec()
@@ -432,12 +446,7 @@ impl<V, W: Weight> WeightedList<V,W>
     {
         self.data.iter().map(|item| (item.weight, &item.value))
     }
-}
 
-impl<V, W: Weight> WeightedList<V,W>
-    where
-        W: nums::PrimInt
-{
     /// Get an iterator over each value in the list, repeated a number of times equal to its weight.
     /// 
     /// # Usage
@@ -458,6 +467,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// - Since repeating an entity a non-integer number of times is undefined, this requires `W` to be an integer type.
     pub fn expanded(&self) -> impl Iterator<Item = &V>
+        where W: nums::PrimInt
     {
         self.data
             .iter()
