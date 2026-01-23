@@ -1,11 +1,32 @@
 # Changelog
 
 
+## v0.5.0
+
+### Breaking
+- Removed `WeightedList::init()`
+  - Use `::from()` (if possible), else `::from_iter(i)` or `i.collect()`
+- `WeightedList::items()` returns `Vec<&WeightedItem>` instead of `&Vec<WeightedItem>`
+- Relaxed trait bounds for `W: Weight`
+  - `fmt::Display` changed to `fmt::Debug`
+
+### New
+- `WeightedList::collect_weights()` method
+- `WeightedList::collect_values()` method
+- Expose `Weight` trait
+- Add `AsRef<>` conversions for `WeightedList`
+- Improve `From<>` conversions for `WeightedList`
+
+### Fixes
+- Changed examples to use `u32` instead of `i32` to enforce non-negative weights
+- Add missing documentation for crate items
+
+
 ## v0.4.1
 
 ### Fixes
 - Add links to documentation
-- Correct documentation of `WeightedList::is_zero`
+- Correct error in documentation for `WeightedList::is_zero`
 
 
 ## v0.4.0

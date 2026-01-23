@@ -10,6 +10,12 @@ use weighted_list::*;
     let _: WL = wl();
     let _: WL = wll();
 
+    let _ = WL::from([
+        (2, str!("sup")),
+        (3, str!("nova")),
+        (5, str!("shard")),
+    ]);
+
     let list: WL = WList::with_capacity(42);
     assert!( list.capacity() >= 42 );
 }

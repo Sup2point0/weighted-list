@@ -1,12 +1,12 @@
 [package]
 name = "weighted-list"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["Sup#2.0"]
 edition = "2024"
 
 description = "A list class for weighted randomisation"
-repository = "https://github.com/Sup2point0/weighted-list/tree/main/rust"
 readme = "README.md"
+repository = "https://github.com/Sup2point0/weighted-list/tree/main/rust"
 documentation = "https://docs.rs/weighted-list/latest/weighted_list/"
 license = "MIT"
 
