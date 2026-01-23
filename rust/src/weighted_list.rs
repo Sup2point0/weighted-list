@@ -220,6 +220,22 @@ impl<V, W: Weight> AsRef<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
         &self.data
     }
 }
+impl<V, W: Weight> AsRef<[WeightedItem<V,W>]> for WeightedList<V,W> {
+    fn as_ref(&self) -> &[WeightedItem<V,W>] {
+        &self.data
+    }
+}
+
+impl<V, W: Weight> AsMut<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
+    fn as_mut(&mut self) -> &mut Vec<WeightedItem<V,W>> {
+        &mut self.data
+    }
+}
+impl<V, W: Weight> AsMut<[WeightedItem<V,W>]> for WeightedList<V,W> {
+    fn as_mut(&mut self) -> &mut [WeightedItem<V,W>] {
+        &mut self.data
+    }
+}
 
 impl<V, W: Weight> Deref for WeightedList<V,W> {
     type Target = [WeightedItem<V,W>];

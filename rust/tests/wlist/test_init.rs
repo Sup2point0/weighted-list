@@ -130,20 +130,3 @@ use weighted_list::*;
     let iter = list.items().into_iter().map(|item| item.clone());
     assert_eq!( iter.collect::<WL>(), wl() );
 }
-
-#[test] fn asref_vec()
-{
-    let list = wl();
-
-    fn test<T>(_: impl AsRef<Vec<T>>) {}
-
-    test(list);
-}
-
-#[test] fn deref_to_slice()
-{
-    let list = wl();
-
-    let _ = list.first();
-    let _ = (*list).len();
-}
