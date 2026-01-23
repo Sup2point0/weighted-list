@@ -393,14 +393,14 @@ impl<V, W: Weight> WeightedList<V,W>
     /// ```
     /// # use weighted_list::*;
     /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// let items = wl.items();
     /// 
-    /// for item in wl.items() {
-    ///     println!("({}, {})", item.weight, item.value);    // => (2, "sup"), (3, "nova")
-    /// }
+    /// assert_eq!(items[0].value, "sup");
+    /// assert_eq!(items[1].value, "nova");
     /// ```
-    pub fn items(&self) -> &Vec<WeightedItem<V,W>>
+    pub fn items(&self) -> Vec<&WeightedItem<V,W>>
     {
-        &self.data
+        self.data.iter().collect_vec()
     }
 
     /// Get an iterator over (weight, value) tuples representing each item in the list.
