@@ -1,14 +1,4 @@
-type LikeWeightedItem<Value> = (
-    WeightedItem<Value>
-  | [number, any]
-);
-
-
-export interface WeightedItem<Value>
-{
-  weight: number;
-  value: Value;
-}
+import type { WeightedItem, LikeWeightedItem } from "./shared";
 
 
 export class WeightedList<Value>
@@ -17,7 +7,6 @@ export class WeightedList<Value>
 
 
   // == CONSTRUCTORS == //
-
   constructor(...items: LikeWeightedItem<Value>[])
   {
     this.#data = items.map(WeightedList.#sanitise);
@@ -45,7 +34,6 @@ export class WeightedList<Value>
 
 
   // == PROPERTIES == //
-
   get length() {
     return this.#data.reduce((acc, item) => acc + item.weight, 0);
   }
