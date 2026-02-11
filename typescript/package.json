@@ -3,11 +3,11 @@
   "type": "module",
   "private": false,
   "license": "MIT",
-  "main": "weighted-list/weighted-list.ts",
+  "main": "weighted-list/index.ts",
   "scripts": {
     "test": "vitest",
-    "testx": "vitest --ui",
-    "test-run": "vitest run"
+      "testx": "vitest --ui",
+      "test-run": "vitest run"
   },
   "devDependencies": {
     "@vitest/ui": "latest",
