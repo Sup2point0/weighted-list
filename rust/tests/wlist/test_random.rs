@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use itertools::Itertools;
 
 use crate::*;
@@ -170,14 +172,25 @@ use weighted_list::*;
     '_small: {
         let mut list = wl();
 
-        list.take_random_values_unique().rng(&mut rng).count(3).call();
-        assert_eq!( list, wlist![(1, str!("sup")), (2, str!("nova")), (4, str!("shard"))] );
+        macro_rules! cycle {
+            () => {
+                list.take_random_values_unique().rng(&mut rng)
+                    .count(3).call()
+                    .into_iter().collect::<HashSet<String>>()
+            }
+        }
 
-        list.take_random_values_unique().rng(&mut rng).count(3).call();
-        assert_eq!( list, wlist![(1, str!("nova")), (3, str!("shard"))] );
+        let selected = cycle!();
+        assert_eq!( selected, HashSet::from([str!("sup"), str!("nova"), str!("shard")]) );
+        assert_eq!( list,     wlist![(1, str!("sup")), (2, str!("nova")), (4, str!("shard"))] );
 
-        list.take_random_values_unique().rng(&mut rng).count(3).call();
-        assert_eq!( list, wlist![(2, str!("shard"))] );
+        let selected = cycle!();
+        assert_eq!( selected, HashSet::from([str!("sup"), str!("nova"), str!("shard")]) );
+        assert_eq!( list,     wlist![(1, str!("nova")), (3, str!("shard"))] );
+
+        let selected = cycle!();
+        assert_eq!( selected, HashSet::from([str!("nova"), str!("shard")]) );
+        assert_eq!( list,     wlist![(2, str!("shard"))] );
     }
 
     '_large: {

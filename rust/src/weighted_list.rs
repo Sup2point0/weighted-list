@@ -1,20 +1,14 @@
-use std::{
-    fmt::{self, Debug, Display},
-    hash::Hash,
-    iter,
-    ops::*,
-};
+use std::collections::{ HashSet };
+use std::fmt::{ Debug, Display };
+use std::hash::{ Hash };
 
 use bon::bon;
 use itertools::Itertools;
 use num_traits as nums;
-use rand::{
-    prelude::*,
-    seq::SliceRandom,
-};
+use rand::prelude::*;
+use rand::seq::{ SliceRandom };
 
-use crate::root::*;
-use crate::WeightedItem;
+use crate::*;
 
 
 /// A shorthand for [`WeightedList`].
@@ -237,14 +231,14 @@ impl<V, W: Weight> AsMut<[WeightedItem<V,W>]> for WeightedList<V,W> {
     }
 }
 
-impl<V, W: Weight> Deref for WeightedList<V,W> {
+impl<V, W: Weight> std::ops::Deref for WeightedList<V,W> {
     type Target = [WeightedItem<V,W>];
 
     fn deref(&self) -> &Self::Target {
         self.data.deref()
     }
 }
-impl<V, W: Weight> DerefMut for WeightedList<V,W> {
+impl<V, W: Weight> std::ops::DerefMut for WeightedList<V,W> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.data.deref_mut()
     }
@@ -267,7 +261,7 @@ impl<V, W: Weight> Display for WeightedList<V,W>
         V: Display,
         W: Display,
 {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result
     {            
         write!(f,
             "WeightedList[{}]",
@@ -277,7 +271,7 @@ impl<V, W: Weight> Display for WeightedList<V,W>
 }
 
 // == INDEXING == //
-impl<V, W: Weight> Index<W> for WeightedList<V,W>
+impl<V, W: Weight> std::ops::Index<W> for WeightedList<V,W>
 {
     type Output = WeightedItem<V,W>;
 
@@ -300,7 +294,7 @@ impl<V, W: Weight> Index<W> for WeightedList<V,W>
     }
 }
 
-impl<V, W: Weight> IndexMut<W> for WeightedList<V,W>
+impl<V, W: Weight> std::ops::IndexMut<W> for WeightedList<V,W>
 {
     fn index_mut(&mut self, weighted_index: W) -> &mut Self::Output
     {
@@ -487,7 +481,7 @@ impl<V, W: Weight> WeightedList<V,W>
     {
         self.data
             .iter()
-            .flat_map(|item| iter::repeat_n(
+            .flat_map(|item| std::iter::repeat_n(
                 &item.value,
                 nums::cast::<W, usize>(item.weight).unwrap_or(0)
             ))
@@ -562,15 +556,15 @@ impl<V, W: Weight> WeightedList<V,W>
     /// assert_eq!(wlist![(0, "qi"), (1, "vi")].is_zero(), false);
     /// 
     /// let empty: WeightedList<(), usize> = wlist![];
-    /// assert_eq!(empty.is_zero(), false);
+    /// assert_eq!(empty.is_zero(), true);
     /// ```
     /// 
     /// # Notes
-    /// - Returns `false` if `.is_empty()` is `true`.
+    /// - Returns `true` if `.is_empty()` is `true`.
     pub fn is_zero(&self) -> bool
     {
-        !self.is_empty()
-        && self.data.iter().all(|item| item.weight == W::zero())
+        self.is_empty()
+        || self.data.iter().all(|item| item.weight == W::zero())
     }
 
     /// Do any items have a negative weight?
@@ -1288,6 +1282,58 @@ impl<V, W: Weight> WeightedList<V,W>
 
         Some(out)
     }
+
+    pub fn select_random_values_unique<RNG>(&self, rng: &mut RNG, count: usize) -> Vec<V>
+        where
+            RNG: Rng + ?Sized,
+            V: Clone + Eq + Hash,
+    {
+        let mut l = self.len();
+        let mut seen_indices = HashSet::<usize>::new();
+
+        let mut out = Vec::with_capacity(
+            /* NOTE: To guard against erroneous overallocations */
+            if count > 16 {
+                count.min(self.total_values())
+            } else {
+                count
+            }
+        );
+
+        for _ in 0..count
+        {
+            if self.is_zero() { break }
+
+            /* NOTE: Need IIFE to allow `?` short-circuiting */
+            let Some(value) = (|| {
+                let weighted_index = self._get_random_weighted_index_up_to_(rng, l)?;
+                let idx = self._unweight_index_skipping_(weighted_index, &seen_indices)?;
+
+                let target = &self.data[idx];
+                let value = target.value.clone();
+
+                Some(value)
+            })() else { continue };
+
+            /* Yeah, the repeated traversal is horrific, but I can’t see any other way... we’ve got to discount *all* duplicates of the value we pick */
+            let (indices, weights): (Vec<usize>, Vec<W>) =
+                self.data.iter().enumerate()
+                    .filter_map(
+                        |(i, item)| {
+                            if item.value == value { Some((i, item.weight)) }
+                            else { None }
+                        }
+                    )
+                    .unzip();
+            
+            seen_indices.extend(indices);
+            l -= weights.into_iter().sum::<W>();
+            
+            out.push(value);
+        }
+
+        out
+    }
 }
 
 /// Methods for in-place random sampling from a list, decreasing weights of items that are chosen.
@@ -1475,7 +1521,7 @@ impl<V, W: Weight> WeightedList<V,W>
                 else if replace { pool.take_by_random(rng, W::zero()) }
                 else            { pool.take_by_random(rng, decrement) }
             } {
-                out.push(item.value.clone());
+                out.push(item.value);
             }
         }
 
@@ -1513,35 +1559,6 @@ impl<V, W: Weight> WeightedList<V,W>
 
         out
     }
-}
-
-#[bon]
-impl<V, W: Weight> WeightedList<V,W>
-    where
-        V: Clone + Eq + Hash
-{
-    /// Variant of `._unweighted_index_()` for mutating random selection with unique outputs.
-    fn _unweight_index_skipping_(&self,
-        weighted_index: W,
-        seen: &std::collections::HashSet<V>,
-    ) -> Option<usize>
-    {
-        let mut t = W::zero();
-
-        for (i, item) in self.data.iter().enumerate() {
-            if seen.contains(&item.value) {
-                continue
-            }
-
-            t += item.weight;
-
-            if t > weighted_index {
-                return Some(i);
-            }
-        }
-
-        None
-    }
 
     /// Take `count` unique values using weighted randomisation.
     ///
@@ -1556,12 +1573,11 @@ impl<V, W: Weight> WeightedList<V,W>
     {
         let decrement = decrement.unwrap_or(W::one());
 
-        let mut n = 0;
         let mut l = self.len();
-
-        let mut seen = std::collections::HashSet::<V>::new();
+        let mut seen_indices = HashSet::<usize>::new();
 
         let mut out = Vec::with_capacity(
+            /* NOTE: To guard against erroneous overallocations */
             if count > 16 {
                 count.min(self.total_values())
             } else {
@@ -1569,40 +1585,38 @@ impl<V, W: Weight> WeightedList<V,W>
             }
         );
         
-        loop {
-            n += 1;
-            if n > count || self.data.is_empty() { break }
+        for _ in 0..count
+        {
+            if l == W::zero() || self.is_zero() { break }
 
-            if let Some(value) = (|| {
-                let weighted_index = self._get_random_weighted_index_up_to_(rng, l)?;
-                let idx = self._unweight_index_skipping_(weighted_index, &seen)?;
+            let Some(weighted_index) = self._get_random_weighted_index_up_to_(rng, l) else { continue };
+            let Some(idx) = self._unweight_index_skipping_(weighted_index, &seen_indices) else { continue };
+            let target = &self.data[idx];
 
-                let target = &mut self.data[idx];
-                let value = target.value.clone();
-
-                if decrement >= target.weight {
-                    self.data.remove(idx);
-                } else {
-                    target.weight -= decrement;
-                }
-
-                Some(value)
-            })()
-            {
-                seen.insert(value.clone());
-                out.push(value);
-
-                /* Yeah, the double traversal is horrific, but I can’t see any other way... we’ve got to discount *all* duplicates of the value we pick */
-                l = self.data.iter()
+            /* Yeah, the repeated traversal is horrific, but I can’t see any other way... we’ve got to discount *all* duplicates of the value we pick */
+            let (indices, weights): (Vec<usize>, Vec<W>) =
+                self.data.iter().enumerate()
                     .filter_map(
-                        |item| {
-                            if !seen.contains(&item.value) { Some(item.weight) }
-                            else { None }
-                        }
+                        |(i, item)| (item.value == target.value).then_some((i, item.weight))
                     )
-                    .sum::<W>();
+                    .unzip();
+            
+            seen_indices.extend(indices);
+            l -= weights.into_iter().sum::<W>();
+
+            /* NOTE: Upgrade to mutable reference here to avoid conflict with earlier */
+            let target = &mut self.data[idx];
+
+            if decrement >= target.weight {
+                target.weight = W::zero();
+            } else {
+                target.weight -= decrement;
             }
+            
+            out.push(target.value.clone());
         }
+
+        self.prune();
 
         out
     }
@@ -1720,6 +1734,28 @@ impl<V, W: Weight> WeightedList<V,W>
             self.len(), weighted_index
         );
     }
+
+    /// Variant of `._unweighted_index_()` for random selection enforcing unique outputs.
+    fn _unweight_index_skipping_(&self,
+        weighted_index: W,
+        seen: &HashSet<usize>,
+    ) -> Option<usize>
+    {
+        let mut t = W::zero();
+
+        for (i, item) in self.data.iter().enumerate()
+        {
+            if seen.contains(&i) { continue }
+
+            t += item.weight;
+
+            if t > weighted_index {
+                return Some(i);
+            }
+        }
+
+        None
+    }
 }
 
 
@@ -1778,7 +1814,7 @@ impl<V, W: Weight> WeightedList<V,W>
     {
         let list = wl();
         
-        let seen = std::collections::HashSet::from(["sup".to_string()]);
+        let seen = HashSet::from([0]);
         assert_eq!( list._unweight_index_skipping_(0, &seen), Some(1) );
         assert_eq!( list._unweight_index_skipping_(1, &seen), Some(1) );
         assert_eq!( list._unweight_index_skipping_(2, &seen), Some(1) );
@@ -1788,7 +1824,7 @@ impl<V, W: Weight> WeightedList<V,W>
         assert_eq!( list._unweight_index_skipping_(6, &seen), Some(2) );
         assert_eq!( list._unweight_index_skipping_(7, &seen), Some(2) );
 
-        let seen = std::collections::HashSet::from(["nova".to_string()]);
+        let seen = HashSet::from([1]);
         assert_eq!( list._unweight_index_skipping_(0, &seen), Some(0) );
         assert_eq!( list._unweight_index_skipping_(1, &seen), Some(0) );
         assert_eq!( list._unweight_index_skipping_(2, &seen), Some(2) );

@@ -28,7 +28,7 @@ use weighted_list::*;
 
 #[test] fn is_zero()
 {
-    assert!( !el().is_zero() );
+    assert!( el().is_zero() );
     assert!( !wl().is_zero() );
     assert!( wlist![(0, "qi")].is_zero() );
     assert!( !wlist![(0, "qi"), (2, "sup")].is_zero() );
