@@ -1,6 +1,6 @@
 # Specification
 
-> v1.1.0  
+> v1.1.1  
 > Last updated: 11 February 2025
 
 > [!Tip]
@@ -131,13 +131,14 @@ for item in WeightedList(...):
 ### Accessors
 | Field | Description | Options | Returns | In-Place | Time Complexity | Notes |
 | :---- | :---------- | :------ | :------ | :------- | :-------------- | :---- |
-| **weights**      | Iterate over the weights of all items. | – | `iter[Weight]` | – | lazy | Weights are in order. |
-| **values**       | Iterate over the values of all items. | – | `iter[Value]` | – | lazy | Values are in order. |
-| **raw**          | Iterate over the `(weight, value)` representations of all items. | – | `iter[(Weight, Value)]` | – | lazy | This usually satisifes the axiom that for any list `wl` we have `WeightedList(wl.raw()) == wl`. |
-| expanded         | Iterate over the values of all items, each value duplicated a number of times equal to its weight. |
-| collect weights  | Get the weights of all items. | – | `list[Weight]` | – | $O(n)$ |
-| collect values   | Get the values of all items. | – | `list[Value]` | – | $O(n)$ |
-| collect raw      | Get the `(weight, value)` representations of all items. | – | `list[(Weight, Value)]` | – | $O(n)$ |
+| **weights**     | Iterate over the weights of all items. | – | `iter[Weight]` | – | lazy | Weights are in order. |
+| **values**      | Iterate over the values of all items. | – | `iter[Value]` | – | lazy | Values are in order. |
+| unique values   | Iterate over the values of all items, without duplicates. | – | `iter[Value]` | – | lazy ($O(n)$ per query) |
+| **raw**         | Iterate over the `(weight, value)` representations of all items. | – | `iter[(Weight, Value)]` | – | lazy | This usually satisifes the axiom that for any list `wl` we have `WeightedList(wl.raw()) == wl`. |
+| expanded        | Iterate over the values of all items, each value duplicated a number of times equal to its weight. |
+| collect weights | Get the weights of all items. | – | `list[Weight]` | – | $O(n)$ |
+| collect values  | Get the values of all items. | – | `list[Value]` | – | $O(n)$ |
+| collect raw     | Get the `(weight, value)` representations of all items. | – | `list[(Weight, Value)]` | – | $O(n)$ |
 
 ### List Methods
 These are usually inherited from the built-in array type of the language and adapted for a `WeightedList`/`FrozenWeightedList`.
@@ -145,8 +146,8 @@ These are usually inherited from the built-in array type of the language and ada
 #### Non-Mutating
 | Field | Description | Options | Returns | In-Place | Time Complexity | Notes |
 | :---- | :---------- | :------ | :------ | :------- | :-------------- | :---- |
-| **get item** | Get an item at the specified weighted index. | The weighted index | `WeightedItem` | – | $O(n)$ |
-| *find item* | Find an item(s) that fulfils a predicate. | May include: <ul> <li>Item to compare equality against</li> <li>Predicate to match against</li> </ul> | `WeightedItem` or <br> `iter[WeightedItem]` | – | $O(n)$ | Multiple variations may be implemented for finding 1 or many items, matching against equality or predicate, etc. |
+| **get item**         | Get an item at the specified weighted index. | The weighted index | `WeightedItem` | – | $O(n)$ |
+| *find item*          | Find an item(s) that fulfils a predicate. | May include: <ul> <li>Item to compare equality against</li> <li>Predicate to match against</li> </ul> | `WeightedItem` or <br> `iter[WeightedItem]` | – | $O(n)$ | Multiple variations may be implemented for finding 1 or many items, matching against equality or predicate, etc. |
 | *find index of item* | Find the (weighted) index of item(s) that fulfil a predicate. | May include: <ul> <li>Item to compare equality against</li> <li>Predicate to match against</li> <li>Whether to return a weighted or unweighted index</li> </ul> | `Weight` or <br> `iter[Weight]` or <br> `int` or <br> `iter[int]` | – | $O(n)$ | Multiple variations may be implemented for finding 1 or many items, matching against equality or predicate, etc. |
 
 #### Mutating
@@ -190,10 +191,16 @@ These are special for `WeightedList`/`FrozenWeightedList`.
 | zero weights | Set the weights of all items in the list to $0$$. | – | default | both | $O(n)$ |
 
 
+<br>
+
+
 ## Rationale
 
 ### Why are weights of $0$ allowed?
 Processes may emit a warning if they encounter an item with a weight of $0$, but this is not a fatal issue since the presence of these items don’t really affect anything. It’s also possible the user may wish to, for instance, initialise items with weights of $0$ and increment them in some way.
+
+
+<br>
 
 
 ## Implementation Checklist
