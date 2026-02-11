@@ -20,6 +20,59 @@ export class FrozenWeightedList<Value>
   }
 
   // == ACCESSORS == //
+  *iter_weights(): Generator<Weight>
+  {
+    for (let item of this.#data) {
+      yield item.weight;
+    }
+  }
+
+  *iter_values(): Generator<Value>
+  {
+    for (let item of this.#data) {
+      yield item.value;
+    }
+  }
+
+  *iter_items(): Generator<WeightedItem<Value>>
+  {
+    for (let item of this.#data) {
+      yield {
+        weight: item.weight,
+        value:  item.value
+      };
+    }
+  }
+
+  *iter_entries(): Generator<[number, WeightedItem<Value>]>
+  {
+    for (let [i, item] of this.#data.entries()) {
+      yield [
+        i,
+        {
+          weight: item.weight,
+          value:  item.value
+        }
+      ];
+    }
+  }
+
+  *iter_raw(): Generator<[Weight, Value]>
+  {
+    for (let item of this.#data) {
+      yield [item.weight, item.value];
+    }
+  }
+
+  *iter_expanded(): Generator<Value>
+  {
+    for (let item of this.#data) {
+      for (let i = 0; i < item.weight; i++) {
+        yield item.value;
+      }
+    }
+  }
+
   weights(): Weight[]
   {
     return this.#data.map(item => item.weight);
@@ -35,48 +88,65 @@ export class FrozenWeightedList<Value>
     return this.#data.map(item => ({
       weight: item.weight,
       value:  item.value,
-    }))
+    }));
   }
 
-  entries(): ArrayIterator<[number, WeightedItem<Value>]>
+  entries(): [number, WeightedItem<Value>][]
   {
-    return this.items().entries();
+    return Array.from(this.items().entries());
   }
 
-  *raw(): Generator<[Weight, Value]>
+  raw(): [Weight, Value][]
   {
-    for (let item of this.#data) {
-      yield [item.weight, item.value];
-    }
+    return this.#data.map(item => [item.weight, item.value]);
   }
 
-  *expanded(): Generator<Value>
+  expanded(): Value[]
   {
-    for (let item of this.#data) {
-      for (let i = 0; i < item.weight; i++) {
-        yield item.value;
-      }
-    }
+    return this.#data.flatMap(item => Array(item.weight).fill(item.value));
   }
+
 
   // == PROPERTIES == //
+
+  /**
+   * The total weight of all items in the list.
+   */
   get length(): Weight {
     return this.#data.at(-1)?.cumulative_weight ?? 0;
   }
 
-  get total_weights(): Weight {
+  /**
+   * The total weight of all items in the list.
+   * 
+   * This may be preferred over `.length` when it could be perceived as ambiguous.
+   */
+  get total_weight(): Weight {
     return this.length;
   }
 
-  get total_values(): Weight {
+  /**
+   * The total number of items in the list.
+   */
+  get total_items(): Weight {
     return this.#data.length;
   }
 
+  /**
+   * Do all items have a weight of `0`?
+   * 
+   * Returns `true` if the list is empty.
+   */
   is_zero(): boolean {
-    return (this.length === 0);
+    return this.#data.every(item => item.weight === 0);
   }
 
+
   // == INDEXING == //
+
+  /**
+   * Get the item in the list at `weighted_index`.
+   */
   at(weighted_index: Weight): WeightedItem<Value> | undefined
   {
     try {
@@ -92,35 +162,67 @@ export class FrozenWeightedList<Value>
     }
   }
 
-  // == SPECIALISED == //
-  sample_value(): WeightedItem<Value> | undefined
+
+  // == RANDOM SAMPLING == //
+
+  /**
+   * Randomly select 1 item from the list, using weighted randomisation. Returns `undefined` if the list is empty.
+   */
+  sample_item(): WeightedItem<Value> | undefined
   {
     if (this.is_zero()) return undefined;
 
-    let idx = Math.floor(Math.random() * this.length);
+    let idx = this.#random_weighted_index();
     let out = this.at(idx)!;
 
     return out;
   }
+  
+  /**
+   * Randomly select 1 value from the list, using weighted randomisation. Returns `undefined` if the list is empty.
+   */
+  sample_value(): Value | undefined
+  {
+    return this.sample_item()?.value;
+  }
 
+  /**
+   * Randomly select `count` values from the list, using weighted randomisation.
+   */
   *sample_values(
     count: number,
     options?: {
-      replace?: boolean;
+      /** Whether to select with replacement. Defaults to `true`. */
+      replace: boolean;
+      /** (only if `replace: false`) How much to decrement the weight of an item by after it is selected. Defaults to `1`. */
       decrement?: Weight;
     },
-  ): Generator<Value>
+  ): Generator<Value | undefined>
   {
-    let pool = structuredClone(this);
+    options = Object.assign({
+      replace:   true,
+      decrement: 1,
+    }, options);
 
-    for (let n = 0; n < count; n++)
-    {
-      if (pool.length <= 0) break;
+    if (options.replace) {
+      for (let n = 0; n < count; n++) {
+        yield this.sample_value();
+      }
+    }
+    else {
+      let l = this.length;
+      let weight_decrements = Array(this.total_items).fill(0);
 
-      let idx = Math.floor(Math.random() * pool.length);
-      let out = pool.at(idx)!;
+      for (let n = 0; n < count; n++)
+      {
+        let widx = this.#random_weighted_index_up_to(l);
+        let  idx = this.#unweight_index_decrementing(widx, weight_decrements);
 
-      yield out.value;
+        weight_decrements[idx] += options.decrement!;
+        l -= options.decrement!;
+
+        yield this.#data.at(idx)?.value;
+      }
     }
   }
 
@@ -140,7 +242,7 @@ export class FrozenWeightedList<Value>
       
       let weighted_index = Math.floor(Math.random() * l);
       let idx = this.#unweight_index_skipping(weighted_index, seen_indices)
-      let out = this.at(idx)!;
+      let out = this.#data[idx];
 
       if (options?.merge_duplicates) {
         for (let [i, item] of this.#data.entries()) {
@@ -160,6 +262,7 @@ export class FrozenWeightedList<Value>
   }
 
   // == INTERNAL == //
+
   static #sanitise<Value>(
     item: LikeWeightedItem<Value>,
     cumulative_weight: Weight,
@@ -236,7 +339,7 @@ export class FrozenWeightedList<Value>
 
   #binary_unweight_index(weighted_index: Weight): Weight
   {
-    let max = this.total_values;
+    let max = this.total_items;
 
     if (max !== 0)
     {
@@ -281,12 +384,46 @@ export class FrozenWeightedList<Value>
     }
 
     throw new RangeError(
-      `Attempted to access weighted index ${weighted_index}, skipping indices ${seen_indices}, but \`WeightedList\` has weighted length ${this.length}`
+      `Attempted to access weighted index ${weighted_index}, skipping indices ${seen_indices}, but went out of bounds`
     );
+  }
+
+  #unweight_index_decrementing(weighted_index: Weight, weight_decrements: Weight[]): Weight
+  {
+    let t = 0;
+
+    let w: Weight;
+
+    for (let [i, item] of this.#data.entries()) {
+      w = item.weight - weight_decrements[i];
+
+      if (w <= 0) continue;
+
+      t += w;
+      if (t >= weighted_index) return i;
+    }
+
+    throw new RangeError(
+      `Attempted to access weighted index ${weighted_index}, with decrements ${weight_decrements}, but went out of bounds`
+    );
+  }
+
+  #random_weighted_index(): Weight
+  {
+    return this.#random_weighted_index_up_to(this.length);
+  }
+
+  #random_weighted_index_up_to(length: Weight): Weight
+  {
+    return Math.floor(Math.random() * length);
   }
 
   #at(weighted_index: Weight): FrozenWeightedItem<Value>
   {
+    if (weighted_index < 0) {
+      throw new RangeError(`Attempted to index \`WeightedList\` at ${weighted_index} - negative indices are currently unsupported!`);
+    }
+
     let out = this.#data[this.#binary_unweight_index(weighted_index)];
     if (out !== undefined) return out;
 
