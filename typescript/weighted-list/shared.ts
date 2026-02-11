@@ -10,8 +10,20 @@ export interface WeightedItem<Value>
   value: Value;
 }
 
+/**
+ * An item in a `FrozenWeightedList`.
+ */
+export interface FrozenWeightedItem<Value> extends WeightedItem<Value>
+{
+  cumulative_weight: Weight;
+  weight: Weight,
+  value: Value,
+}
 
+
+/** Any value that could be converted to a `WeightedItem`. */
 export type LikeWeightedItem<Value> = (
-    WeightedItem<Value>
-  | [Weight, Value]
+    [Weight, Value]
+  | WeightedItem<Value>
+  | FrozenWeightedItem<Value>
 );

@@ -1,25 +1,12 @@
-import type { Weight, WeightedItem, LikeWeightedItem } from "./shared";
+import type { Weight, WeightedItem, FrozenWeightedItem, LikeWeightedItem } from "./shared";
 
-
-export type LikeFrozenWeightedItem<Value> = (
-    FrozenWeightedItem<Value>
-  | LikeWeightedItem<Value>
-);
-
-
-export interface FrozenWeightedItem<Value> extends WeightedItem<Value>
-{
-  cumulative_weight: Weight;
-  weight: Weight,
-  value: Value,
-}
 
 export class FrozenWeightedList<Value>
 {
   #data: FrozenWeightedItem<Value>[];
 
   // == CONSTRUCTORS == //
-  constructor(...items: LikeFrozenWeightedItem<Value>[])
+  constructor(...items: LikeWeightedItem<Value>[])
   {
     this.#data = [];
     let cumulative_weight = 0;
@@ -51,14 +38,16 @@ export class FrozenWeightedList<Value>
     }))
   }
 
-  entries(): ArrayIterator<[Weight, WeightedItem<Value>]>
+  entries(): ArrayIterator<[number, WeightedItem<Value>]>
   {
     return this.items().entries();
   }
 
-  raw(): [Weight, Value][]
+  *raw(): Generator<[Weight, Value]>
   {
-    return this.#data.map(item => [item.weight, item.value]);
+    for (let item of this.#data) {
+      yield [item.weight, item.value];
+    }
   }
 
   *expanded(): Generator<Value>
@@ -83,20 +72,96 @@ export class FrozenWeightedList<Value>
     return this.#data.length;
   }
 
-  // ==  == //
-  at(weighted_index: Weight): FrozenWeightedItem<Value> | undefined
+  is_zero(): boolean {
+    return (this.length === 0);
+  }
+
+  // == INDEXING == //
+  at(weighted_index: Weight): WeightedItem<Value> | undefined
   {
     try {
-      return this.#at(weighted_index);
+      let item = this.#at(weighted_index);
+
+      return {
+        weight: item.weight,
+        value:  item.value,
+      };
     }
     catch {
       return undefined;
     }
   }
 
+  // == SPECIALISED == //
+  sample_value(): WeightedItem<Value> | undefined
+  {
+    if (this.is_zero()) return undefined;
+
+    let idx = Math.floor(Math.random() * this.length);
+    let out = this.at(idx)!;
+
+    return out;
+  }
+
+  *sample_values(
+    count: number,
+    options?: {
+      replace?: boolean;
+      decrement?: Weight;
+    },
+  ): Generator<Value>
+  {
+    let pool = structuredClone(this);
+
+    for (let n = 0; n < count; n++)
+    {
+      if (pool.length <= 0) break;
+
+      let idx = Math.floor(Math.random() * pool.length);
+      let out = pool.at(idx)!;
+
+      yield out.value;
+    }
+  }
+
+  *sample_values_unique(
+    count: number,
+    options?: {
+      merge_duplicates: boolean,
+    },
+  ): Generator<Value>
+  {
+    let seen_indices = new Set<number>();
+    let l = this.length;
+
+    for (let n = 0; n < count; n++)
+    {
+      if (l <= 0) break;
+      
+      let weighted_index = Math.floor(Math.random() * l);
+      let idx = this.#unweight_index_skipping(weighted_index, seen_indices)
+      let out = this.at(idx)!;
+
+      if (options?.merge_duplicates) {
+        for (let [i, item] of this.#data.entries()) {
+          if (item.value != out.value) continue;
+
+          seen_indices.add(i);
+          l -= item.weight;
+        }
+      }
+      else {
+        seen_indices.add(idx);
+        l -= out.weight;
+      }
+
+      yield out.value;
+    }
+  }
+
   // == INTERNAL == //
   static #sanitise<Value>(
-    item: LikeFrozenWeightedItem<Value>,
+    item: LikeWeightedItem<Value>,
     cumulative_weight: Weight,
   ): FrozenWeightedItem<Value>
   {
@@ -153,8 +218,17 @@ export class FrozenWeightedList<Value>
         + (typeof item.value === "number") ? " Perhaps you got the value and weight the wrong way round? (weight always comes first)" : ""
       );
     }
-    if (item.weight < 0) {
-      throw new Error("Weight of a `FrozenWeightedItem` cannot be negative");
+
+    if (item.weight <= 0) {
+      if (item.weight === 0) {
+        console.warn(
+          `Received a \`FrozenWeightedItem\` with zero weight: ${item}`
+        );
+      }
+
+      throw new Error(
+        `Received invalid \`FrozenWeightedItem\`: ${item} - weight of a cannot be negative`
+      );
     }
 
     return item;
@@ -191,7 +265,23 @@ export class FrozenWeightedList<Value>
     }
 
     throw new RangeError(
-      `Attempted to access weighted index ${weighted_index} but \`FrozenWeightedList\` has weighted length ${this.length}`
+      `Attempted to access weighted index ${weighted_index}, but \`FrozenWeightedList\` has weighted length ${this.length}`
+    );
+  }
+
+  #unweight_index_skipping(weighted_index: Weight, seen_indices: Set<number>): Weight
+  {
+    let t = 0;
+
+    for (let [i, item] of this.#data.entries()) {
+      if (seen_indices.has(i)) continue;
+
+      t += item.weight;
+      if (t >= weighted_index) return i;
+    }
+
+    throw new RangeError(
+      `Attempted to access weighted index ${weighted_index}, skipping indices ${seen_indices}, but \`WeightedList\` has weighted length ${this.length}`
     );
   }
 
@@ -200,6 +290,10 @@ export class FrozenWeightedList<Value>
     let out = this.#data[this.#binary_unweight_index(weighted_index)];
     if (out !== undefined) return out;
 
-    throw new RangeError(`Attempted to access weighted index ${weighted_index} but WeightedList has weighted length ${this.length}`);
+    throw new RangeError(
+      `Attempted to access weighted index ${weighted_index}, but \`WeightedList\` has weighted length ${this.length}`
+    );
   }
 }
+
+export default FrozenWeightedList
