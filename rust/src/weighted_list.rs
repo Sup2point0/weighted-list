@@ -364,12 +364,6 @@ impl<V, W: Weight> WeightedList<V,W>
         self.data.iter().map(|item| item.weight)
     }
 
-    /// Get a vector of the weights of each item in the list.
-    pub fn collect_weights(&self) -> Vec<W>
-    {
-        self.weights().collect_vec()
-    }
-
     /// Get an iterator over the values of each item in the list.
     /// 
     /// # Usage
@@ -388,12 +382,6 @@ impl<V, W: Weight> WeightedList<V,W>
     pub fn values(&self) -> impl Iterator<Item = &V>
     {
         self.data.iter().map(|item| &item.value)
-    }
-
-    /// Get a vector of the values of each item in the list.
-    pub fn collect_values(&self) -> Vec<&V>
-    {
-        self.values().collect_vec()
     }
 
     /// Get a vector of references to items in the list.
@@ -485,6 +473,18 @@ impl<V, W: Weight> WeightedList<V,W>
                 &item.value,
                 nums::cast::<W, usize>(item.weight).unwrap_or(0)
             ))
+    }
+
+    /// Get a vector of the weights of each item in the list.
+    pub fn collect_weights(&self) -> Vec<W>
+    {
+        self.weights().collect_vec()
+    }
+
+    /// Get a vector of the values of each item in the list.
+    pub fn collect_values(&self) -> Vec<&V>
+    {
+        self.values().collect_vec()
     }
 }
 

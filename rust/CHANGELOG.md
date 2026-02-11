@@ -1,6 +1,16 @@
 # Changelog
 
 
+## v0.6.0
+
+### Breaking
+- `WeightedList::select_random_values().unique()` option extracted to new `WeightedList::select_random_values_unique()` method
+- `WeightedList::is_zero()` returns `true` instead of `false` when the list is empty
+
+### New
+- `WeightedList::select_random_values_unique()` method
+
+
 ## v0.5.0
 
 ### Breaking

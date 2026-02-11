@@ -4,7 +4,7 @@ version = "0.5.0"
 authors = ["Sup#2.0"]
 edition = "2024"
 
-description = "A list class for weighted randomisation"
+description = "Data structures for weighted randomisation"
 readme = "README.md"
 repository = "https://github.com/Sup2point0/weighted-list/tree/main/rust"
 documentation = "https://docs.rs/weighted-list/latest/weighted_list/"
@@ -15,10 +15,10 @@ exclude = [
 ]
 
 [dependencies]
+bon = "3.8.1"
+itertools = "0.14.0"
 num-traits = "0.2.19"
 rand = "0.9"
-itertools = "0.14.0"
-bon = "3.8.1"
 
 [dev-dependencies]
 statrs = "0.18.0"
