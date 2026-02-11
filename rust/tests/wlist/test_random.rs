@@ -6,6 +6,9 @@ use crate::*;
 use weighted_list::*;
 
 
+const TRIALS: usize = 50;
+
+
 #[test] fn select_single()
 {
     let mut rng = rand::rng();
@@ -18,7 +21,7 @@ use weighted_list::*;
     let outs = vec!["sup", "woah"];
     let mut out;
 
-    for _ in 0..50 {
+    for _ in 0..TRIALS {
         out = list.select_random_value(&mut rng);
         assert!( outs.contains(&out.unwrap().as_str()) );
     }
@@ -26,7 +29,7 @@ use weighted_list::*;
     let outs = vec![wit!(100, str!("sup")), wit!(5, str!("woah"))];
     let mut out;
 
-    for _ in 0..50 {
+    for _ in 0..TRIALS {
         out = list.select_random_item(&mut rng);
         assert!( outs.contains(out.unwrap()) );
     }
@@ -59,7 +62,7 @@ use weighted_list::*;
     let mut results;
 
     '_standard: {
-        for _ in 0..50 {
+        for _ in 0..TRIALS {
             results = list.select_random_values()
                 .rng(&mut rng)
                 .count(count)
@@ -72,7 +75,7 @@ use weighted_list::*;
     }
 
     '_excess: {
-        for _ in 0..50 {
+        for _ in 0..TRIALS {
             results = list.select_random_values()
                 .rng(&mut rng)
                 .count(count * 2)
@@ -84,28 +87,10 @@ use weighted_list::*;
         }
     }
 
-    '_unique: {
-        for _ in 0..2 {
-            results = list.select_random_values()
-                .rng(&mut rng)
-                .count(count)
-                .unique(true)
-                .call();
-
-            assert!(
-                results.len() == 3,
-                "Expected 3 unique items, got {}: {:?}", results.len(), results
-            );
-            assert!( results.contains(&str!("sup")) );
-            assert!( results.contains(&str!("nova")) );
-            assert!( results.contains(&str!("shard")) );
-        }
-    }
-
     '_replace: {
         let mut counts;
 
-        for _ in 0..50 {
+        for _ in 0..TRIALS {
             results = list.select_random_values()
                 .rng(&mut rng)
                 .count(count)
@@ -122,7 +107,7 @@ use weighted_list::*;
     '_replace_decrement: {
         let mut counts;
 
-        for _ in 0..50 {
+        for _ in 0..TRIALS {
             results = list.select_random_values()
                 .rng(&mut rng)
                 .count(count)
@@ -138,9 +123,62 @@ use weighted_list::*;
     }
 }
 
+#[test] fn select_many_unique()
+{
+    let mut rng = rand::rng();
+
+    '_standard: {
+        let list = wl();
+
+        for c in 3..10 {
+            let selected = list.select_random_values_unique()
+                .rng(&mut rng)
+                .count(c)
+                .call();
+
+            assert_eq!(
+                HashSet::from_iter(selected),
+                HashSet::from([str!("sup"), str!("nova"), str!("shard")])
+            );
+        }
+    }
+
+    '_treat_separate: {
+        let list = wlist![(1, "qi"), (1, "qi"), (7, "cortex")];
+
+        for c in 3..10 {
+            let selected = list.select_random_values_unique()
+                .rng(&mut rng)
+                .count(c)
+                .call();
+
+            assert_eq!(
+                HashSet::from_iter(selected),
+                HashSet::from(["qi", "qi", "cortex"])
+            );
+        }
+    }
+
+    '_merge_duplicates: {
+        let list = wlist![(1, "qi"), (1, "qi"), (7, "cortex")];
+
+        for c in 3..10 {
+            let selected = list.select_random_values_unique()
+                .rng(&mut rng)
+                .count(c)
+                .merge_duplicates(true)
+                .call();
+
+            assert_eq!(
+                HashSet::from_iter(selected),
+                HashSet::from(["qi", "cortex"])
+            );
+        }
+    }
+}
+
 #[test] fn take_many()
 {
-    let trials = 50;
     let mut rng = rand::rng();
 
     let valid = vec!["sup", "nova", "shard"];
@@ -150,7 +188,7 @@ use weighted_list::*;
         let mut list = wl();
         let count = list.len() as usize;
 
-        for _ in 0..trials {
+        for _ in 0..TRIALS {
             results = list.take_random_values()
                 .rng(&mut rng)
                 .count(count)
