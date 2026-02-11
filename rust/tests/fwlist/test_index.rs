@@ -1,5 +1,5 @@
 use crate::*;
-// use weighted_list::*;
+use weighted_list::*;
 
 
 #[test] fn index()
@@ -45,7 +45,13 @@ use crate::*;
     for _ in list {}
 }
 
-#[test] fn test_index_large()
+#[test] fn index_small()
+{
+    let list = fwlist![(1, "qi")];
+    assert_eq!( *list[0].value(), "qi" );
+}
+
+#[test] fn index_large()
 {
     let list = fwll();
     assert_eq!( list[0].value(),  "sup"    );

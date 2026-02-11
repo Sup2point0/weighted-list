@@ -1,8 +1,4 @@
-use std::{
-    fmt::{self, Display},
-    ops::*,
-    slice,
-};
+use std::*;
 
 use itertools::Itertools;
 
@@ -62,8 +58,7 @@ impl<V, W: Weight> FrozenWeightedList<V,W>
 {
     pub fn len(&self) -> W
     {
-        self.data
-            .last()
+        self.data.last()
             .map(|item| item.cumulative_weight())
             .unwrap_or(W::zero())
     }
@@ -107,7 +102,7 @@ impl<V, W: Weight> AsRef<Vec<FrozenWeightedItem<V,W>>> for FrozenWeightedList<V,
     }
 }
 
-impl<V, W: Weight> Deref for FrozenWeightedList<V,W>
+impl<V, W: Weight> ops::Deref for FrozenWeightedList<V,W>
 {
     type Target = [FrozenWeightedItem<V,W>];
 
@@ -117,7 +112,8 @@ impl<V, W: Weight> Deref for FrozenWeightedList<V,W>
 }
 
 // == TRAITS == //
-impl<V: Display, W: Weight + Display> Display for FrozenWeightedList<V,W>
+impl<V: fmt::Display, W: Weight> fmt::Display for FrozenWeightedList<V,W>
+    where W: fmt::Display
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {            
         write!(f,
@@ -165,7 +161,7 @@ impl<V, W: Weight> FrozenWeightedList<V,W>
 }
 
 // == INDEXING == //
-impl<V, W: Weight> Index<W> for FrozenWeightedList<V,W>
+impl<V, W: Weight> ops::Index<W> for FrozenWeightedList<V,W>
 {
     type Output = FrozenWeightedItem<V,W>;
 
@@ -233,5 +229,9 @@ mod tests
         assert_eq!( list._binary_unweight_index_(7), 2 );
         assert_eq!( list._binary_unweight_index_(8), 2 );
         assert_eq!( list._binary_unweight_index_(9), 2 );
+
+        let list = fwlist![(2, "sup".to_string())];
+        assert_eq!( list._binary_unweight_index_(0), 0 );
+        assert_eq!( list._binary_unweight_index_(1), 0 );
     }
 }
