@@ -142,7 +142,7 @@ export class FrozenWeightedList<Value>
   }
 
 
-  // == INDEXING == //
+  // == INTERFACES == //
 
   /**
    * Get the item in the list at `weighted_index`.
@@ -160,6 +160,21 @@ export class FrozenWeightedList<Value>
     catch {
       return undefined;
     }
+  }
+
+  toString()
+  {
+    let data = this.#data.map(item => `(${item.weight}, ${item.value})`);
+    return `FrozenWeightedList {${data}}`;
+  }
+
+
+  // == ARRAY METHODS == //
+
+  /** (out-of-place) Return this list concatenated with another `FrozenWeightedList`. */
+  concat(other: FrozenWeightedList<Value>): FrozenWeightedList<Value>
+  {
+    return new FrozenWeightedList<Value>(...this.#data.concat(other.#data));
   }
 
 
@@ -218,10 +233,18 @@ export class FrozenWeightedList<Value>
         let widx = this.#random_weighted_index_up_to(l);
         let  idx = this.#unweight_index_decrementing(widx, weight_decrements);
 
-        weight_decrements[idx] += options.decrement!;
-        l -= options.decrement!;
+        let target = this.#data.at(idx)!;
 
-        yield this.#data.at(idx)?.value;
+        if (target.weight < options.decrement!) {
+          weight_decrements[idx] += target.weight;
+          l -= target.weight;
+        }
+        else {
+          weight_decrements[idx] += options.decrement!;
+          l -= options.decrement!;
+        }
+
+        yield target.value;
       }
     }
   }
@@ -246,10 +269,10 @@ export class FrozenWeightedList<Value>
 
       if (options?.merge_duplicates) {
         for (let [i, item] of this.#data.entries()) {
-          if (item.value != out.value) continue;
-
-          seen_indices.add(i);
-          l -= item.weight;
+          if (item.value === out.value) {
+            seen_indices.add(i);
+            l -= item.weight;
+          }
         }
       }
       else {
@@ -276,10 +299,7 @@ export class FrozenWeightedList<Value>
       && "weight" in item
     ) {
       out = {
-        cumulative_weight:
-          "cumulative_weight" in item
-          ? item.cumulative_weight
-          : cumulative_weight + item.weight,
+        cumulative_weight: cumulative_weight + item.weight,
         weight: item.weight,
         value: item.value
       };
