@@ -20,9 +20,3 @@ test("total-items", () =>
   assert.equal( el().total_items,  0 );
   assert.equal( fwl().total_items, 3 );
 });
-
-test("total-items", () =>
-{
-  assert.isTrue(  el().is_zero() );
-  assert.isFalse( fwl().is_zero() );
-});

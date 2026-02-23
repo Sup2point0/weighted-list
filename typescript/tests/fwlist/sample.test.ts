@@ -54,7 +54,7 @@ test("sample-values-unique", () =>
   
   for (let i = 0; i < TRIALS; i++) {
     let pool = fwl().concat(fwl());
-    console.log("pool.at(0) =", pool.at(0));
+    // console.log("pool.at(0) =", pool.at(0));
     let results = pool.sample_values_unique(10);
     let sorted = Array.from(results).toSorted((prot, deut) => prot.length - deut.length);
 

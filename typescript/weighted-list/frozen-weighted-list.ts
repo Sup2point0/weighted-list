@@ -167,21 +167,6 @@ export class FrozenWeightedList<Value>
     return this.#data.length;
   }
 
-  /**
-   * Do all items have a weight of `0`?
-   * 
-   * Returns `true` if the list is empty.
-   */
-  is_zero(): boolean
-  {
-    return this.#data.every(item => item.weight === 0);
-  }
-
-  has_negative_weights(): boolean
-  {
-    return this.#data.some(item => item.weight < 0);
-  }
-
 
   // == INTERFACES == //
 
@@ -203,11 +188,6 @@ export class FrozenWeightedList<Value>
     }
   }
 
-  toString()
-  {
-    let data = this.#data.map(item => `(${item.weight}, ${item.value})`);
-    return `FrozenWeightedList {${data}}`;
-  }
 
 
   // == ARRAY METHODS == //
@@ -226,7 +206,7 @@ export class FrozenWeightedList<Value>
    */
   sample_item(): WeightedItem<Value> | undefined
   {
-    if (this.is_zero()) return undefined;
+    if (this.length === 0) return undefined;
 
     let idx = this.#random_weighted_index();
     let out = this.at(idx)!;
@@ -392,14 +372,8 @@ export class FrozenWeightedList<Value>
     }
 
     if (item.weight <= 0) {
-      if (item.weight === 0) {
-        console.warn(
-          `Received a \`FrozenWeightedItem\` with zero weight: ${item}`
-        );
-      }
-
       throw new Error(
-        `Received invalid \`FrozenWeightedItem\`: ${item} - weight cannot be negative`
+        `Received invalid \`FrozenWeightedItem\`: ${item} - weight must be positive`
       );
     }
 
@@ -413,19 +387,18 @@ export class FrozenWeightedList<Value>
 
     if (max !== 0)
     {
-      const cycles = Math.ceil(Math.log2(max));
+      const cycles = Math.floor(Math.log2(max) + 1);
 
       let l = 0;
       let r = max - 1;
 
       for (let i = 0; i < cycles; i++) {
-        let idx = l + (r - l) / 2;
+        let idx = Math.floor(l + (r - l) / 2);
 
         let cand = this.#data[idx];
-        let weight = cand.weight;
         let c_weight = cand.cumulative_weight;
 
-        if (c_weight > weighted_index && weighted_index >= c_weight - weight) {
+        if (c_weight > weighted_index && weighted_index >= c_weight - cand.weight) {
           return idx;
         }
 
