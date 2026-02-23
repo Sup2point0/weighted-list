@@ -1,11 +1,28 @@
 import type { Weight, WeightedItem, FrozenWeightedItem, LikeWeightedItem } from "./shared";
 
 
+/**
+ * An immutable list of weighted items.
+ * 
+ * "Immutable" means the items, the order of items, and the weights of items cannot be changed. However, their values can still be changed through obtaining a reference to the value of an item in the list.
+ */
 export class FrozenWeightedList<Value>
 {
   #data: FrozenWeightedItem<Value>[];
 
+
   // == CONSTRUCTORS == //
+
+  /**
+   * Construct a `FrozenWeightedList` from the provided items.
+   * 
+   * @example
+   * let fwl = new FrozenWeightedList(
+   *   [2, "sup"],
+   *   [3, "nova"],
+   *   [5, "shard"],
+   * );
+   */
   constructor(...items: LikeWeightedItem<Value>[])
   {
     this.#data = [];
@@ -19,7 +36,10 @@ export class FrozenWeightedList<Value>
     }
   }
 
+
   // == ACCESSORS == //
+
+  /** Get an iterator over the weights of each item in the list. */
   *iter_weights(): Generator<Weight>
   {
     for (let item of this.#data) {
@@ -27,6 +47,7 @@ export class FrozenWeightedList<Value>
     }
   }
 
+  /** Get an iterator over the values of each item in the list. */
   *iter_values(): Generator<Value>
   {
     for (let item of this.#data) {
@@ -34,6 +55,7 @@ export class FrozenWeightedList<Value>
     }
   }
 
+  /** Get an iterator over the items in the list. */
   *iter_items(): Generator<WeightedItem<Value>>
   {
     for (let item of this.#data) {
@@ -44,6 +66,7 @@ export class FrozenWeightedList<Value>
     }
   }
 
+  /** Get an iterator over the items in the list as `[index, item]` pairs. */
   *iter_entries(): Generator<[number, WeightedItem<Value>]>
   {
     for (let [i, item] of this.#data.entries()) {
@@ -57,6 +80,7 @@ export class FrozenWeightedList<Value>
     }
   }
 
+  /** Get an iterator over the items in the list as `[weight, value]` pairs. */
   *iter_raw(): Generator<[Weight, Value]>
   {
     for (let item of this.#data) {
@@ -64,6 +88,7 @@ export class FrozenWeightedList<Value>
     }
   }
 
+  /** Get an iterator over the values in the list, with each value repeated a number of times equal to its weight (rounded up). */
   *iter_expanded(): Generator<Value>
   {
     for (let item of this.#data) {
@@ -73,16 +98,23 @@ export class FrozenWeightedList<Value>
     }
   }
 
+  /** Get the weight of each item in the list. */
   weights(): Weight[]
   {
     return this.#data.map(item => item.weight);
   }
 
+  /** Get the value of each item in the list. */
   values(): Value[]
   {
     return this.#data.map(item => item.value);
   }
 
+  /**
+   * Get the items in the list.
+   * 
+   * Note this returns shallow copies of the items - altering them will not alter the original list, but altering the values will alter the list.
+   */
   items(): WeightedItem<Value>[]
   {
     return this.#data.map(item => ({
@@ -91,19 +123,22 @@ export class FrozenWeightedList<Value>
     }));
   }
 
+  /** Get the items in the list as `[index, item]` pairs. */
   entries(): [number, WeightedItem<Value>][]
   {
     return Array.from(this.items().entries());
   }
 
+  /** Get the items in the list as `[weight, value]` pairs. */
   raw(): [Weight, Value][]
   {
     return this.#data.map(item => [item.weight, item.value]);
   }
 
+  /** Get the values in the list, with each value repeated a number of times equal to its weight (rounded up). */
   expanded(): Value[]
   {
-    return this.#data.flatMap(item => Array(item.weight).fill(item.value));
+    return this.#data.flatMap(item => Array(Math.ceil(item.weight)).fill(item.value));
   }
 
 
@@ -137,8 +172,14 @@ export class FrozenWeightedList<Value>
    * 
    * Returns `true` if the list is empty.
    */
-  is_zero(): boolean {
+  is_zero(): boolean
+  {
     return this.#data.every(item => item.weight === 0);
+  }
+
+  has_negative_weights(): boolean
+  {
+    return this.#data.some(item => item.weight < 0);
   }
 
 
@@ -249,9 +290,14 @@ export class FrozenWeightedList<Value>
     }
   }
 
+  /**
+   * Randomly select `count` unique values from the list, using weighted randomisation.
+   * @param count How many values to select. The generator will yield this many values *at most*.
+   */
   *sample_values_unique(
     count: number,
     options?: {
+      /** By default, each item in the list is treated as a 'unique' value. If `merge_duplicates` is set to `true`, duplicate values (values that compare `===`) will be treated as equivalent. */
       merge_duplicates: boolean,
     },
   ): Generator<Value>
@@ -284,8 +330,10 @@ export class FrozenWeightedList<Value>
     }
   }
 
+
   // == INTERNAL == //
 
+  /** Convert a compatible object into a `FrozenWeightedItem`, throwing an error if the conversion fails. */
   static #sanitise<Value>(
     item: LikeWeightedItem<Value>,
     cumulative_weight: Weight,
@@ -333,6 +381,7 @@ export class FrozenWeightedList<Value>
     return this.#check(out);
   }
   
+  /** Check if `item` is a valid `FrozenWeightedItem`. */
   static #check<Value>(item: FrozenWeightedItem<Value>): FrozenWeightedItem<Value>
   {
     if (typeof item.weight !== "number") {
@@ -350,13 +399,14 @@ export class FrozenWeightedList<Value>
       }
 
       throw new Error(
-        `Received invalid \`FrozenWeightedItem\`: ${item} - weight of a cannot be negative`
+        `Received invalid \`FrozenWeightedItem\`: ${item} - weight cannot be negative`
       );
     }
 
     return item;
   }
 
+  /** Convert a weighted index to its corresponding unweighted index in the list, using binary search. */
   #binary_unweight_index(weighted_index: Weight): Weight
   {
     let max = this.total_items;
@@ -392,6 +442,7 @@ export class FrozenWeightedList<Value>
     );
   }
 
+  /** Convert a weighted index to its corresponding unweighted index in the list, using linear search, skipping a set of seen (unweighted) indices. */
   #unweight_index_skipping(weighted_index: Weight, seen_indices: Set<number>): Weight
   {
     let t = 0;
@@ -408,6 +459,7 @@ export class FrozenWeightedList<Value>
     );
   }
 
+  /** Convert a weighted index to its corresponding unweighted index in the list, using linear search, applying a map of weight decrements. */
   #unweight_index_decrementing(weighted_index: Weight, weight_decrements: Weight[]): Weight
   {
     let t = 0;
@@ -428,16 +480,19 @@ export class FrozenWeightedList<Value>
     );
   }
 
+  /** Get a random weighted index in the list. */
   #random_weighted_index(): Weight
   {
     return this.#random_weighted_index_up_to(this.length);
   }
 
+  /** Get a random weighted index in the list, up to but excluding `length`. */
   #random_weighted_index_up_to(length: Weight): Weight
   {
     return Math.floor(Math.random() * length);
   }
 
+  /** Get the item at `weighted_index` in the list. */
   #at(weighted_index: Weight): FrozenWeightedItem<Value>
   {
     if (weighted_index < 0) {
