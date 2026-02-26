@@ -67,6 +67,10 @@ impl<V, W: Weight> FrozenWeightedItem<V,W>
     pub fn value(&self) -> &V {
         &self.value
     }
+
+    pub fn value_mut(&mut self) -> &mut V {
+        &mut self.value
+    }
 }
 
 // == CONVERSIONS == //

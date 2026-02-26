@@ -52,6 +52,38 @@ macro_rules! fwlist {
 }
 
 // == ACCESSORS == //
+impl<V, W: Weight> FrozenWeightedList<V,W>
+{
+    pub fn weights(&self) -> impl Iterator<Item = W>
+    {
+        self.data.iter().map(|item| item.weight())
+    }
+    
+    pub fn values(&self) -> impl Iterator<Item = &V>
+    {
+        self.data.iter().map(|item| item.value())
+    }
+
+    pub fn values_mut(&mut self) -> impl Iterator<Item = &mut V>
+    {
+        self.data.iter_mut().map(|item| item.value_mut())
+    }
+
+    pub fn items(&self) -> impl Iterator<Item = &FrozenWeightedItem<V,W>>
+    {
+        self.data.iter()
+    }
+
+    pub fn collect_weights(&self) -> Vec<W>
+    {
+        self.weights().collect_vec()
+    }
+
+    pub fn collect_values(&self) -> Vec<&V>
+    {
+        self.values().collect_vec()
+    }
+}
 
 // == PROPERTIES == //
 impl<V, W: Weight> FrozenWeightedList<V,W>
@@ -63,7 +95,7 @@ impl<V, W: Weight> FrozenWeightedList<V,W>
             .unwrap_or(W::zero())
     }
 
-    pub fn total_values(&self) -> usize
+    pub fn total_items(&self) -> usize
     {
         self.data.len()
     }
@@ -75,8 +107,8 @@ impl<V, W: Weight> FrozenWeightedList<V,W>
 
     pub fn is_zero(&self) -> bool
     {
-        !self.is_empty()
-        && self.data.iter().all(|item| item.weight() == W::zero())
+        self.is_empty()
+        || self.data.iter().all(|item| item.weight() == W::zero())
     }
 }
 
@@ -128,7 +160,7 @@ impl<V, W: Weight> FrozenWeightedList<V,W>
 {
     fn _binary_unweight_index_(&self, weighted_index: W) -> usize
     {
-        let max = self.total_values();
+        let max = self.total_items();
 
         if max != 0 {
             let mut left_idx:  usize = 0;
@@ -229,6 +261,9 @@ mod tests
         assert_eq!( list._binary_unweight_index_(7), 2 );
         assert_eq!( list._binary_unweight_index_(8), 2 );
         assert_eq!( list._binary_unweight_index_(9), 2 );
+
+        let list = fwlist![(1, "qi".to_owned())];
+        assert_eq!( list._binary_unweight_index_(0), 0 );
 
         let list = fwlist![(2, "sup".to_string())];
         assert_eq!( list._binary_unweight_index_(0), 0 );

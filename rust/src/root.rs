@@ -23,3 +23,14 @@ impl<Type> Weight for Type where Type:
     + Sum
     + fmt::Display
 {}
+
+
+pub trait UnsignedWeight:
+    Weight
+    + nums::Unsigned
+{}
+
+impl<Type> UnsignedWeight for Type where Type:
+    Weight
+    + nums::Unsigned
+{}
