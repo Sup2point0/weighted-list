@@ -90,7 +90,7 @@ const TRIALS: usize = 50;
     '_replace: {
         let mut counts;
 
-        for _ in 0..50 {
+        for _ in 0..TRIALS {
             results = list.select_random_values()
                 .rng(&mut rng)
                 .count(count)

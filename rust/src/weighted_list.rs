@@ -173,7 +173,7 @@ impl<V, W: Weight> FromIterator<WeightedItem<V,W>> for WeightedList<V,W>
         let mut data = vec![];
 
         for item in items {
-            data.push(item.into());
+            data.push(item);
         }
 
         Self { data }
