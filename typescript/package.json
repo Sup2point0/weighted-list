@@ -1,15 +1,21 @@
 {
-  "name": "weighted-list",
   "type": "module",
-  "private": false,
+  "name": "@sup2.0/weighted-list",
+  "version": "0.1.1",
   "license": "MIT",
-  "main": "weighted-list/weighted-list.ts",
-  "scripts": {
-    "test": "vitest",
-    "testx": "vitest --ui",
-    "test-run": "vitest run"
+  "description": "A list implementation for weighted randomisation",
+  "author": {"name": "Sup#2.0", "url": "https://github.com/Sup2point0"},
+  "main": "weighted-list/index.ts",
+
+  "scripts":
+  {
+    "test":    "vitest",
+      "testx": "vitest run",
+      "testu": "vitest --ui"
   },
-  "devDependencies": {
+
+  "devDependencies":
+  {
     "@vitest/ui": "latest",
     "vite": "latest",
     "vitest": "^4.0.7"
