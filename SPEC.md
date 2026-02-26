@@ -1,7 +1,7 @@
 # Specification
 
 > v1.1.1  
-> Last updated: 11 February 2025
+> Last updated: 11 February 2026
 
 > [!Tip]
 > Quicklink: [Jump to fields reference](#fields)
