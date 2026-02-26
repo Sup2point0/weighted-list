@@ -2,6 +2,61 @@ use crate::*;
 // use weighted_list::*;
 
 
+<<<<<<< HEAD
+=======
+#[test] fn clone() {
+    let list = wl();
+    let mut cloned = list.clone();
+    cloned.clear();
+    assert_ne!( list, cloned );
+}
+
+#[test] fn asref_vec()
+{
+    let list = wl();
+
+    fn test<T>(_: impl AsRef<Vec<T>>) {}
+
+    test(list);
+}
+
+#[test] fn asref_slice()
+{
+    let list = wl();
+
+    fn test<T>(_: impl AsRef<[T]>) {}
+
+    test(list);
+}
+
+#[test] fn asmut_vec()
+{
+    let list = wl();
+
+    fn test<T>(_: impl AsMut<Vec<T>>) {}
+
+    test(list);
+}
+
+#[test] fn asmut_slice()
+{
+    let list = wl();
+
+    fn test<T>(_: impl AsMut<[T]>) {}
+
+    test(list);
+}
+
+#[test] fn deref_to_slice()
+{
+    let list = wl();
+
+    let _ = list.first();
+    let _ = (*list).len();
+}
+
+
+>>>>>>> rs-dev
 #[test] fn printing()
 {
     println!("\n");

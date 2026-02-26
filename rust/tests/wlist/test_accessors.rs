@@ -5,7 +5,7 @@ use weighted_list::*;
 #[test] fn weights()
 {
     assert!( el().weights().eq([0; 0]) );
-    assert!( wl().weights().eq([2, 3, 5]) );
+    assert!( wl().weights().eq([2,3,5]) );
 }
 
 #[test] fn values()
@@ -16,19 +16,19 @@ use weighted_list::*;
 
 #[test] fn items()
 {
-    let e: [WeightedItem<String, i32>; 0] = [];
+    let e: [&WeightedItem<String, u32>; 0] = [];
     assert!( el().items().eq(&e) );
 
     assert!( wl().items().eq(&[
-        wit!(2, str!("sup")),
-        wit!(3, str!("nova")),
-        wit!(5, str!("shard")),
+        &wit!(2, str!("sup")),
+        &wit!(3, str!("nova")),
+        &wit!(5, str!("shard")),
     ]) );
 }
 
 #[test] fn raw()
 {
-    let e: [(i32, &String); 0] = [];
+    let e: [(u32, &String); 0] = [];
     assert!( el().raw().eq(e) );
 
     assert!(

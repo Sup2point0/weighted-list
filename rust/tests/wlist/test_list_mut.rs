@@ -98,16 +98,48 @@ use weighted_list::*;
     assert_eq!( *wl().insert_new_item(11, (1, str!("elysion"))), fourth );
 }
 
+<<<<<<< HEAD
 #[test] fn remove()
+=======
+#[test] fn remove_at()
+>>>>>>> rs-dev
 {
     let orig = wl();
+    let orig = orig.items();
+    
     let mut list = wl();
 
-    assert_eq!( list.remove(0), orig.items()[0] );
-    assert_eq!( list.remove(0), orig.items()[1] );
-    assert_eq!( list.remove(0), orig.items()[2] );
+    assert_eq!( list.remove_at(0), *orig[0] );
+    assert_eq!( list.remove_at(0), *orig[1] );
+    assert_eq!( list.remove_at(0), *orig[2] );
 }
 
+<<<<<<< HEAD
+=======
+#[test] fn truncate()
+{
+    assert_eq!( *el().truncate(0), el() );
+    assert_eq!( *el().truncate(1), el() );
+    assert_eq!( *el().truncate(10), el() );
+
+    assert_eq!( *wl().truncate(0), el() );
+    assert_eq!( *wl().truncate(1), wlist![(1, str!("sup"))] );
+    assert_eq!( *wl().truncate(2), wlist![(2, str!("sup"))] );
+    assert_eq!( *wl().truncate(3), wlist![(2, str!("sup")), (1, str!("nova"))] );
+    assert_eq!( *wl().truncate(4), wlist![(2, str!("sup")), (2, str!("nova"))] );
+    assert_eq!( *wl().truncate(5), wlist![(2, str!("sup")), (3, str!("nova"))] );
+    assert_eq!( *wl().truncate(6), wlist![(2, str!("sup")), (3, str!("nova")), (1, str!("shard"))] );
+
+    assert_eq!( *wl().truncate(wl().len()), wl() );
+}
+
+#[test] fn retain()
+{}
+
+#[test] fn retain_mut()
+{}
+
+>>>>>>> rs-dev
 #[test] fn clear()
 {
     assert_eq!( *wl().clear(), el() );

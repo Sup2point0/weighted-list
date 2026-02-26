@@ -1,19 +1,25 @@
-use std::{
-    fmt
-};
-
 use crate::root::*;
 
 
-/// An item in a `WeightedList`, with a `value` of type `V` and a `weight` of numerical type `W`.
+/// A shorthand for [`WeightedItem`].
 /// 
-/// For consistency and layout, `weight` always comes before `value` when ordering is relevant.
+/// If you refer to [`WeightedItem`] prolifically in your code, you may wish to use this for brevity. Otherwise, the full [`WeightedItem`] is recommended for clarity.
+pub type WItem<V,W> = WeightedItem<V,W>;
+
+
+/// An item in a [`WeightedList`](crate::WeightedList), with a `value` of type `V` and a `weight` of numerical type `W`.
 /// 
-/// You should rarely find yourself constructing a `WeightedItem` by hand – instead, you'll usually interact with existing instances from a `WeightedList`.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+/// For consistency and layout, `weight` always comes before `value` when ordering is relevant. Methods and conversions will expect `(W, V)`, not `(V, W)`.
+/// 
+/// You should rarely find yourself constructing a [`WeightedItem`] by hand – instead, you'll usually interact with existing instances from a [`WeightedList`](crate::WeightedList).
+#[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct WeightedItem<V, W: Weight>
 {
-    /// The weight of the item. A non-negative number. `0` is technically valid, but not advised.
+    /// The weight of the item. A positive number. `0` is technically valid, but not advised.
+    /// 
+    /// # Notes
+    /// 
+    /// - `num_traits::Unsigned` is not enforced because this is incompatible with non-integer `W` (`f32`, `f64`, etc.) which are always signed.
     pub weight: W,
 
     /// The value stored in the item.
@@ -23,7 +29,7 @@ pub struct WeightedItem<V, W: Weight>
 // == CONSTRUCTORS == //
 impl<V, W: Weight> WeightedItem<V,W>
 {
-    /// Construct a `WeightedItem` with `value` and a weight of `1`.
+    /// Construct an item with `value` and a weight of `1`.
     pub fn unit(value: V) -> Self
     {
         Self {
@@ -32,20 +38,20 @@ impl<V, W: Weight> WeightedItem<V,W>
         }
     }
 
-    /// Construct a `WeightedItem` with `value` and `weight`.
+    /// Construct an item with `value` and `weight`.
     pub fn new(weight: W, value: V) -> Self
     {
         Self { weight, value }
     }
 
-    /// Construct a `WeightedItem` from a `(weight, value)` pair.
+    /// Construct an item from a `(weight, value)` pair.
     pub fn from((weight, value): (W, V)) -> Self
     {
         Self { weight, value }
     }
 }
 
-/// Construct a `WeightedItem` from a `(weight, value)` pair.
+/// Construct a [`WeightedItem`] from a `(weight, value)` pair.
 /// 
 /// # Usage
 /// 
@@ -56,7 +62,7 @@ impl<V, W: Weight> WeightedItem<V,W>
 /// ```
 #[macro_export]
 macro_rules! wit {
-    ( $weight: expr, $value: expr ) => {
+    ($weight: expr, $value: expr) => {
         WeightedItem::new($weight, $value)
     };
 }
@@ -69,28 +75,46 @@ impl<V, W: Weight> From<WeightedItem<V,W>> for (W, V)
     }
 }
 
-// == TRAITS == //
-impl<V: fmt::Display, W: Weight> fmt::Display for WeightedItem<V,W>
-{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
-    {
-        write!(f, "{{ {}, {} }}", self.weight, self.value)
-    }
-}
-
-impl<V: Eq, W: Weight + Ord> Ord for WeightedItem<V,W>
+// == TRAIT IMPLEMENTATIONS == //
+impl<V, W: Weight> Ord for WeightedItem<V,W>
+    where
+        V: Eq,
+        W: Ord,
 {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering
     {
         self.weight.cmp(&other.weight)
-        // .then(self.value.cmp(&other.value))
+            // .then(self.value.cmp(&other.value))  // TODO FIXME
     }
 }
 
-impl<V: Eq, W: Weight> PartialOrd for WeightedItem<V,W>
+impl<V, W: Weight> PartialOrd for WeightedItem<V,W>
+    where
+        V: Eq,
 {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering>
     {
         self.weight.partial_cmp(&other.weight)
+    }
+}
+
+impl<V, W: Weight> Default for WeightedItem<V,W>
+    where
+        V: Default,
+        W: Default,
+{
+    fn default() -> Self {
+        Self { weight: W::default(), value: V::default() }
+    }
+}
+
+impl<V, W: Weight> std::fmt::Display for WeightedItem<V,W>
+    where
+        V: std::fmt::Display,
+        W: std::fmt::Display,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result
+    {
+        write!(f, "{{ {}, {} }}", self.weight, self.value)
     }
 }

@@ -2,7 +2,7 @@
 
 A vector implementation for weighted randomisation.
 
-Implements the `WeightedList` struct, an ordered collection of `WeightedItem`s, which hold a `value` and `weight`. Indexing and random selection takes the weight of items into consideration, such that items with greater weights are more likely to be selected.
+This crate implements the `WeightedList` struct, an ordered collection of `WeightedItem`s, which hold a `value` and `weight`. Indexing and random selection takes the weight of items into consideration, such that items with greater weights are more likely to be selected.
 
 
 ## Usage
@@ -64,26 +64,28 @@ let words = descriptors.select_random_values()
     .call();
 
 if let Some(first) = words[0] && let Some(second) = words[1] {
-    println!("Rust is {} and {}", first, second);
+    println!("Rust is {first} and {second}");
     // => Rust is awesome and elegant
 }
 ```
 
 ### Indexing
 ```rust
-let wl = wlist![
-    (1, "qi"),
-    (2, "sup"),
-    (5, "shard"),
-];
+let wl = wlist![(1, "qi"), (2, "sup"), (5, "shard")];
 
-wl[0]; // => WeightedItem { weight: 1, value: "qi" }
-wl[1]; // => WeightedItem { weight: 2, value: "sup" }
-wl[2]; // => WeightedItem { weight: 2, value: "sup" }
-wl[3]; // => WeightedItem { weight: 5, value: "shard" }
-wl[4]; // => WeightedItem { weight: 5, value: "shard" }
-wl[5]; // => WeightedItem { weight: 5, value: "shard" }
-wl[6]; // => WeightedItem { weight: 5, value: "shard" }
-wl[7]; // => WeightedItem { weight: 5, value: "shard" }
-wl[8]; // panic - out of bounds!
+let _ = wl[0]; // => WeightedItem { weight: 1, value: "qi" }
+let _ = wl[1]; // => WeightedItem { weight: 2, value: "sup" }
+let _ = wl[2]; // => WeightedItem { weight: 2, value: "sup" }
+let _ = wl[3]; // => WeightedItem { weight: 5, value: "shard" }
+let _ = wl[4]; // => WeightedItem { weight: 5, value: "shard" }
+let _ = wl[5]; // => WeightedItem { weight: 5, value: "shard" }
+let _ = wl[6]; // => WeightedItem { weight: 5, value: "shard" }
+let _ = wl[7]; // => WeightedItem { weight: 5, value: "shard" }
+let _ = wl[8]; // => panic - out of bounds!
 ```
+
+
+## Future Features
+
+- immutable `FrozenWeightedList` variant
+- slice indexing

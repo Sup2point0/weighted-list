@@ -7,7 +7,7 @@ use weighted_list::*;
     assert_eq!( *el().prune(), el() );
     assert_eq!( *wl().prune(), wl() );
     assert_eq!( *wlist![(0, str!("sup"))].prune(), el() );
-    assert_eq!( *wlist![(-1, str!("sup"))].prune(), el() );
+    assert_eq!( *wlist![(-1.0, str!("sup"))].prune(), WList::<String, f64>::new() );
 }
 
 #[test] fn set_weights()
@@ -147,25 +147,29 @@ use weighted_list::*;
     );
 }
 
+<<<<<<< HEAD
 #[test] fn take_one()
+=======
+#[test] fn take_one_at()
+>>>>>>> rs-dev
 {
     let mut list = wl();
 
-    list.take_one(0);
+    list.take_one_at(0);
     assert_eq!(list, wlist!(
         (1, str!("sup")),
         (3, str!("nova")),
         (5, str!("shard"))
     ));
 
-    list.take_one(8);
+    list.take_one_at(8);
     assert_eq!(list, wlist!(
         (1, str!("sup")),
         (3, str!("nova")),
         (4, str!("shard"))
     ));
 
-    list.take_one(3);
+    list.take_one_at(3);
     assert_eq!(list, wlist!(
         (1, str!("sup")),
         (2, str!("nova")),
@@ -173,11 +177,15 @@ use weighted_list::*;
     ));
 }
 
+<<<<<<< HEAD
 #[test] fn take_by()
+=======
+#[test] fn take_by_at()
+>>>>>>> rs-dev
 {
     let mut list = wl();
 
-    list.take_by(0, 2);
+    list.take_by_at(2, 0);
     assert_eq!(list, wlist!(
         (3, str!("nova")),
         (5, str!("shard"))

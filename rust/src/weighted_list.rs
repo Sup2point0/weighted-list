@@ -1,45 +1,70 @@
-use std::{
-    fmt,
-    iter,
-    ops::*,
-};
+use std::collections::{ HashSet };
+use std::fmt::{ Debug, Display };
+use std::hash::{ Hash };
 
-use bon::{bon};
+use bon::bon;
 use itertools::Itertools;
 use num_traits as nums;
-use rand::{
-    prelude::*,
-    seq::SliceRandom,
-};
+use rand::prelude::*;
+use rand::seq::{ SliceRandom };
 
 use crate::*;
 
 
+/// A shorthand for [`WeightedList`].
+/// 
+/// If you refer to [`WeightedList`] prolifically in your code, you may wish to use this for brevity. Otherwise, the full [`WeightedList`] is recommended for clarity.
+pub type WList<V,W> = WeightedList<V,W>;
+
+
 /// A homogeneous list of weighted items with values of type `V` and weights of numerical type `W`.
 /// 
-/// Near-identical to `Vec<T>`, but stores `WeightedItem<V,W>` objects instead. You can think of it like a `Vec<WeightedItem<V,W>>`.
+/// Near-identical to `Vec<T>`, but stores [`WeightedItem<V,W>`](WeightedItem) objects instead. You can think of it like a `Vec<WeightedItem<V,W>>`.
 /// 
 /// # Usage
 /// 
 /// ```
 /// # use weighted_list::*;
-/// let list: WeightedList<String, i32> = wlist![
-///     (2, String::from("sup")),
-///     (3, String::from("nova")),
-///     (5, String::from("shard")),
+/// let wl: WeightedList<String, u32> = wlist![
+///     (2, "sup".to_string()),
+///     (3, "nova".to_string()),
+///     (5, "shard".to_string()),
 /// ];
 /// 
-/// for item in &list {
+/// for item in &wl {
 ///     println!("{item}");
 /// }
 /// 
-/// if let Some(result) = list.select_random_value(&mut rand::rng()) {
-///     println!("{}", result);
+/// if let Some(result) = wl.select_random_value(&mut rand::rng()) {
+///     println!("{result}");
 /// }
 /// ```
 /// 
+/// # Indexing
+/// 
+/// `WeightedList` uses *weighted* indexing; this is the key difference between it and a `Vec`. It's most easily explained with an example:
+/// 
+/// ```should_panic
+/// # use weighted_list::*;
+/// let wl = wlist![(1, "qi"), (2, "sup"), (5, "shard")];
+/// 
+/// let _ = wl[0]; // => WeightedItem { weight: 1, value: "qi" }
+/// let _ = wl[1]; // => WeightedItem { weight: 2, value: "sup" }
+/// let _ = wl[2]; // => WeightedItem { weight: 2, value: "sup" }
+/// let _ = wl[3]; // => WeightedItem { weight: 5, value: "shard" }
+/// let _ = wl[4]; // => WeightedItem { weight: 5, value: "shard" }
+/// let _ = wl[5]; // => WeightedItem { weight: 5, value: "shard" }
+/// let _ = wl[6]; // => WeightedItem { weight: 5, value: "shard" }
+/// let _ = wl[7]; // => WeightedItem { weight: 5, value: "shard" }
+/// let _ = wl[8]; // => panic - out of bounds!
+/// ```
+/// 
+/// In essence, each value is "copied" a number of times equal to its weight – this is what enables the weighted randomisation. But because the values are stored in [`WeightedItem`] objects, instead of actually being duplicated, larger weight values can be used without fear of performance impacts.
+/// 
 /// # Tips
 /// 
+/// - If you only need integer weights, use unsigned types like `u32` to enforce non-negative item weights.
+///   - If you really want to, you can use `NonZero<u32>` to further ensure item weights are valid.
 /// - Most methods return `&Self` or `&mut Self`, allowing you to chain methods. Here's a contrived example:
 /// 
 /// ```
@@ -51,184 +76,100 @@ use crate::*;
 ///     .prune()
 ///     .len();
 /// ```
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
-pub struct WeightedList<V, W: Weight>
+#[derive(Clone, Hash, PartialEq, Eq, Default, Debug)]
+pub struct WeightedList<V,
+    W: Weight>
 {
     data: Vec<WeightedItem<V,W>>
 }
 
 // == CONSTRUCTORS == //
+/// Methods for constructing a [`WeightedList`].
 impl<V, W: Weight> WeightedList<V,W>
 {
-    /// Construct an empty `WeightedList`.
+    /// Construct an empty list.
     pub fn new() -> Self
     {
         Self { data: Vec::new() }
     }
 
-    /// Construct an empty `WeightedList` with the specified capacity.
+    /// Construct an empty list with the specified capacity.
     pub fn with_capacity(capacity: usize) -> Self
     {
         Self { data: Vec::with_capacity(capacity) }
     }
 
-    /// Construct a `WeightedList` from an iterable of `(weight, value)` pairs.
-    pub fn init<I>(items: I) -> Self
-        where I: IntoIterator<Item = (W, V)>
+    /// Construct a [`WeightedList`] from an iterable of `value`s, merging duplicate values into single [`WeightedItem`]s.
+    /// 
+    /// Note that this has $O(n^2)$ time complexity.
+    pub fn from_expanded<I>(values: I) -> Self
+        where
+            I: IntoIterator<Item = V>,
+            V: PartialEq,
     {
-        Self {
-            data: items.into_iter().map(
-                |(weight, value)|
-                WeightedItem::new(weight, value)
-            ).collect::<Vec<WeightedItem<V,W>>>()
+        let mut out = WeightedList::new();
+
+        for value in values {
+            if let Some(existing) = out.iter_mut().find(|item| item.value == value) {
+                existing.weight += W::one();
+            }
+            else {
+                out.push_value(value);
+            }
         }
+
+        out
     }
 }
 
-/// Construct a `WeightedList` from the provided `(weight, value)` pairs.
+/// Construct a [`WeightedList`] from the provided `(weight, value)` pairs.
 /// 
 /// # Usage
 /// 
 /// ```
 /// # use weighted_list::*;
-/// let list = wlist![
-///     (2, String::from("sup")),
-///     (3, String::from("nova")),
-///     (5, String::from("shard")),
+/// let wl = wlist![
+///     (2, "sup"),
+///     (3, "nova"),
+///     (5, "shard"),
 /// ];
+/// 
+/// let empty: WeightedList<(), usize> = wlist![];
 /// ```
 #[macro_export]
 macro_rules! wlist {
-    ( $( $item: expr ),* $(,)? ) => {
-        WeightedList::init([
-            $( $item, )*
-        ])
+    () => { WeightedList::new() };
+
+    ($( ($weight:expr, $value:expr) ),* $(,)?) =>
+    {
+        WeightedList::from_iter(
+            [
+                $( ($weight, $value), )*
+            ].into_iter()
+        )
     };
 }
 
-// == ACCESSORS == //
-impl<V, W: Weight> WeightedList<V,W>
-{
-    /// Get an iterator over copies of the weights of each item in the list.
-    pub fn weights(&self) -> impl Iterator<Item = W>
+// == CONVERSIONS FROM == //
+impl<V, W: Weight> FromIterator<(W,V)> for WeightedList<V,W> {
+    fn from_iter<I>(pairs: I) -> Self
+        where I: IntoIterator<Item = (W,V)>
     {
-        self.data.iter().map(|item| item.weight)
-    }
-
-    /// Get an iterator over references to the values of each item in the list.
-    pub fn values(&self) -> impl Iterator<Item = &V>
-    {
-        self.data.iter().map(|item| &item.value)
-    }
-
-    /// Get a reference to the `Vec<>` of items in the list.
-    pub fn items(&self) -> &Vec<WeightedItem<V,W>>
-    {
-        &self.data
-    }
-
-    /// Get an iterator over (weight, value) tuples representing each item in the list.
-    /// 
-    /// This satisfies the axiom:
-    /// 
-    /// ```
-    /// # use weighted_list::*;
-    /// let wl = wlist![(2, "sup"), (3, "nova")];
-    /// let rl = WeightedList::init(wl.raw());
-    /// 
-    /// for (left, right) in std::iter::zip(wl.clone(), rl.clone()) {
-    ///     assert_eq!(left.weight, right.weight);
-    ///     assert_eq!(left.value, *right.value);
-    /// }
-    /// ```
-    pub fn raw(&self) -> impl Iterator<Item = (W,&V)>
-    {
-        self.data.iter().map(|item| (item.weight, &item.value))
+        Self {
+            data:
+                pairs.into_iter()
+                    .map(
+                        |(weight, value)| WeightedItem::new(weight, value)
+                    )
+                    .collect::<Vec<_>>()
+        }
     }
 }
-
-impl<V, W: Weight + nums::PrimInt> WeightedList<V,W>
-{
-    pub fn expanded(&self) -> impl Iterator<Item = &V>
-    {
-        self.data
-            .iter()
-            .flat_map(|item| iter::repeat_n(
-                &item.value,
-                nums::cast::<W, usize>(item.weight).unwrap_or(0)
-            ))
-    }
-}
-
-// == PROPERTIES == //
-impl<V, W: Weight> WeightedList<V,W>
-{
-    /// Sum the weights of all items in the list.
-    /// 
-    /// # Notes
-    /// 
-    /// - This is not the number of items in the list – use `.total_values()` for that.
-    /// - `len() == 0` does not imply the list is empty – items may have zero or negative weights! To check if the list is empty, use `.is_empty()` instead.
-    pub fn len(&self) -> W
-    {
-        self.data.iter().map(|item| item.weight).sum()
-    }
-
-    pub fn capacity(&self) -> usize
-    {
-        self.data.capacity()
-    }
-
-    /// How many items/values are in the list?
-    /// 
-    /// Note that this is not equivalent to `.len()`, which is the total weights of all items in the list.
-    pub fn total_values(&self) -> usize
-    {
-        self.data.len()
-    }
-
-    /// Does the list contain no items?
-    /// 
-    /// Note that this returns `false` if the list contains items with weights of `0`.
-    pub fn is_empty(&self) -> bool
-    {
-        self.data.is_empty()
-    }
-
-    /// Do any items have a weight of `0`?
-    pub fn is_zero(&self) -> bool
-    {
-        !self.is_empty()
-        && self.data.iter().all(|item| item.weight == W::zero())
-    }
-
-    /// Do any items have a negative weight?
-    pub fn has_negative_weights(&self) -> bool
-    {
-        !self.is_empty()
-        && self.data.iter().any(|item| item.weight < W::zero())
-    }
-}
-
-// == CONVERSIONS == //
-impl<V, W: Weight> From<FrozenWeightedList<V,W>> for WeightedList<V,W>
-{
-    fn from(list: FrozenWeightedList<V,W>) -> Self {
-        Self::from_iter(list)
-    }
-}
-
-impl<T, V, W: Weight> FromIterator<T> for WeightedList<V,W>
-    where T: Into<WeightedItem<V,W>>
+impl<V, W: Weight> FromIterator<WeightedItem<V,W>> for WeightedList<V,W>
 {
     fn from_iter<I>(items: I) -> Self
         where I: IntoIterator<Item = T>
     {
-        // TODO benchmark
-        // Self {
-        //     data: items.into_iter().collect::<Vec<WeightedItem<V,W>>>()
-        // }
-
         let mut data = vec![];
 
         for item in items {
@@ -239,54 +180,71 @@ impl<T, V, W: Weight> FromIterator<T> for WeightedList<V,W>
     }
 }
 
-// impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
-// {
-//     fn from(vec: Vec<WeightedItem<V,W>>) -> Self {
-//         Self { data: vec }
-//     }
-// }
+impl<V, W: Weight> From<Vec<(W,V)>> for WeightedList<V,W> {
+    fn from(pairs: Vec<(W,V)>) -> Self {
+        pairs.into_iter().collect()
+    }
+}
+impl<V, W: Weight> From<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
+    fn from(data: Vec<WeightedItem<V,W>>) -> Self {
+        Self { data }
+    }
+}
 
-impl<V, W: Weight> From<WeightedList<V,W>> for Vec<WeightedItem<V,W>>
-{
+impl<V, W: Weight, const N: usize> From<[(W,V); N]> for WeightedList<V,W> {
+    fn from(pairs: [(W,V); N]) -> Self {
+        pairs.into_iter().collect()
+    }
+}
+impl<V, W: Weight, const N: usize> From<[WeightedItem<V,W>; N]> for WeightedList<V,W> {
+    fn from(pairs: [WeightedItem<V,W>; N]) -> Self {
+        pairs.into_iter().collect()
+    }
+}
+
+// == CONVERSIONS TO == //
+impl<V, W: Weight> From<WeightedList<V,W>> for Vec<WeightedItem<V,W>> {
     fn from(list: WeightedList<V,W>) -> Self {
         list.data
     }
 }
 
-impl<V, W: Weight> AsRef<Vec<WeightedItem<V,W>>> for WeightedList<V,W>
-{
+impl<V, W: Weight> AsRef<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
     fn as_ref(&self) -> &Vec<WeightedItem<V,W>> {
         &self.data
     }
 }
+impl<V, W: Weight> AsRef<[WeightedItem<V,W>]> for WeightedList<V,W> {
+    fn as_ref(&self) -> &[WeightedItem<V,W>] {
+        &self.data
+    }
+}
 
-impl<V, W: Weight> Deref for WeightedList<V,W>
-{
+impl<V, W: Weight> AsMut<Vec<WeightedItem<V,W>>> for WeightedList<V,W> {
+    fn as_mut(&mut self) -> &mut Vec<WeightedItem<V,W>> {
+        &mut self.data
+    }
+}
+impl<V, W: Weight> AsMut<[WeightedItem<V,W>]> for WeightedList<V,W> {
+    fn as_mut(&mut self) -> &mut [WeightedItem<V,W>] {
+        &mut self.data
+    }
+}
+
+impl<V, W: Weight> std::ops::Deref for WeightedList<V,W> {
     type Target = [WeightedItem<V,W>];
 
     fn deref(&self) -> &Self::Target {
         self.data.deref()
     }
 }
-
-impl<V, W: Weight> DerefMut for WeightedList<V,W>
-{
+impl<V, W: Weight> std::ops::DerefMut for WeightedList<V,W> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.data.deref_mut()
     }
 }
 
-// == TRAITS == //
-impl<V: fmt::Display, W: Weight + fmt::Display> fmt::Display for WeightedList<V,W>
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {            
-        write!(f,
-            "WeightedList[{}]",
-            self.data.iter().map(|item| item.to_string()).join(", ")
-        )
-    }
-}
-
+// == TRAIT IMPLEMENTATIONS == //
 impl<V, W: Weight> Extend<WeightedItem<V,W>> for WeightedList<V,W>
 {
     fn extend<T>(&mut self, iter: T)
@@ -298,50 +256,22 @@ impl<V, W: Weight> Extend<WeightedItem<V,W>> for WeightedList<V,W>
     }
 }
 
-// == INTERNAL == //
-impl<V, W: Weight> WeightedList<V,W>
+impl<V, W: Weight> Display for WeightedList<V,W>
+    where
+        V: Display,
+        W: Display,
 {
-    /// Convert a `weighted_index` to its unweighted equivalent in the underlying `Vec`. Does not panic on overflow and instead returns the `.len()` of the underlying `Vec`.
-    fn _unweight_index_nopanic_(&self, weighted_index: W) -> usize
-    {
-        let mut t = W::zero();
-        let mut i = 0;
-
-        for item in &self.data {
-            t += item.weight;
-
-            if t > weighted_index {
-                return i;
-            }
-
-            i += 1;
-        }
-
-        i
-    }
-
-    /// Convert a `weighted_index` to its unweighted equivalent in the underlying `Vec`. Panics on overflow.
-    fn _unweight_index_(&self, weighted_index: W) -> usize
-    {
-        let mut t = W::zero();
-
-        for (i, item) in self.data.iter().enumerate() {
-            t += item.weight;
-
-            if t > weighted_index {
-                return i;
-            }
-        }
-
-        panic!(
-            "index out of bounds: the len is {} but the index is {}",
-            self.len(), weighted_index
-        );
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result
+    {            
+        write!(f,
+            "WeightedList[{}]",
+            self.data.iter().map(|item| item.to_string()).join(", ")
+        )
     }
 }
 
 // == INDEXING == //
-impl<V, W: Weight> Index<W> for WeightedList<V,W>
+impl<V, W: Weight> std::ops::Index<W> for WeightedList<V,W>
 {
     type Output = WeightedItem<V,W>;
 
@@ -357,11 +287,14 @@ impl<V, W: Weight> Index<W> for WeightedList<V,W>
             }
         };
 
-        panic!("index out of bounds: the len is {} but the index is {weighted_index}", self.len());
+        panic!(
+            "index out of bounds: the len is {:?} but the index is {:?}",
+            self.len(), weighted_index
+        );
     }
 }
 
-impl<V, W: Weight> IndexMut<W> for WeightedList<V,W>
+impl<V, W: Weight> std::ops::IndexMut<W> for WeightedList<V,W>
 {
     fn index_mut(&mut self, weighted_index: W) -> &mut Self::Output
     {
@@ -371,18 +304,6 @@ impl<V, W: Weight> IndexMut<W> for WeightedList<V,W>
 }
 
 // == ITERATION == //
-// TODO: is this still necessary?
-impl<V, W: Weight> WeightedList<V,W>
-{
-    pub fn iter(&self) -> impl Iterator<Item = &WeightedItem<V,W>> {
-        self.data.iter()
-    }
-
-    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut WeightedItem<V,W>> {
-        self.data.iter_mut()
-    }
-}
-
 impl<V, W: Weight> IntoIterator for WeightedList<V,W>
 {
     type Item = WeightedItem<V,W>;
@@ -419,7 +340,281 @@ impl<'l, V, W: Weight> IntoIterator for &'l mut WeightedList<V,W>
     }
 }
 
+// == ACCESSORS == //
+/// Methods for accessing data of the list.
+impl<V, W: Weight> WeightedList<V,W>
+{
+    /// Get an iterator over the weights of each item in the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// 
+    /// for weight in wl.weights() {
+    ///     println!("{weight}");    // => 2, 3
+    /// }
+    /// 
+    /// let weights = wl.weights().collect::<Vec<u32>>();
+    /// assert_eq!(weights, vec![2, 3]);
+    /// ```
+    pub fn weights(&self) -> impl Iterator<Item = W>
+    {
+        self.data.iter().map(|item| item.weight)
+    }
+
+    /// Get an iterator over the values of each item in the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// 
+    /// for value in wl.values() {
+    ///     println!("{value}");    // => &"sup", &"nova"
+    /// }
+    /// 
+    /// let values = wl.values().collect::<Vec<&&str>>();
+    /// assert_eq!(values, vec![&"sup", &"nova"]);
+    /// ```
+    pub fn values(&self) -> impl Iterator<Item = &V>
+    {
+        self.data.iter().map(|item| &item.value)
+    }
+
+    /// Get a vector of references to items in the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// let items = wl.items();
+    /// 
+    /// assert_eq!(items[0].value, "sup");
+    /// assert_eq!(items[1].value, "nova");
+    /// ```
+    /// 
+    /// # Tips
+    /// 
+    /// - This may be helpful for [non-weighted indexing](WeightedList#indexing).
+    /// - If you'd like a vector of owned [`WeightedItem`](WeightedItem)s, [`WeightedList`](WeightedList) implements `Into<Vec>`:
+    /// 
+    /// ```rust
+    /// # use weighted_list::*;
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// let items = Vec::from(wl);
+    /// 
+    /// assert_eq!(items[0].value, "sup");
+    /// assert_eq!(items[1].value, "nova");
+    /// ```
+    pub fn items(&self) -> Vec<&WeightedItem<V,W>>
+    {
+        self.data.iter().collect_vec()
+    }
+
+    /// Get an iterator over (weight, value) tuples representing each item in the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// 
+    /// for (weight, value) in wl.raw() {
+    ///     println!("({weight}, {value})");    // => (2, "sup"), (3, "nova")
+    /// }
+    /// 
+    /// let raw = wl.raw().collect::<Vec<_>>();
+    /// assert_eq!(raw, vec![(2, &"sup"), (3, &"nova")]);
+    /// ```
+    /// 
+    /// # Notes
+    /// 
+    /// This function acts essentially like an "un-constructor", giving back the tuples you usually use to construct a [`WeightedList`]:
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = WeightedList::from([(2, "sup"), (3, "nova")]);
+    /// let rl = wl.raw();    // => [(2, &"sup"), (3, &"nova")]
+    /// ```
+    pub fn raw(&self) -> impl Iterator<Item = (W,&V)>
+    {
+        self.data.iter().map(|item| (item.weight, &item.value))
+    }
+
+    /// Get an iterator over each value in the list, repeated a number of times equal to its weight.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// 
+    /// let mut test = vec![];
+    /// for value in wl.expanded() {
+    ///     test.push(*value);
+    /// }
+    /// 
+    /// assert_eq!(test, vec!["sup", "sup", "nova", "nova", "nova"]);
+    /// ```
+    /// 
+    /// # Notes
+    /// 
+    /// - Since repeating an entity a non-integer number of times is undefined, this requires `W` to be an integer type.
+    pub fn expanded(&self) -> impl Iterator<Item = &V>
+        where W: nums::PrimInt
+    {
+        self.data
+            .iter()
+            .flat_map(|item| std::iter::repeat_n(
+                &item.value,
+                nums::cast::<W, usize>(item.weight).unwrap_or(0)
+            ))
+    }
+
+    /// Get a vector of the weights of each item in the list.
+    pub fn collect_weights(&self) -> Vec<W>
+    {
+        self.weights().collect_vec()
+    }
+
+    /// Get a vector of the values of each item in the list.
+    pub fn collect_values(&self) -> Vec<&V>
+    {
+        self.values().collect_vec()
+    }
+}
+
+// == PROPERTIES == //
+/// Methods for computing properties of the list.
+impl<V, W: Weight> WeightedList<V,W>
+{
+    /// Sum the weights of all items in the list.
+    /// 
+    /// # Notes
+    /// 
+    /// - This is not the number of items in the list – use [`.total_values()`](Self::total_values) for that.
+    /// - `self.len() == 0` does not imply the list is empty – items may have zero or negative weights! To check if the list is empty, use [`.is_empty()`](Self::is_empty) instead.
+    pub fn len(&self) -> W
+    {
+        self.data.iter().map(|item| item.weight).sum()
+    }
+
+    pub fn capacity(&self) -> usize
+    {
+        self.data.capacity()
+    }
+
+    /// How many items/values are in the list?
+    /// 
+    /// Note that this is not equivalent to [`self.len()`](Self::len), which is the total weights of all items in the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// 
+    /// assert_eq!(wl.total_values(), 2);
+    /// assert_eq!(wl.len(), 5);
+    /// ```
+    pub fn total_values(&self) -> usize
+    {
+        self.data.len()
+    }
+
+    /// Does the list contain no items?
+    /// 
+    /// Note that this returns `false` if the list contains items with weights of `0`.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let empty: WeightedList<(), usize> = wlist![];
+    /// assert_eq!(empty.is_empty(), true);
+    /// 
+    /// assert_eq!(wlist![(0, "qi")].is_empty(), false);
+    /// ```
+    pub fn is_empty(&self) -> bool
+    {
+        self.data.is_empty()
+    }
+
+    /// Do all items have a weight of `0`?
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// assert_eq!(wlist![(0, "qi")].is_zero(), true);
+    /// assert_eq!(wlist![(1, "qi")].is_zero(), false);
+    /// assert_eq!(wlist![(0, "qi"), (0, "xi")].is_zero(), true);
+    /// assert_eq!(wlist![(0, "qi"), (1, "vi")].is_zero(), false);
+    /// 
+    /// let empty: WeightedList<(), usize> = wlist![];
+    /// assert_eq!(empty.is_zero(), true);
+    /// ```
+    /// 
+    /// # Notes
+    /// - Returns `true` if `.is_empty()` is `true`.
+    pub fn is_zero(&self) -> bool
+    {
+        self.is_empty()
+        || self.data.iter().all(|item| item.weight == W::zero())
+    }
+
+    /// Do any items have a negative weight?
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// assert_eq!(wlist![(0, "qi"), ( 2, "sup")  ].has_negative_weights(), false);
+    /// assert_eq!(wlist![(0, "qi"), (-1, "aleph")].has_negative_weights(), true);
+    /// ```
+    /// 
+    /// # Notes
+    /// 
+    /// - If you only need integer weights, you should probably use an unsigned type like `u32` to ensure weights are never negative.
+    pub fn has_negative_weights(&self) -> bool
+    {
+        !self.is_empty()
+        && self.data.iter().any(|item| item.weight < W::zero())
+    }
+}
+
+// == LIST QUERYING == //
+/// Methods specialised from `Vec<>` for querying the list.
+impl<V, W: Weight> WeightedList<V,W>
+    where
+        V: Clone
+{
+    /// Return a clone of the list with items sorted in ascending order of weights.
+    /// 
+    /// Orderings of items with equivalent weights is (currently) undefined behaviour.
+    pub fn sorted(&self) -> Self
+        where V: Eq, W: Ord
+    {
+        let mut out = self.clone();
+        out.sort();
+        out
+    }
+    
+    /// Return a clone of the list with items reversed.
+    pub fn reversed(&self) -> Self
+    {
+        let mut out = self.clone();
+        out.reverse();
+        out
+    }
+}
+
 // == LIST MUTATION == //
+/// Methods specialised from `Vec<>` for mutating the list.
 impl<V, W: Weight> WeightedList<V,W>
 {
     pub fn reserve(&mut self, additional: usize) -> &mut Self
@@ -429,6 +624,18 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 
     /// Append an item to the end of the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.push_item(wl[0].clone()),
+    ///     wlist![(2, "sup"), (3, "nova"), (5, "shard"), (2, "sup")],
+    /// )
+    /// ```
     pub fn push_item(&mut self, item: WeightedItem<V,W>) -> &mut Self
     {
         self.data.push(item);
@@ -436,12 +643,36 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 
     /// Append a new item with `value` and `weight` to the end of the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.push_new_item(7, "cortex"),
+    ///     wlist![(2, "sup"), (3, "nova"), (5, "shard"), (7, "cortex")],
+    /// )
+    /// ```
     pub fn push_new_item(&mut self, weight: W, value: V) -> &mut Self
     {
         self.push_item(WeightedItem { weight, value })
     }
     
     /// Append a new item with `value` and a weight of `1` to the end of the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.push_value("elysion"),
+    ///     wlist![(2, "sup"), (3, "nova"), (5, "shard"), (1, "elysion")],
+    /// )
+    /// ```
     pub fn push_value(&mut self, value: V) -> &mut Self
     {
         self.push_item(WeightedItem::unit(value))
@@ -482,7 +713,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
-    /// Reverse the order of items in the list.
+    /// Reverse the order of items in the list (in-place).
     pub fn reverse(&mut self) -> &mut Self
     {
         self.data.reverse();
@@ -516,28 +747,61 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 
     /// Remove the entire item at `weighted_index` and return it.
-    pub fn remove(&mut self, weighted_index: W) -> WeightedItem<V,W>
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if `weighted_index` is out of bounds.
+    pub fn remove_at(&mut self, weighted_index: W) -> WeightedItem<V,W>
     {
         self.data.remove(self._unweight_index_(weighted_index))
     }
 
-    // UNTESTED
+    /// Remove elements from the end of the list, such that [`self.len()`](Self::len) == `len`. The last element may have its weight decreased.
+    /// 
+    /// # Usage
+    /// 
+    /// ```rust
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// wl.truncate(5);
+    /// assert_eq!(wl, wlist![(2, "sup"), (3, "nova")]);
+    /// 
+    /// wl.truncate(3);
+    /// assert_eq!(wl, wlist![(2, "sup"), (1, "nova")]);
+    /// 
+    /// wl.truncate(0);
+    /// assert_eq!(wl, wlist![]);
+    /// ```
     pub fn truncate(&mut self, len: W) -> &mut Self
+        where W: Debug
     {
+        if len == W::zero() {
+            return self.clear();
+        }
+
         let mut t = W::zero();
+        let mut n = 0;
         
-        for each in &mut self.data {
+        for (i, each) in self.iter_mut().enumerate() {
             t += each.weight;
 
-            if t > len {
-                each.weight = t - len;
+            if t >= len {
+                if t > len {
+                    each.weight -= t - len;
+                }
+
+                n = i + 1;
+                break;
             }
         }
+
+        self.data.truncate(n);
 
         self
     }
 
-    /// Retain only items that fulfil the predicate.
+    /// Retain only items that fulfil `predicate``.
     pub fn retain<F>(&mut self, predicate: F) -> &mut Self
         where F: FnMut(&WeightedItem<V,W>) -> bool
     {
@@ -545,7 +809,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
-    /// Retain only items that fulfil the predicate, passing a mutable reference to the predicate.
+    /// Retain only items that fulfil `predicate``, passing a mutable reference to the predicate.
     pub fn retain_mut<F>(&mut self, predicate: F) -> &mut Self
         where F: FnMut(&mut WeightedItem<V,W>) -> bool
     {
@@ -553,9 +817,9 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
-    /// Clear the list, removing all items.
+    /// Clear the list, removing all items (in-place).
     /// 
-    /// If you'd like to set the weights of all items to `0`, you can use `.zero_all_weights()`.
+    /// If you'd like to set the weights of all items to `0`, you can use [`.zero_all_weights()`](Self::zero_all_weights).
     pub fn clear(&mut self) -> &mut Self
     {
         self.data.clear();
@@ -563,29 +827,26 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 }
 
-impl<V: Clone, W: Weight> WeightedList<V,W>
+// == SPECIALISED QUERYING == //
+/// Special [`WeightedList`]-specific methods for querying the list.
+impl<V, W: Weight> WeightedList<V,W>
 {
-    /// Return a clone of the list with items sorted in ascending order of weights.
-    /// 
-    /// Orderings of items with equivalent weights is (currently) undefined behaviour.
-    pub fn sorted(&self) -> Self
-        where V: Eq, W: Ord
+    /// Does any item in the list have a value equal to `value`?
+    pub fn contains_value(&self, value: &V) -> bool
+        where V: PartialEq
     {
-        let mut out = self.clone();
-        out.sort();
-        out
+        self.data.iter().any(|item| item.value == *value)
     }
     
-    /// Return a clone of the list with items reversed.
-    pub fn reversed(&self) -> Self
+    /// Does any item in the list have a weight equal to `weight`?
+    pub fn contains_weight(&self, weight: W) -> bool
     {
-        let mut out = self.clone();
-        out.reverse();
-        out
+        self.data.iter().any(|item| item.weight == weight)
     }
 }
 
 // == SPECIALISED MUTATION == //
+/// Special [`WeightedList`]-specific methods for mutating the list.
 impl<V, W: Weight> WeightedList<V,W>
 {
     /// Remove all items with non-positive weight.
@@ -595,6 +856,9 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
+    /// Return a clone of the list with all items having a non-positive weight removed.
+    /// 
+    /// Out-of-place version of [`.prune()`](Self::prune).
     pub fn pruned(&self) -> Self
         where V: Clone
     {
@@ -603,7 +867,103 @@ impl<V, W: Weight> WeightedList<V,W>
         out
     }
 
+    /// Find the first occurrence (from the left) of an item with `value`, and remove the entire item.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.remove_value_first(&"nova"),
+    ///     wlist![(2, "sup"), (5, "shard")],
+    /// )
+    /// ```
+    pub fn remove_value_first(&mut self, value: &V) -> &mut Self
+        where V: PartialEq
+    {
+        self.remove_first_where(|item| item.value == *value)
+    }
+
+    /// Find the last occurrence (from the right) of an item with `value`, and remove the entire item.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(0, "qi"), (1, "qi"), (2, "sup")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.remove_value_last(&"qi"),
+    ///     wlist![(0, "qi"), (2, "sup")],
+    /// )
+    /// ```
+    pub fn remove_value_last(&mut self, value: &V) -> &mut Self
+        where V: PartialEq
+    {
+        self.remove_last_where(|item| item.value == *value)
+    }
+
+    /// Find the first occurrence (from the left) of an item that fulfils `predicate`, and remove the entire item.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.remove_first_where(|item| item.weight > 2),
+    ///     wlist![(2, "sup"), (5, "shard")],
+    /// )
+    /// ```
+    pub fn remove_first_where<F>(&mut self, predicate: F) -> &mut Self
+        where F: FnMut(&WeightedItem<V,W>) -> bool
+    {
+        if let Some(idx) = self.iter().position(predicate) {
+            self.data.remove(idx);
+        }
+
+        self
+    }
+
+    /// Find the last occurrence (from the right) of an item that fulfils `predicate`, and remove the entire item.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.remove_last_where(|item| item.weight > 2),
+    ///     wlist![(2, "sup"), (3, "nova")],
+    /// );
+    /// ```
+    pub fn remove_last_where<F>(&mut self, predicate: F) -> &mut Self
+        where F: FnMut(&WeightedItem<V,W>) -> bool
+    {
+        if let Some(idx) = self.iter().rposition(predicate) {
+            self.data.remove(idx);
+        }
+
+        self
+    }
+
     /// Set the weight of all items to `0`.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.zero_all_weights(),
+    ///     wlist![(0, "sup"), (0, "nova"), (0, "shard")],
+    /// )
+    /// ```
     pub fn zero_all_weights(&mut self) -> &mut Self
     {
         for item in &mut self.data {
@@ -614,6 +974,18 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 
     /// Set the weight of all items to `weight`.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// assert_eq!(
+    ///     *wl.set_all_weights(1),
+    ///     wlist![(1, "sup"), (1, "nova"), (1, "shard")],
+    /// )
+    /// ```
     pub fn set_all_weights(&mut self, weight: W) -> &mut Self
     {
         for item in &mut self.data {
@@ -629,19 +1001,11 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// let mut wl = wlist![
-    ///     (2, "sup"),
-    ///     (3, "nova"),
-    ///     (5, "shard"),
-    /// ];
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
     /// 
     /// assert_eq!(
     ///     wl.normalised().ok(),
-    ///     Some(wlist![
-    ///         (0.2, "sup"),
-    ///         (0.3, "nova"),
-    ///         (0.5, "shard"),
-    ///     ])
+    ///     Some(wlist![(0.2, "sup"), (0.3, "nova"), (0.5, "shard")])
     /// );
     /// ```
     pub fn normalised(&mut self) -> Result<WeightedList<V, f64>, &str>
@@ -675,13 +1039,18 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 }
 
-impl<V: PartialEq, W: Weight> WeightedList<V,W>
+/// Methods for merging items into the list.
+/// 
+/// This involves comparing item values to check for duplicates, hence requiring `V: PartialEq`.
+impl<V, W: Weight> WeightedList<V,W>
+    where
+        V: PartialEq
 {
-    /// Merge a `WeightedItem` into the list. If an item with the same value already exists, add the weight of the new item to the existing item. Otherwise, append the new item to the list.
+    /// Merge an item into the list. If an item with the same value already exists, add the weight of the new item to the existing item. Otherwise, append the new item to the list.
     /// 
     /// # Tips
     /// 
-    /// - Use this method when you already have an existing `WeightedItem` instance. If you're going to construct a new `WeightedItem`, `.merge_new_item()` will be more convenient.
+    /// - Use this method when you already have an existing [`WeightedItem`] instance. If you're going to construct a new [`WeightedItem`], [`.merge_new_item()`](Self::merge_new_item) is probably more convenient.
     /// 
     /// # Usage
     /// 
@@ -713,7 +1082,7 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
 
     /// Merge a new item with `value` and `weight` into the list.
     /// 
-    /// See `.merge_item()` for details.
+    /// See [`.merge_item()`](Self::merge_item) for details.
     pub fn merge_new_item(&mut self, weight: W, value: V) -> &mut Self
     {
         self.merge_item(WeightedItem { weight, value })
@@ -721,7 +1090,7 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
 
     /// Merge a new item with `value` and a weight of `1` into the list.
     /// 
-    /// See `.merge_item()` for details.
+    /// See [`.merge_item()`](Self::merge_item) for details.
     pub fn merge_value(&mut self, value: V) -> &mut Self
     {
         self.merge_item(WeightedItem::unit(value))
@@ -729,7 +1098,7 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
 
     /// Merge the items of `other` into `self`, leaving `other` empty.
     /// 
-    /// See `.merge_item()` for details.
+    /// See [`.merge_item()`](Self::merge_item) for details.
     pub fn merge_with(&mut self, other: WeightedList<V,W>) -> &mut Self
     {
         for item in other {
@@ -739,7 +1108,7 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
         self
     }
 
-    /// Merge any duplicate items in the list.
+    /// Merge any items in the list with duplicate values by combining their weights with the first instance.
     /// 
     /// # Usage
     /// 
@@ -767,38 +1136,87 @@ impl<V: PartialEq, W: Weight> WeightedList<V,W>
     }
 }
 
-impl<V: Clone, W: Weight> WeightedList<V,W>
+/// Methods for taking items from the list.
+/// 
+/// This involves returning values without removing the existing one, hence requiring `V: Clone`.
+impl<V, W: Weight> WeightedList<V,W>
+    where
+        V: Clone
 {
     /// Decrement the weight of the item at `weighted_index` by `1`. If its weight becomes non-positive as a result, remove the entire item. Returns a clone of the item with its updated weight.
-    pub fn take_one(&mut self, weighted_index: W) -> WeightedItem<V,W>
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// wl.take_one_at(2);
+    /// assert_eq!( wl, wlist![(2, "sup"), (2, "nova"), (5, "shard")] );
+    /// 
+    /// wl.take_one_at(2);
+    /// assert_eq!( wl, wlist![(2, "sup"), (1, "nova"), (5, "shard")] );
+    /// 
+    /// wl.take_one_at(2);
+    /// assert_eq!( wl, wlist![(2, "sup"), (5, "shard")] );
+    /// ```
+    pub fn take_one_at(&mut self, weighted_index: W) -> WeightedItem<V,W>
     {
-        self.take_by(weighted_index, W::one())
+        self.take_by_at(W::one(), weighted_index)
     }
 
     /// Decrement the weight of the item at `weighted_index` by `decrement`. If its weight becomes non-positive as a result, remove the entire item. Returns a clone of the item with its updated weight.
-    pub fn take_by(&mut self, weighted_index: W, decrement: W) -> WeightedItem<V,W>
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if `weighted_index` is out of bounds.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// wl.take_by_at(2, 2);
+    /// assert_eq!( wl, wlist![(2, "sup"), (1, "nova"), (5, "shard")] );
+    /// 
+    /// wl.take_by_at(2, 2);
+    /// assert_eq!( wl, wlist![(2, "sup"), (5, "shard")]);
+    /// ```
+    pub fn take_by_at(&mut self, decrement: W, weighted_index: W) -> WeightedItem<V,W>
     {
         let idx = self._unweight_index_(weighted_index);
         let target = &mut self.data[idx];
 
-        target.weight -= decrement;
-
-        if target.weight <= W::zero() {
+        if decrement >= target.weight {
+            target.weight = W::zero();
             self.data.remove(idx)
         }
         else {
+            target.weight -= decrement;
             target.clone()
         }
     }
 
     /// Remove the entire item at `weighted_index`.
-    pub fn take_entire(&mut self, weighted_index: W) -> WeightedItem<V,W>
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// wl.take_entire_at(3);
+    /// assert_eq!( wl, wlist![(2, "sup"), (5, "shard")] );
+    /// ```
+    pub fn take_entire_at(&mut self, weighted_index: W) -> WeightedItem<V,W>
     {
-        self.remove(weighted_index)
+        self.remove_at(weighted_index)
     }
 }
 
 // == RANDOMISATION == //
+/// Methods for out-of-place random sampling from a list.
 impl<V, W: Weight> WeightedList<V,W>
 {
     fn _get_random_weighted_index_up_to_<RNG>(&self, rng: &mut RNG, upper: W) -> Option<W>
@@ -825,11 +1243,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// let wl = wlist![
-    ///     (2, String::from("sup")),
-    ///     (3, String::from("nova")),
-    ///     (5, String::from("shard")),
-    /// ];
+    /// let wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
     /// 
     /// wl.select_random_value(&mut rand::rng());
     /// // could give:
@@ -850,11 +1264,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// let wl = wlist![
-    ///     (2, String::from("sup")),
-    ///     (3, String::from("nova")),
-    ///     (5, String::from("shard")),
-    /// ];
+    /// let wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
     /// 
     /// wl.select_random_item(&mut rand::rng());
     /// // could give:
@@ -874,7 +1284,10 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 }
 
-impl<V: Clone, W: Weight> WeightedList<V,W>
+/// Methods for in-place random sampling from a list, decreasing weights of items that are chosen.
+impl<V, W: Weight> WeightedList<V,W>
+    where
+        V: Clone
 {
     /// Select a random item from the list using weighted randomisation, and decrement its weight by `1`.
     /// 
@@ -882,11 +1295,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// let mut wl = wlist![
-    ///     (2, String::from("sup")),
-    ///     (3, String::from("nova")),
-    ///     (5, String::from("shard")),
-    /// ];
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
     /// 
     /// wl.take_one_random(&mut rand::rng());
     /// // could give:
@@ -906,11 +1315,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// let mut wl = wlist![
-    ///     (2, String::from("sup")),
-    ///     (3, String::from("nova")),
-    ///     (5, String::from("shard")),
-    /// ];
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
     /// 
     /// wl.take_by_random(&mut rand::rng(), 2);
     /// // could give:
@@ -924,7 +1329,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
         if self.data.is_empty() { return None }
 
         let idx = self._get_random_weighted_index_(rng)?;
-        let out = self.take_by(idx, decrement);
+        let out = self.take_by_at(decrement, idx);
 
         Some(out)
     }
@@ -935,11 +1340,7 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// let mut wl = wlist![
-    ///     (2, String::from("sup")),
-    ///     (3, String::from("nova")),
-    ///     (5, String::from("shard")),
-    /// ];
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
     /// 
     /// wl.take_entire_random(&mut rand::rng());
     /// // could give:
@@ -955,14 +1356,17 @@ impl<V: Clone, W: Weight> WeightedList<V,W>
         if self.data.is_empty() { return None }
 
         let idx = self._get_random_weighted_index_(rng)?;
-        let out = self.take_entire(idx);
+        let out = self.take_entire_at(idx);
 
         Some(out)
     }
 }
 
+/// Random sampling methods which use the bon builder syntax.
 #[bon]
-impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
+impl<V, W: Weight> WeightedList<V,W>
+    where
+        V: Clone + Eq
 {
     /// Select `count` values using weighted randomisation.
     /// 
@@ -970,22 +1374,16 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     /// 
     /// # Options
     /// 
-    /// ```ignore
-    /// rng: RNG,
-    /// count: usize,
-    /// replace: Option<bool> = true,
-    ///     decrement: Option<W> = 1,
-    /// unique: Option<bool> = false,
+    /// ```text
+    /// rng:       RNG,
+    /// count:     usize,
+    /// replace:   bool = true,
+    /// decrement: W = 1,
     /// ```
     /// 
     /// - `count`: How many values to select.
-    /// - `replace`: If `true`, items do not have their weight decremented after selection, and infinite values can be selected. If `false`, items have their weight decremented after selection.
-    ///   - This means at most `self.len()` values will be returned.
-    /// - `decrement`: How much to decrement weights by if `replace` is `false`.
-    /// - `unique`: If `true`, only distinct values will be returned.
-    ///   - `replace` becomes irrelevant in this case.
-    ///   - This uses `Eq` equality comparison.
-    ///   - This means at most `self.total_values()` values will be returned.
+    /// - `replace` (optional): If `true`, items do not have their weight decremented after selection, and infinite values can be selected. If `false`, items have their weight decremented after selection – this would mean at most [`self.len()`](Self::len) values are returned.
+    /// - `decrement` (optional): How much to decrement weights by if `replace` is `false`.
     /// 
     /// # Usage
     /// 
@@ -994,9 +1392,9 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     /// ```
     /// # use weighted_list::*;
     /// let mut pool = wlist![
-    ///     (2, String::from("sup")),
-    ///     (3, String::from("nova")),
-    ///     (5, String::from("shard")),
+    ///     (2, "sup".to_string()),
+    ///     (3, "nova".to_string()),
+    ///     (5, "shard".to_string()),
     /// ];
     /// 
     /// let mut rng = rand::rng();
@@ -1020,16 +1418,6 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
     ///         .call();
     /// 
     /// assert!(selected.len() == 6);
-    /// 
-    /// // unique only
-    /// let selected =
-    ///     pool.select_random_values()
-    ///         .rng(&mut rng)
-    ///         .count(100)
-    ///         .unique(true)
-    ///         .call();
-    /// 
-    /// assert!(selected.len() == 3);
     /// ```
     /// 
     /// # Notes
@@ -1043,8 +1431,7 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
         rng: &mut RNG,
         count: usize,
         replace: Option<bool>,
-            decrement: Option<W>,
-        unique: Option<bool>,
+        decrement: Option<W>,
     ) -> Vec<V>
         where RNG: Rng + ?Sized
     {
@@ -1052,22 +1439,159 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
         let decrement = decrement.unwrap_or(W::one());
         let unique = unique.unwrap_or(false);
 
-        let mut pool = self.clone();
-        let mut n = 0;
-        let mut out = Vec::with_capacity(count);
+        if replace {
+            (0..count)
+                .filter_map(|_| self.select_random_value(rng).cloned())
+                .collect()
+        }
+        else {
+            let mut pool = self.clone();
 
-        loop
-        {
-            n += 1;
-            if n > count || self.data.is_empty() { break }
+            let mut out = Vec::with_capacity(
+                if count > 16 {
+                    count.min(self.total_values())
+                } else {
+                    count
+                }
+            );
 
-            if let Some(item) = {
-                if unique       { pool.take_entire_random(rng) }
-                else if replace { pool.take_by_random(rng, W::zero()) }
-                else            { pool.take_by_random(rng, decrement) }
-            } {
-                out.push(item.value.clone());
+            for _ in 0..count {
+                if self.is_zero() { break }
+
+                if let Some(item) = pool.take_by_random(rng, decrement) {
+                    out.push(item.value);
+                }
             }
+
+            out
+        }
+    }
+
+    /// Select `count` unique values using weighted randomisation.
+    /// 
+    /// Call this method using `bon` builder syntax (see [§ Usage](Self::select_random_values_unique#usage) below).
+    /// 
+    /// # Options
+    /// 
+    /// ```text
+    /// rng:              RNG,
+    /// count:            usize,
+    /// merge_duplicates: bool = false,
+    /// ```
+    /// 
+    /// - `count`: How many values to select.
+    /// - `merge_duplicates`: Whether to treat duplicate values as non-unique (see [§ Notes](Self::select_random_values_unique#notes) below for details).
+    /// 
+    /// # Usage
+    /// 
+    /// This method uses the bon builder syntax:
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let pool = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// 
+    /// let selected =
+    ///     pool.select_random_values_unique()
+    ///         .rng(&mut rand::rng())
+    ///         .count(3)
+    ///         .call();
+    /// ```
+    /// 
+    /// # Notes
+    /// 
+    /// By default, this treats each *individual item* as ‘unique’. For instance, the following lists all contain 3 unique values:
+    /// 
+    /// ```rust
+    /// # use weighted_list::*;
+    /// wlist![(2, "sup"), (3, "nova"), (5, "shard")];
+    /// wlist![(2, "sup"), (3, "sup"),  (5, "shard")];
+    /// wlist![(2, "sup"), (3, "sup"),  (5, "sup")  ];
+    /// ```
+    /// 
+    /// This means using `select_random_values_unique()` on them will return at most [`self.total_values()`](Self::total_values) values.
+    /// 
+    /// However, if `merge_duplicates` is `true`, then duplicate values (using `Eq` comparison) will be treated as non-unique. In this case, the previous lists have 3, 2, and 1 unique values, respectively.
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut pool = wlist![
+    ///     (2, "sup"),
+    ///     (2, "sup"),
+    ///     (5, "shard"),
+    /// ];
+    /// 
+    /// let mut rng = rand::rng();
+    /// 
+    /// // non-merged
+    /// let selected = pool
+    ///     .select_random_values_unique()
+    ///     .rng(&mut rng)
+    ///     .count(3)
+    ///     .call();
+    /// 
+    /// /* guaranteed to contain {"sup", "sup", "shard"} in some order */
+    /// assert!(selected.len() == 3);
+    /// 
+    /// // merged
+    /// let selected = pool
+    ///     .select_random_values_unique()
+    ///     .rng(&mut rng)
+    ///     .count(3)
+    ///     .merge_duplicates(true)
+    ///     .call();
+    /// 
+    /// /* guaranteed to contain {"sup", "shard"} in some order */
+    /// assert!(selected.len() == 2);
+    /// ```
+    #[builder]
+    pub fn select_random_values_unique<RNG>(&self,
+        rng: &mut RNG,
+        count: usize,
+        merge_duplicates: Option<bool>,
+    ) -> Vec<V>
+        where
+            RNG: Rng + ?Sized,
+            V: Clone + Eq,
+    {
+        let merge_duplicates = merge_duplicates.unwrap_or(false);
+
+        let mut l = self.len();
+        let mut seen_indices = HashSet::<usize>::new();
+
+        let mut out = Vec::with_capacity(
+            if count > 16 {
+                count.min(self.total_values())
+            } else {
+                count
+            }
+        );
+
+        for _ in 0..count
+        {
+            if l == W::zero() { break }
+
+            let Some(weighted_index) = self._get_random_weighted_index_up_to_(rng, l) else { continue };
+            let Some(idx) = self._unweight_index_skipping_(weighted_index, &seen_indices) else { continue };
+            let target = &self.data[idx];
+
+            if !merge_duplicates {
+                seen_indices.insert(idx);
+                l -= target.weight;
+            }
+            else {
+                /* Yeah, the repeated traversal is horrific, but I can’t see any other way... we’ve got to discount *all* duplicates of the value we pick */
+                let (indices, weights): (Vec<usize>, Vec<W>) =
+                    self.data.iter().enumerate()
+                        .filter_map(
+                            |(i, item)| (item.value == target.value).then_some((i, item.weight))
+                        )
+                        .unzip();
+            
+                seen_indices.extend(indices);
+                l -= weights.into_iter().sum::<W>();
+            }
+            
+            out.push(target.value.clone());
         }
 
         out
@@ -1087,7 +1611,7 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
         let decrement = decrement.unwrap_or(W::one());
 
         let mut n = 0;
-        let mut out = Vec::with_capacity(count as usize);
+        let mut out = Vec::with_capacity(count);
 
         loop
         {
@@ -1104,35 +1628,10 @@ impl<V: Clone + Eq, W: Weight> WeightedList<V,W>
 
         out
     }
-}
 
-#[bon]
-impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
-{
-    /// Variant of `._unweighted_index_()` for mutating random selection with unique outputs.
-    fn _unweight_index_skipping_(&self,
-        weighted_index: W,
-        seen: &std::collections::HashSet<V>,
-    ) -> Option<usize>
-    {
-        let mut t = W::zero();
-
-        for (i, item) in self.data.iter().enumerate() {
-            if seen.contains(&item.value) {
-                continue
-            }
-
-            t += item.weight;
-
-            if t > weighted_index {
-                return Some(i);
-            }
-        }
-
-        None
-    }
-
-    /// Take `count` values using weighted randomisation.
+    /// Take `count` unique values using weighted randomisation.
+    ///
+    /// This method is separate to `.take_random_values` due to having more restrictive trait bounds on `V` and using a different algorithm with heavier performance.
     #[builder]
     pub fn take_random_values_unique<RNG>(&mut self,
         rng: &mut RNG,
@@ -1143,12 +1642,11 @@ impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
     {
         let decrement = decrement.unwrap_or(W::one());
 
-        let mut n = 0;
         let mut l = self.len();
-
-        let mut seen = std::collections::HashSet::<V>::new();
+        let mut seen_indices = HashSet::<usize>::new();
 
         let mut out = Vec::with_capacity(
+            /* NOTE: To guard against erroneous overallocations */
             if count > 16 {
                 count.min(self.total_values())
             } else {
@@ -1156,48 +1654,49 @@ impl<V: Clone + Eq + std::hash::Hash, W: Weight> WeightedList<V,W>
             }
         );
         
-        loop
+        for _ in 0..count
         {
-            n += 1;
-            if n > count || self.data.is_empty() { break }
+            if l == W::zero() || self.is_zero() { break }
 
-            if let Some(value) = (|| {
-                let weighted_index = self._get_random_weighted_index_up_to_(rng, l)?;
-                let idx = self._unweight_index_skipping_(weighted_index, &seen)?;
+            let Some(weighted_index) = self._get_random_weighted_index_up_to_(rng, l) else { continue };
+            let Some(idx) = self._unweight_index_skipping_(weighted_index, &seen_indices) else { continue };
+            let target = &self.data[idx];
 
-                let target = &mut self.data[idx];
-                let value = target.value.clone();
-
-                target.weight -= decrement;
-
-                if target.weight <= W::zero() {
-                    self.data.remove(idx);
-                }
-
-                Some(value)
-            })()
-            {
-                seen.insert(value.clone());
-                out.push(value.clone());
-
-                l = self.data.iter()
+            /* Yeah, the repeated traversal is horrific, but I can’t see any other way... we’ve got to discount *all* duplicates of the value we pick */
+            let (indices, weights): (Vec<usize>, Vec<W>) =
+                self.data.iter().enumerate()
                     .filter_map(
-                        |item| {
-                            if !seen.contains(&item.value) { Some(item.weight) }
-                            else { None }
-                        }
+                        |(i, item)| (item.value == target.value).then_some((i, item.weight))
                     )
-                    .sum::<W>();
+                    .unzip();
+            
+            seen_indices.extend(indices);
+            l -= weights.into_iter().sum::<W>();
+
+            /* NOTE: Upgrade to mutable reference here to avoid conflict with earlier */
+            let target = &mut self.data[idx];
+
+            if decrement >= target.weight {
+                target.weight = W::zero();
+            } else {
+                target.weight -= decrement;
             }
+            
+            out.push(target.value.clone());
         }
+
+        self.prune();
 
         out
     }
 }
 
-impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
+/// Methods for shuffling data.
+impl<V, W: Weight> WeightedList<V,W>
+    where
+        V: Clone,
 {
-    /// Shuffle the order of items in the list in-place.
+    /// Shuffle the order of items in the list (in-place).
     pub fn shuffle_items<RNG>(&mut self, rng: &mut RNG) -> &mut Self
         where RNG: Rng + ?Sized
     {
@@ -1207,7 +1706,7 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
 
     /// Return a clone with the order of items shuffled.
     /// 
-    /// Out-of-place version of `.shuffle_items()`.
+    /// Out-of-place version of [`.shuffle_items()`](Self::shuffle_items).
     pub fn shuffled_items<RNG>(&self, rng: &mut RNG) -> Self
         where RNG: Rng + ?Sized
     {
@@ -1217,7 +1716,7 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
         out
     }
 
-    /// Shuffle the pairings of (weight, value) for items in the list, in-place.
+    /// Shuffle the pairings of (weight, value) for items in the list (in-place).
     /// 
     /// Values remain in the same order, while weights are re-assigned.
     /// 
@@ -1225,11 +1724,7 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
     /// 
     /// ```
     /// # use weighted_list::*;
-    /// let mut wl = wlist![
-    ///     (2, "sup"),
-    ///     (3, "nova"),
-    ///     (5, "shard"),
-    /// ];
+    /// let mut wl = wlist![(2, "sup"), (3, "nova"), (5, "shard")];
     /// 
     /// wl.shuffle_weights(&mut rand::rng());
     /// 
@@ -1257,7 +1752,7 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
 
     /// Return a clone of the list with (weight, value) pairings shuffled.
     /// 
-    /// Out-of-place version of `.shuffle_weights()`.
+    /// Out-of-place version of [`.shuffle_weights()`](Self::shuffle_weights).
     pub fn shuffled_weights<RNG>(&self, rng: &mut RNG) -> Self
         where RNG: Rng + ?Sized
     {
@@ -1268,10 +1763,72 @@ impl<V: Clone, W: Weight + Clone> WeightedList<V,W>
     }
 }
 
+// == INTERNAL == //
+impl<V, W: Weight> WeightedList<V,W>
+{
+    /// Convert a `weighted_index` to its unweighted equivalent in the underlying `Vec<>`. Does not panic on overflow and instead returns `Vec::len()`.
+    fn _unweight_index_nopanic_(&self, weighted_index: W) -> usize
+    {
+        let mut t = W::zero();
+        let mut i = 0;
 
-// == INTERNAL TESTS == //
-#[cfg(test)]
-mod tests
+        for item in &self.data {
+            t += item.weight;
+
+            if t > weighted_index {
+                return i;
+            }
+
+            i += 1;
+        }
+
+        i
+    }
+
+    /// Convert a `weighted_index` to its unweighted equivalent in the underlying `Vec<>`. Panics on overflow.
+    fn _unweight_index_(&self, weighted_index: W) -> usize
+    {
+        let mut t = W::zero();
+
+        for (i, item) in self.data.iter().enumerate() {
+            t += item.weight;
+
+            if t > weighted_index {
+                return i;
+            }
+        }
+
+        panic!(
+            "index out of bounds: the len is {:?} but the index is {:?}",
+            self.len(), weighted_index
+        );
+    }
+
+    /// Variant of `._unweighted_index_()` for random selection enforcing unique outputs.
+    fn _unweight_index_skipping_(&self,
+        weighted_index: W,
+        seen: &HashSet<usize>,
+    ) -> Option<usize>
+    {
+        let mut t = W::zero();
+
+        for (i, item) in self.data.iter().enumerate()
+        {
+            if seen.contains(&i) { continue }
+
+            t += item.weight;
+
+            if t > weighted_index {
+                return Some(i);
+            }
+        }
+
+        None
+    }
+}
+
+
+#[cfg(test)] mod tests
 {
     use super::*;
 
@@ -1326,7 +1883,7 @@ mod tests
     {
         let list = wl();
         
-        let seen = std::collections::HashSet::from(["sup".to_string()]);
+        let seen = HashSet::from([0]);
         assert_eq!( list._unweight_index_skipping_(0, &seen), Some(1) );
         assert_eq!( list._unweight_index_skipping_(1, &seen), Some(1) );
         assert_eq!( list._unweight_index_skipping_(2, &seen), Some(1) );
@@ -1336,7 +1893,7 @@ mod tests
         assert_eq!( list._unweight_index_skipping_(6, &seen), Some(2) );
         assert_eq!( list._unweight_index_skipping_(7, &seen), Some(2) );
 
-        let seen = std::collections::HashSet::from(["nova".to_string()]);
+        let seen = HashSet::from([1]);
         assert_eq!( list._unweight_index_skipping_(0, &seen), Some(0) );
         assert_eq!( list._unweight_index_skipping_(1, &seen), Some(0) );
         assert_eq!( list._unweight_index_skipping_(2, &seen), Some(2) );
