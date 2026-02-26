@@ -168,7 +168,7 @@ impl<V, W: Weight> FromIterator<(W,V)> for WeightedList<V,W> {
 impl<V, W: Weight> FromIterator<WeightedItem<V,W>> for WeightedList<V,W>
 {
     fn from_iter<I>(items: I) -> Self
-        where I: IntoIterator<Item = T>
+        where I: IntoIterator<Item = WeightedItem<V,W>>
     {
         let mut data = vec![];
 
@@ -1437,7 +1437,6 @@ impl<V, W: Weight> WeightedList<V,W>
     {
         let replace = replace.unwrap_or(true);
         let decrement = decrement.unwrap_or(W::one());
-        let unique = unique.unwrap_or(false);
 
         if replace {
             (0..count)

@@ -86,7 +86,7 @@ impl<V: fmt::Display, W: Weight> fmt::Display for FrozenWeightedItem<V,W>
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
     {
-        write!(f, "{{ {}, {} }}", self.weight, self.value)
+        write!(f, "{{ {:?}, {} }}", self.weight, self.value)
     }
 }
 

@@ -1,41 +1,27 @@
-<<<<<<< HEAD
-=======
 use std::collections::HashSet;
 
->>>>>>> rs-dev
 use itertools::Itertools;
 
 use crate::*;
 use weighted_list::*;
 
 
-<<<<<<< HEAD
-=======
 const TRIALS: usize = 50;
 
 
->>>>>>> rs-dev
 #[test] fn select_single()
 {
     let mut rng = rand::rng();
 
-<<<<<<< HEAD
-    let list: WeightedList<String, i32> = wlist!(
-=======
-    let list = wlist!(
->>>>>>> rs-dev
+    let list = wlist![
         (100, str!("sup")),
         (5, str!("woah"))
-    );
+    ];
 
     let outs = vec!["sup", "woah"];
     let mut out;
 
-<<<<<<< HEAD
-    for _ in 0..50 {
-=======
     for _ in 0..TRIALS {
->>>>>>> rs-dev
         out = list.select_random_value(&mut rng);
         assert!( outs.contains(&out.unwrap().as_str()) );
     }
@@ -43,11 +29,7 @@ const TRIALS: usize = 50;
     let outs = vec![wit!(100, str!("sup")), wit!(5, str!("woah"))];
     let mut out;
 
-<<<<<<< HEAD
-    for _ in 0..50 {
-=======
     for _ in 0..TRIALS {
->>>>>>> rs-dev
         out = list.select_random_item(&mut rng);
         assert!( outs.contains(out.unwrap()) );
     }
@@ -80,11 +62,7 @@ const TRIALS: usize = 50;
     let mut results;
 
     '_standard: {
-<<<<<<< HEAD
-        for _ in 0..50 {
-=======
         for _ in 0..TRIALS {
->>>>>>> rs-dev
             results = list.select_random_values()
                 .rng(&mut rng)
                 .count(count)
@@ -97,11 +75,7 @@ const TRIALS: usize = 50;
     }
 
     '_excess: {
-<<<<<<< HEAD
-        for _ in 0..50 {
-=======
         for _ in 0..TRIALS {
->>>>>>> rs-dev
             results = list.select_random_values()
                 .rng(&mut rng)
                 .count(count * 2)
@@ -113,35 +87,10 @@ const TRIALS: usize = 50;
         }
     }
 
-<<<<<<< HEAD
-    '_unique: {
-        for _ in 0..2 {
-            results = list.select_random_values()
-                .rng(&mut rng)
-                .count(count)
-                .unique(true)
-                .call();
-
-            assert!(
-                results.len() == 3,
-                "Expected 3 unique items, got {}: {:?}", results.len(), results
-            );
-            assert!( results.contains(&str!("sup")) );
-            assert!( results.contains(&str!("nova")) );
-            assert!( results.contains(&str!("shard")) );
-        }
-    }
-
     '_replace: {
         let mut counts;
 
         for _ in 0..50 {
-=======
-    '_replace: {
-        let mut counts;
-
-        for _ in 0..TRIALS {
->>>>>>> rs-dev
             results = list.select_random_values()
                 .rng(&mut rng)
                 .count(count)
@@ -158,11 +107,7 @@ const TRIALS: usize = 50;
     '_replace_decrement: {
         let mut counts;
 
-<<<<<<< HEAD
-        for _ in 0..50 {
-=======
         for _ in 0..TRIALS {
->>>>>>> rs-dev
             results = list.select_random_values()
                 .rng(&mut rng)
                 .count(count)
@@ -178,11 +123,6 @@ const TRIALS: usize = 50;
     }
 }
 
-<<<<<<< HEAD
-#[test] fn take_many()
-{
-    let trials = 50;
-=======
 #[test] fn select_many_unique()
 {
     let mut rng = rand::rng();
@@ -239,7 +179,6 @@ const TRIALS: usize = 50;
 
 #[test] fn take_many()
 {
->>>>>>> rs-dev
     let mut rng = rand::rng();
 
     let valid = vec!["sup", "nova", "shard"];
@@ -249,11 +188,7 @@ const TRIALS: usize = 50;
         let mut list = wl();
         let count = list.len() as usize;
 
-<<<<<<< HEAD
-        for _ in 0..trials {
-=======
         for _ in 0..TRIALS {
->>>>>>> rs-dev
             results = list.take_random_values()
                 .rng(&mut rng)
                 .count(count)
@@ -275,16 +210,6 @@ const TRIALS: usize = 50;
     '_small: {
         let mut list = wl();
 
-<<<<<<< HEAD
-        list.take_random_values_unique().rng(&mut rng).count(3).call();
-        assert_eq!( list, wlist![(1, str!("sup")), (2, str!("nova")), (4, str!("shard"))] );
-
-        list.take_random_values_unique().rng(&mut rng).count(3).call();
-        assert_eq!( list, wlist![(1, str!("nova")), (3, str!("shard"))] );
-
-        list.take_random_values_unique().rng(&mut rng).count(3).call();
-        assert_eq!( list, wlist![(2, str!("shard"))] );
-=======
         macro_rules! cycle {
             () => {
                 list.take_random_values_unique().rng(&mut rng)
@@ -304,7 +229,6 @@ const TRIALS: usize = 50;
         let selected = cycle!();
         assert_eq!( selected, HashSet::from([str!("nova"), str!("shard")]) );
         assert_eq!( list,     wlist![(2, str!("shard"))] );
->>>>>>> rs-dev
     }
 
     '_large: {
@@ -314,11 +238,7 @@ const TRIALS: usize = 50;
 
         list.take_random_values_unique().rng(&mut rng).count(n).call();
         assert_eq!( list.total_values(), n );
-<<<<<<< HEAD
-        assert_eq!( list.len(), l - n as i32 );
-=======
         assert_eq!( list.len(), l - n as u32 );
->>>>>>> rs-dev
     }
 }
 

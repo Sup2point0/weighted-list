@@ -6,6 +6,9 @@ use crate::root::*;
 use crate::FrozenWeightedItem;
 
 
+pub type FWList<V,W> = FrozenWeightedList<V,W>;
+
+
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
 pub struct FrozenWeightedList<V, W: Weight>
 {
@@ -186,7 +189,7 @@ impl<V, W: Weight> FrozenWeightedList<V,W>
         }
 
         panic!(
-            "index out of bounds: the len is {} but the index is {}",
+            "index out of bounds: the len is {:?} but the index is {:?}",
             self.len(), weighted_index
         );
     }

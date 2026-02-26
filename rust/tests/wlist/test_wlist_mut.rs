@@ -147,11 +147,7 @@ use weighted_list::*;
     );
 }
 
-<<<<<<< HEAD
-#[test] fn take_one()
-=======
 #[test] fn take_one_at()
->>>>>>> rs-dev
 {
     let mut list = wl();
 
@@ -177,11 +173,7 @@ use weighted_list::*;
     ));
 }
 
-<<<<<<< HEAD
-#[test] fn take_by()
-=======
 #[test] fn take_by_at()
->>>>>>> rs-dev
 {
     let mut list = wl();
 

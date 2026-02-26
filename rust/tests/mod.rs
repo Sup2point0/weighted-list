@@ -5,7 +5,7 @@ pub use utils::*;
 mod wlist {
     mod test_all;
 
-    mod test_constructors;
+    mod test_init;
 
     mod test_accessors;
 
@@ -19,7 +19,7 @@ mod wlist {
 
     mod test_traits;
 
-    mod test_index;
+    mod test_index_iter;
 
     mod test_list_mut;
 

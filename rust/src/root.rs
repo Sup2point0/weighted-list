@@ -21,14 +21,3 @@ impl<Type> Weight for Type where Type:
     + iter::Sum
     + fmt::Debug
 {}
-
-
-pub trait UnsignedWeight:
-    Weight
-    + nums::Unsigned
-{}
-
-impl<Type> UnsignedWeight for Type where Type:
-    Weight
-    + nums::Unsigned
-{}

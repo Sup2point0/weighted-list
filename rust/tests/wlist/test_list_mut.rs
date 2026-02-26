@@ -98,11 +98,7 @@ use weighted_list::*;
     assert_eq!( *wl().insert_new_item(11, (1, str!("elysion"))), fourth );
 }
 
-<<<<<<< HEAD
-#[test] fn remove()
-=======
 #[test] fn remove_at()
->>>>>>> rs-dev
 {
     let orig = wl();
     let orig = orig.items();
@@ -114,8 +110,6 @@ use weighted_list::*;
     assert_eq!( list.remove_at(0), *orig[2] );
 }
 
-<<<<<<< HEAD
-=======
 #[test] fn truncate()
 {
     assert_eq!( *el().truncate(0), el() );
@@ -139,7 +133,6 @@ use weighted_list::*;
 #[test] fn retain_mut()
 {}
 
->>>>>>> rs-dev
 #[test] fn clear()
 {
     assert_eq!( *wl().clear(), el() );

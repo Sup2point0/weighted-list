@@ -2,8 +2,6 @@ use crate::*;
 // use weighted_list::*;
 
 
-<<<<<<< HEAD
-=======
 #[test] fn clone() {
     let list = wl();
     let mut cloned = list.clone();
@@ -56,7 +54,6 @@ use crate::*;
 }
 
 
->>>>>>> rs-dev
 #[test] fn printing()
 {
     println!("\n");

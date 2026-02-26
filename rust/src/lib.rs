@@ -36,17 +36,14 @@ pub use root::{
 };
 
 mod weighted_item;
-pub use weighted_item::{
-    WeightedItem,
-    WItem
-};
+pub use weighted_item::{ WeightedItem, WItem };
 
 mod weighted_list;
-pub use weighted_list::WeightedList;
+pub use weighted_list::{ WeightedList, WList };
 
 
 mod frozen_weighted_item;
 pub use frozen_weighted_item::FrozenWeightedItem;
 
 mod frozen_weighted_list;
-pub use frozen_weighted_list::FrozenWeightedList;
+pub use frozen_weighted_list::{ FrozenWeightedList, FWList };

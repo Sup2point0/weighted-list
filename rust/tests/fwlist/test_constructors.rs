@@ -4,11 +4,11 @@ use weighted_list::*;
 
 #[test] fn constructors()
 {
-    let _: FrozenWeightedList<String, i32> = efl();
+    let _: FWList<String, u32> = efl();
 
-    let _: FrozenWeightedList<String, i32> = fwl();
+    let _: FWList<String, u32> = fwl();
 
-    let _: FrozenWeightedList<bool, f64> = fwlist!(
+    let _: FWList<bool, f64> = fwlist!(
         (2.0, false),
         (4.2, true)
     );
@@ -21,7 +21,7 @@ use weighted_list::*;
 
 #[test] fn macros()
 {
-    let list: FrozenWeightedList<String, i32> = fwlist!(
+    let list: FWList<String, u32> = fwlist!(
         (2, str!("sup")),
         (3, str!("nova")),
         (5, str!("shard"))

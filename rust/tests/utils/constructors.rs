@@ -1,6 +1,6 @@
 use crate::str;
 
-use weighted_list::WList;
+use weighted_list::{ WList, FWList };
 
 
 #[allow(dead_code)]
@@ -47,9 +47,9 @@ pub fn wll() -> WList<String, u32>
 
 /// Construct an empty `FrozenWeightedList` for testing.
 #[allow(dead_code)]
-pub fn efl() -> FrozenWeightedList<String, i32>
+pub fn efl() -> FWList<String, u32>
 {
-    FrozenWeightedList::new()
+    FWList::new()
 }
 
 /// Construct a `FrozenWeightedList` for testing:
@@ -62,9 +62,9 @@ pub fn efl() -> FrozenWeightedList<String, i32>
 /// ]
 /// ```
 #[allow(dead_code)]
-pub fn fwl() -> FrozenWeightedList<String, i32>
+pub fn fwl() -> FWList<String, u32>
 {
-    FrozenWeightedList::init(data_string(false))
+    FWList::init(data_string(false))
 }
 
 /// Construct a `FrozenWeightedList` for testing with more items:
@@ -80,7 +80,7 @@ pub fn fwl() -> FrozenWeightedList<String, i32>
 /// ]
 /// ```
 #[allow(dead_code)]
-pub fn fwll() -> FrozenWeightedList<String, i32>
+pub fn fwll() -> FWList<String, u32>
 {
-    FrozenWeightedList::init(data_string(true))
+    FWList::init(data_string(true))
 }

@@ -1,8 +1,5 @@
-<<<<<<<< HEAD:rust/tests/wlist/test_index.rs
-========
 use itertools::Itertools;
 
->>>>>>>> rs-dev:rust/tests/wlist/test_index_iter.rs
 use crate::*;
 use weighted_list::*;
 
@@ -23,11 +20,7 @@ use weighted_list::*;
     assert_eq!( list[9].value, "shard" );
 }
 
-<<<<<<<< HEAD:rust/tests/wlist/test_index.rs
-#[test] fn iter_methods()
-========
 #[test] fn iter()
->>>>>>>> rs-dev:rust/tests/wlist/test_index_iter.rs
 {
     let list = wl();
 
