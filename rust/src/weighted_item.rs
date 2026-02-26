@@ -1,7 +1,3 @@
-use std::{
-    fmt
-};
-
 use crate::root::*;
 
 
@@ -112,12 +108,12 @@ impl<V, W: Weight> Default for WeightedItem<V,W>
     }
 }
 
-impl<V, W: Weight> fmt::Display for WeightedItem<V,W>
+impl<V, W: Weight> std::fmt::Display for WeightedItem<V,W>
     where
-        V: fmt::Display,
-        W: fmt::Display,
+        V: std::fmt::Display,
+        W: std::fmt::Display,
 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result
     {
         write!(f, "{{ {}, {} }}", self.weight, self.value)
     }
