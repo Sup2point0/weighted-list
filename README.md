@@ -18,26 +18,23 @@
 
 </div>
 
-A list implementation for weighted randomisation, implemented (eventually) in every programming language I’ve learnt.
+List data structures for weighted randomisation, implemented (eventually) in every programming language I’ve learnt.
 
 
 <details open>
-  <summary>
-    <strong> Rust </strong>
-  </summary>
+  <summary> <strong> Rust </strong> </summary>
 
 ```rs
 let descriptors = wlist![
-    (10, "cool".to_string()),
-    (5,  "awesome".to_string()),
-    (2,  "elegant".to_string()),
-    (1,  "beautiful".to_string()),
+    (10, "cool".to_owned()),
+    (5,  "awesome".to_owned()),
+    (2,  "elegant".to_owned()),
+    (1,  "beautiful".to_owned()),
 ];
 
 let words = descriptors.select_random_values()
     .rng(&mut rand::rng())
     .count(2)
-    .unique(true)
     .call();
 
 if let Some(first) = words[0] && let Some(second) = words[1] {
@@ -48,10 +45,9 @@ if let Some(first) = words[0] && let Some(second) = words[1] {
 
 </details>
 
+
 <details>
-  <summary>
-    <strong> Python </strong>
-  </summary>
+  <summary> <strong> Python </strong> </summary>
 
 ```py
 greetings = WeightedList((20, "sup"), (2, "salutations"))
@@ -62,10 +58,9 @@ print(greetings.select())
 
 </details>
 
+
 <details>
-  <summary>
-    <strong> C# </strong>
-  </summary>
+  <summary> <strong> C# </strong> </summary>
 
 ```cs
 WeightedList<string, int> greetings = new((20, "sup"), (2, "salutations"));
@@ -76,23 +71,23 @@ Console.WriteLine(greetings.GetRandomValue());
 
 </details>
 
+
 <details>
-  <summary>
-    <strong> TypeScript </strong> (under development)
+  <summary> <strong> TypeScript </strong> (under  )
   </summary>
 
 ```ts
-let greetings = new WeightedList([20, "sup"], [2, "salutations"]);
+let greetings = new FrozenWeightedList([20, "sup"], [2, "salutations"]);
 
-console.log(greetings.select_value());
+console.log(greetings.sample_value());
 // => sup
 ```
 
 </details>
 
+
 <details>
-  <summary>
-    <strong> Haskell </strong> (under development)
+  <summary> <strong> Haskell </strong> (under  )
   </summary>
 
 ```hs
@@ -106,9 +101,9 @@ main = print (selectValue greetings)
 
 </details>
 
+
 <details>
-  <summary>
-    <strong> Ruby </strong> (awaiting development)
+  <summary> <strong> Ruby </strong> (awaiting  )
   </summary>
 
 ```rb
@@ -116,6 +111,7 @@ main = print (selectValue greetings)
 ```
 
 </details>
+
 
 An immutable optimised variant `FrozenWeightedList` is also implemented, which provides $O(\log{n})$ item access.
 
@@ -153,17 +149,27 @@ I made this class for *weighted randomisation*, where each element in a collecti
 
 ## Usage
 
-> [!Tip]
-> Walkthroughs and specimens for each language can be found in their respective folders.
-
 ### Rust
-`weighted-list` is now on [crates.io](https://crates.io/crates/weighted-list)! Add the crate to your Rust project by running:
+[crates.io](https://crates.io/crates/weighted-list) · [documentation](https://docs.rs/crate/weighted-list/latest)
 
 ```bash
 > cargo add weighted-list
 ```
 
-For more info on how to import and use the crate, see [docs.rs](https://docs.rs/crate/weighted-list/latest).
+```rust
+use weighted_list::{ WeightedList, FrozenWeightedList };
+```
+
+### TypeScript
+[npm](https://www.npmjs.com/package/@sup2.0/weighted-list)
+
+```bash
+npm i @sup2.0/weighted-list
+```
+
+```ts
+import { FrozenWeightedList } from "@sup2.0/weighted-list";
+```
 
 ### Python
 All you need is the [`weightedlist.py`](python/source/weighted_list.py) file, which contains the `WeightedList` class with all the functionality. Simply import it, and you’re ready to go!
@@ -187,10 +193,10 @@ For a tutorial, see [walkthrough](c-sharp/walkthrough.md).
 
 | Language   | Version   | Status | Dependencies | Notes |
 | :--------- | :-------- | :----- | :----------- | :---- |
-| Rust       | `2024`    | Unstable | `rand`, `num_traits`, `itertools`, `bon` |
+| Rust       | `2024`    | Maintaining | `rand`, `num_traits`, `itertools`, `bon` |
 | Python     | `>= 3.11` | Awaiting rewrite | None |
 | C#         | `12.0`    | Awaiting maintenance | None | Supports LINQ querying |
-| TypeScript |           | Under development | None |
+| TypeScript |           | Under development | None | Currently only supports `FrozenWeightedList` |
 | Haskell    | `GHC2021` | Under development | None |
 | Ruby       |           | Awaiting development |
 
