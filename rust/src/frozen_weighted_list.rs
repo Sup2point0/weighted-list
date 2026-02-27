@@ -45,6 +45,7 @@ impl<V, W: Weight> FrozenWeightedList<V,W>
     }
 }
 
+#[cfg(feature = "frozen")]
 #[macro_export]
 macro_rules! fwlist {
     ( $( $item: expr ),* $(,)? ) => {
@@ -53,7 +54,6 @@ macro_rules! fwlist {
         ])
     };
 }
-pub use fwlist;
 
 // == ACCESSORS == //
 impl<V, W: Weight> FrozenWeightedList<V,W>
