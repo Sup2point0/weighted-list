@@ -1,9 +1,13 @@
+#![allow(dead_code)]
+
 use crate::str;
 
-use weighted_list::{ WList, FWList };
+use weighted_list::WList;
+
+#[cfg(feature = "frozen")]
+use weighted_list::FWList;
 
 
-#[allow(dead_code)]
 pub fn data_string(long: bool) -> Vec<(u32, String)>
 {
     [
@@ -26,19 +30,16 @@ pub fn data_string(long: bool) -> Vec<(u32, String)>
 }
 
 
-#[allow(dead_code)]
 pub fn el() -> WList<String, u32>
 {
     WList::new()
 }
 
-#[allow(dead_code)]
 pub fn wl() -> WList<String, u32>
 {
     WList::from(data_string(false))
 }
 
-#[allow(dead_code)]
 pub fn wll() -> WList<String, u32>
 {
     WList::from(data_string(true))
@@ -46,7 +47,7 @@ pub fn wll() -> WList<String, u32>
 
 
 /// Construct an empty `FrozenWeightedList` for testing.
-#[allow(dead_code)]
+#[cfg(feature = "frozen")]
 pub fn efl() -> FWList<String, u32>
 {
     FWList::new()
@@ -61,7 +62,7 @@ pub fn efl() -> FWList<String, u32>
 ///   (5, "shard")
 /// ]
 /// ```
-#[allow(dead_code)]
+#[cfg(feature = "frozen")]
 pub fn fwl() -> FWList<String, u32>
 {
     FWList::init(data_string(false))
@@ -79,7 +80,7 @@ pub fn fwl() -> FWList<String, u32>
 ///   (20, "vision"),
 /// ]
 /// ```
-#[allow(dead_code)]
+#[cfg(feature = "frozen")]
 pub fn fwll() -> FWList<String, u32>
 {
     FWList::init(data_string(true))

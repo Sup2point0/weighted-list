@@ -5,6 +5,9 @@ use std::{
 use crate::*;
 
 
+pub type FWItem<V,W> = FrozenWeightedItem<V,W>;
+
+
 #[derive(Debug, Clone, Hash)]
 pub struct FrozenWeightedItem<V, W: Weight>
 {

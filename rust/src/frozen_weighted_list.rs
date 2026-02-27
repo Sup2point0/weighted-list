@@ -3,7 +3,7 @@ use std::*;
 use itertools::Itertools;
 
 use crate::root::*;
-use crate::FrozenWeightedItem;
+use crate::frozen_weighted_item::FrozenWeightedItem;
 
 
 pub type FWList<V,W> = FrozenWeightedList<V,W>;
@@ -53,6 +53,7 @@ macro_rules! fwlist {
         ])
     };
 }
+pub use fwlist;
 
 // == ACCESSORS == //
 impl<V, W: Weight> FrozenWeightedList<V,W>

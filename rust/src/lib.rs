@@ -4,7 +4,7 @@
 //! 
 //! ## Example
 //! 
-//! ```rust
+//! ```
 //! use weighted_list::*;
 //! 
 //! let wl = WeightedList::<String, u8>::from([
@@ -40,8 +40,8 @@ mod weighted_list;
 pub use weighted_list::{ WeightedList, WList };
 
 
-mod frozen_weighted_item;
-#[cfg(feature = "frozen")] pub use frozen_weighted_item::FrozenWeightedItem;
+#[cfg(feature = "frozen")] mod frozen_weighted_item;
+#[cfg(feature = "frozen")] pub use frozen_weighted_item::{ FrozenWeightedItem, FWItem };
 
-mod frozen_weighted_list;
+#[cfg(feature = "frozen")] mod frozen_weighted_list;
 #[cfg(feature = "frozen")] pub use frozen_weighted_list::{ FrozenWeightedList, FWList };
