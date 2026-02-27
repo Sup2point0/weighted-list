@@ -9,7 +9,11 @@
 - `WeightedList::total_values()` renamed to `::total_items()`
 
 ### New
+- `FrozenWeightedList` skeleton implementation, enable `frozen` feature to use (not advised currently!)
 - `WeightedList::select_random_values_unique()` method
+
+### Fixes
+- `WeightedList::take_random_values_unique()` algorithm reworked to avoid redundant work
 
 
 ## v0.5.0
