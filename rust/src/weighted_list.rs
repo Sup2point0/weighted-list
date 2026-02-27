@@ -77,8 +77,7 @@ pub type WList<V,W> = WeightedList<V,W>;
 ///     .len();
 /// ```
 #[derive(Clone, Hash, PartialEq, Eq, Default, Debug)]
-pub struct WeightedList<V,
-    W: Weight>
+pub struct WeightedList<V, W: Weight>
 {
     data: Vec<WeightedItem<V,W>>
 }
@@ -476,12 +475,36 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 
     /// Get a vector of the weights of each item in the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// 
+    /// let weights = wl.collect_weights();
+    /// 
+    /// assert_eq!(weights[0], 2);
+    /// assert_eq!(weights[1], 3);
+    /// ```
     pub fn collect_weights(&self) -> Vec<W>
     {
         self.weights().collect_vec()
     }
 
     /// Get a vector of the values of each item in the list.
+    /// 
+    /// # Usage
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let wl = wlist![(2, "sup"), (3, "nova")];
+    /// 
+    /// let weights = wl.collect_values();
+    /// 
+    /// assert_eq!(weights[0], &"sup");
+    /// assert_eq!(weights[1], &"nova");
+    /// ```
     pub fn collect_values(&self) -> Vec<&V>
     {
         self.values().collect_vec()
@@ -527,8 +550,6 @@ impl<V, W: Weight> WeightedList<V,W>
 
     /// Does the list contain no items?
     /// 
-    /// Note that this returns `false` if the list contains items with weights of `0`.
-    /// 
     /// # Usage
     /// 
     /// ```
@@ -538,6 +559,9 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// assert_eq!(wlist![(0, "qi")].is_empty(), false);
     /// ```
+    /// 
+    /// # Notes
+    /// - [`self.len()`](Self::len) returning `0` does not guarantee `self.is_empty()`, since items could have zero or negative weights. This method only returns `true` if no items are in the list at all.
     pub fn is_empty(&self) -> bool
     {
         self.data.is_empty()
@@ -577,12 +601,11 @@ impl<V, W: Weight> WeightedList<V,W>
     /// ```
     /// 
     /// # Notes
-    /// 
+    /// - Returns `false` if the list is empty.
     /// - If you only need integer weights, you should probably use an unsigned type like `u32` to ensure weights are never negative.
     pub fn has_negative_weights(&self) -> bool
     {
-        !self.is_empty()
-        && self.data.iter().any(|item| item.weight < W::zero())
+        self.data.iter().any(|item| item.weight < W::zero())
     }
 }
 
