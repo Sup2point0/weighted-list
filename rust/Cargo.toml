@@ -14,6 +14,9 @@ exclude = [
   ".dev.md"
 ]
 
+[features]
+frozen = []
+
 [dependencies]
 bon = "3.8.1"
 itertools = "0.14.0"

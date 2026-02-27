@@ -31,9 +31,7 @@
 //! For more detailed guidance on how to use the struct, see [`WeightedList`].
 
 mod root;
-pub use root::{
-    Weight,
-};
+pub use root::{ Weight };
 
 mod weighted_item;
 pub use weighted_item::{ WeightedItem, WItem };
@@ -43,7 +41,7 @@ pub use weighted_list::{ WeightedList, WList };
 
 
 mod frozen_weighted_item;
-pub use frozen_weighted_item::FrozenWeightedItem;
+#[cfg(feature = "frozen")] pub use frozen_weighted_item::FrozenWeightedItem;
 
 mod frozen_weighted_list;
-pub use frozen_weighted_list::{ FrozenWeightedList, FWList };
+#[cfg(feature = "frozen")] pub use frozen_weighted_list::{ FrozenWeightedList, FWList };
