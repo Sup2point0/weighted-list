@@ -6,6 +6,7 @@
 ### Breaking
 - `WeightedList::select_random_values().unique()` option extracted to new `WeightedList::select_random_values_unique()` method
 - `WeightedList::is_zero()` returns `true` instead of `false` when the list is empty
+- `WeightedList::total_values()` renamed to `::total_items()`
 
 ### New
 - `WeightedList::select_random_values_unique()` method

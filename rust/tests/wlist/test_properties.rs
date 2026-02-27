@@ -16,8 +16,8 @@ use weighted_list::*;
 
 #[test] fn total_values()
 {
-    assert_eq!( el().total_values(), 0 );
-    assert_eq!( wl().total_values(), 3 );
+    assert_eq!( el().total_items(), 0 );
+    assert_eq!( wl().total_items(), 3 );
 }
 
 #[test] fn is_empty()

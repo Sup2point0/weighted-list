@@ -32,7 +32,7 @@ pub fn test_binomial<V>(
         let value = &item.value;
 
         let prob = match method {
-            Method::SHUFFLE => 1.0 / (1..(wlist.total_values()+1)).product::<usize>() as f64,
+            Method::SHUFFLE => 1.0 / (1..(wlist.total_items()+1)).product::<usize>() as f64,
             _               => item.weight as f64 / wlist.len() as f64,
         };
 

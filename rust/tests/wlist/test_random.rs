@@ -40,15 +40,15 @@ const TRIALS: usize = 50;
     let mut rng = rand::rng();
 
     let mut list = wl();
-    list.take_entire_random(&mut rng); assert_eq!( list.total_values(), 2 );
-    list.take_entire_random(&mut rng); assert_eq!( list.total_values(), 1 );
-    list.take_entire_random(&mut rng); assert_eq!( list.total_values(), 0 );
+    list.take_entire_random(&mut rng); assert_eq!( list.total_items(), 2 );
+    list.take_entire_random(&mut rng); assert_eq!( list.total_items(), 1 );
+    list.take_entire_random(&mut rng); assert_eq!( list.total_items(), 0 );
 
     let mut list = wl();
-    list.take_by_random(&mut rng, 1); assert_eq!( list.total_values(), 3 );
-    list.take_by_random(&mut rng, 5); assert_eq!( list.total_values(), 2 );
-    list.take_by_random(&mut rng, 5); assert_eq!( list.total_values(), 1 );
-    list.take_by_random(&mut rng, 5); assert_eq!( list.total_values(), 0 );
+    list.take_by_random(&mut rng, 1); assert_eq!( list.total_items(), 3 );
+    list.take_by_random(&mut rng, 5); assert_eq!( list.total_items(), 2 );
+    list.take_by_random(&mut rng, 5); assert_eq!( list.total_items(), 1 );
+    list.take_by_random(&mut rng, 5); assert_eq!( list.total_items(), 0 );
 }
 
 #[test] fn select_many()
@@ -234,10 +234,10 @@ const TRIALS: usize = 50;
     '_large: {
         let mut list = wll();
         let l = list.len();
-        let n = list.total_values();
+        let n = list.total_items();
 
         list.take_random_values_unique().rng(&mut rng).count(n).call();
-        assert_eq!( list.total_values(), n );
+        assert_eq!( list.total_items(), n );
         assert_eq!( list.len(), l - n as u32 );
     }
 }

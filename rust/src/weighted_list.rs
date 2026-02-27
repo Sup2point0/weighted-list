@@ -495,8 +495,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// Sum the weights of all items in the list.
     /// 
     /// # Notes
-    /// 
-    /// - This is not the number of items in the list – use [`.total_values()`](Self::total_values) for that.
+    /// - This is not the number of items in the list – use [`.total_items()`](Self::total_items) for that.
     /// - `self.len() == 0` does not imply the list is empty – items may have zero or negative weights! To check if the list is empty, use [`.is_empty()`](Self::is_empty) instead.
     pub fn len(&self) -> W
     {
@@ -518,10 +517,10 @@ impl<V, W: Weight> WeightedList<V,W>
     /// # use weighted_list::*;
     /// let wl = wlist![(2, "sup"), (3, "nova")];
     /// 
-    /// assert_eq!(wl.total_values(), 2);
+    /// assert_eq!(wl.total_items(), 2);
     /// assert_eq!(wl.len(), 5);
     /// ```
-    pub fn total_values(&self) -> usize
+    pub fn total_items(&self) -> usize
     {
         self.data.len()
     }
@@ -1348,7 +1347,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// //   - Some(WeightedItem { 3, "nova"  })  with 30% probability
     /// //   - Some(WeightedItem { 5, "shard" }) with 50% probability
     /// 
-    /// assert!( wl.total_values() == 2 );
+    /// assert!( wl.total_items() == 2 );
     /// ```
     pub fn take_entire_random<RNG>(&mut self, rng: &mut RNG) -> Option<WeightedItem<V,W>>
         where RNG: Rng + ?Sized
@@ -1448,7 +1447,7 @@ impl<V, W: Weight> WeightedList<V,W>
 
             let mut out = Vec::with_capacity(
                 if count > 16 {
-                    count.min(self.total_values())
+                    count.min(self.total_items())
                 } else {
                     count
                 }
@@ -1507,7 +1506,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// wlist![(2, "sup"), (3, "sup"),  (5, "sup")  ];
     /// ```
     /// 
-    /// This means using `select_random_values_unique()` on them will return at most [`self.total_values()`](Self::total_values) values.
+    /// This means using `select_random_values_unique()` on them will return at most [`self.total_items()`](Self::total_items) values.
     /// 
     /// However, if `merge_duplicates` is `true`, then duplicate values (using `Eq` comparison) will be treated as non-unique. In this case, the previous lists have 3, 2, and 1 unique values, respectively.
     /// 
@@ -1559,7 +1558,7 @@ impl<V, W: Weight> WeightedList<V,W>
 
         let mut out = Vec::with_capacity(
             if count > 16 {
-                count.min(self.total_values())
+                count.min(self.total_items())
             } else {
                 count
             }
@@ -1647,7 +1646,7 @@ impl<V, W: Weight> WeightedList<V,W>
         let mut out = Vec::with_capacity(
             /* NOTE: To guard against erroneous overallocations */
             if count > 16 {
-                count.min(self.total_values())
+                count.min(self.total_items())
             } else {
                 count
             }
