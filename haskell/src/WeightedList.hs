@@ -5,7 +5,7 @@ by Sup#2.0 (@Sup2point0)
 
 module WeightedList where
 
-import Data.List
+import Data.Bifunctor
 import Data.Either
 import Data.List
 import Data.Tuple
@@ -13,28 +13,30 @@ import Data.Tuple
 
 ---------------------------------------------------------------------
 
-type WeightedList v w = [Item v w]
+type WeightedList v w = [Item w v]
 
 
-data Item v w = Item
-  { value :: v
-  , weight :: w
+data Item w v = Item
+  { weight :: w
+  , value :: v
   }
 
-instance (Show v, Show w) => Show (Item v w) where
-  show (Item value weight) = (
-      "{ value = " ++ show value ++ ", weight = " ++ show weight ++ " }"
-    )
+instance (Show v, Show w) => Show (Item w v) where
+  show (Item weight value)
+    = "{ weight = " ++ show weight ++ ", value = " ++ show value ++ " }"
 
-instance (Eq v, Eq w) => Eq (Item v w) where
-  item == item'
-    = (
-      value item == value item'
-      && weight item == weight item'
-    )
+instance (Eq v, Eq w) => Eq (Item w v) where
+  item == item' = value item == value item'
+                && weight item == weight item'
 
-instance (Eq v, Eq w, Ord w) => Ord (Item v w) where
+instance (Eq v, Eq w, Ord w) => Ord (Item w v) where
   item <= item' = weight item <= weight item'
+
+instance Functor (Item w) where
+  fmap f (Item weight value) = Item weight (f value)
+
+instance Bifunctor Item where
+  bimap f g (Item weight value) = Item (f weight) (g value)
 
 
 -------------------- CONSTRUCTORS --------------------
@@ -42,13 +44,11 @@ instance (Eq v, Eq w, Ord w) => Ord (Item v w) where
 {-|
 Construct a list of `Item`s from the provided (weight, value) pairs.
 -}
-newWeightedList :: forall v w. (Num w)
-                => [(w, v)]
-                -> WeightedList v w
+newWeightedList :: (Num w) => [(w, v)] -> WeightedList v w
 newWeightedList []    = []
-newWeightedList items = map (uncurry Item . swap) items
+newWeightedList items = map (uncurry Item) items
 
-
+wlist :: (Num w) => [(w, v)] -> WeightedList v w
 wlist = newWeightedList
 
 
@@ -115,7 +115,7 @@ Note that this has $O(n)$ time complexity.
 get :: forall v w. (Num w, Ord w)
     => WeightedList v w
     -> w
-    -> Item v w
+    -> Item w v
 
 get [] _ = error "Cannot access an empty WeightedList"
 
@@ -125,7 +125,7 @@ get list i
   where
     get' :: WeightedList v w
          -> w
-         -> Item v w
+         -> Item w v
     get' [] _ = error "Index exceeded length of WeightedList"
     get' (item:items) t
       | t' > i    = item
@@ -133,9 +133,9 @@ get list i
       where
         t' = t + weight item
     
-    get_r :: Item v w
-          -> Either w (Item v w)
-          -> Either w (Item v w)
+    get_r :: Item w v
+          -> Either w (Item w v)
+          -> Either w (Item w v)
     get_r item (Right out) = Right out
     get_r item (Left acc)
         | t' >= (-i) = Right item
@@ -152,7 +152,7 @@ Note that this has $O(n)$ time complexity.
 tryGet :: forall v w. (Num w, Ord w)
        => WeightedList v w
        -> w
-       -> Maybe (Item v w)
+       -> Maybe (Item w v)
 
 tryGet [] _ = Nothing
 
@@ -160,7 +160,7 @@ tryGet list i
   | i < 0     = either (const Nothing) Just $ foldr get_r (Left 0) list
   | otherwise = get' list 0
   where
-    get' :: (WeightedList v w) -> w -> Maybe (Item v w)
+    get' :: (WeightedList v w) -> w -> Maybe (Item w v)
     get' [] _ = Nothing
     get' (item:items) t
       | t' > i    = Just item
@@ -168,9 +168,9 @@ tryGet list i
       where
         t' = t + weight item
     
-    get_r :: Item v w
-          -> Either w (Item v w)
-          -> Either w (Item v w)
+    get_r :: Item w v
+          -> Either w (Item w v)
+          -> Either w (Item w v)
     get_r item (Right out) = Right out
     get_r item (Left acc)
         | t' >= (-i) = Right item
@@ -220,7 +220,7 @@ takeByAt list n i
 -}
 merge :: (Eq v, Num w)
       => WeightedList v w
-      -> Item v w
+      -> Item w v
       -> WeightedList v w
 merge [] item = [item]
 merge (cand:rest) item
