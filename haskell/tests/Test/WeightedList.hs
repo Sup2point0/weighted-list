@@ -20,7 +20,7 @@ test_weighted_list = testGroup "WeightedList"
   [ test_collection "constructor" test_constructor
   , test_collection "properties" test_properties
   , test_collection "index" test_index
-  , test_collection "pop" test_pop
+  , test_collection "take" test_take
   , test_collection "merge" test_merge
   , test_collection "typeclasses" test_typeclasses
   ]
@@ -28,7 +28,7 @@ test_weighted_list = testGroup "WeightedList"
 test_weighted_list_errors :: TestTree
 test_weighted_list_errors = expectFail $ testGroup "WeightedList Errors"
   [ test_collection "index" test_index_errors
-  , test_collection "pop" test_pop_errors
+  , test_collection "take" test_take_errors
   ]
 
 
@@ -39,9 +39,9 @@ test_constructor =
   [
     __ === []
 
-  , wl === [ WeightedItem { value = "sup", weight = 2 }
-           , WeightedItem { value = "nova", weight = 3 }
-           , WeightedItem { value = "shard", weight = 7 }
+  , wl === [ Item { value = "sup", weight = 2 }
+           , Item { value = "nova", weight = 3 }
+           , Item { value = "shard", weight = 7 }
            ]
   ]
 
@@ -97,48 +97,48 @@ test_index =
 test_index_errors :: [Assertion]
 test_index_errors =
   [
-    Just (get wl (12)) === Nothing
+    Just (get wl   12 ) === Nothing
   , Just (get wl (-13)) === Nothing
   ]
 
-test_pop :: [Assertion]
-test_pop =
+test_take :: [Assertion]
+test_take =
   [
-    -- pop "sup"
-    pop wl 0 === newWeightedList [ (1, "sup"), (3, "nova"), (7, "shard") ]
-  , pop wl 1 === newWeightedList [ (1, "sup"), (3, "nova"), (7, "shard") ]
+    -- take "sup"
+    takeAt wl 0 === newWeightedList [ (1, "sup"), (3, "nova"), (7, "shard") ]
+  , takeAt wl 1 === newWeightedList [ (1, "sup"), (3, "nova"), (7, "shard") ]
 
-    -- pop "nova"
-  , pop wl 2 === newWeightedList [ (2, "sup"), (2, "nova"), (7, "shard") ]
-  , pop wl 3 === newWeightedList [ (2, "sup"), (2, "nova"), (7, "shard") ]
-  , pop wl 4 === newWeightedList [ (2, "sup"), (2, "nova"), (7, "shard") ]
+    -- take "nova"
+  , takeAt wl 2 === newWeightedList [ (2, "sup"), (2, "nova"), (7, "shard") ]
+  , takeAt wl 3 === newWeightedList [ (2, "sup"), (2, "nova"), (7, "shard") ]
+  , takeAt wl 4 === newWeightedList [ (2, "sup"), (2, "nova"), (7, "shard") ]
 
-    -- pop "shard"
-  , pop wl 5  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
-  , pop wl 6  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
-  , pop wl 7  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
-  , pop wl 8  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
-  , pop wl 9  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
-  , pop wl 10 === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
-  , pop wl 11 === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
+    -- take "shard"
+  , takeAt wl 5  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , takeAt wl 6  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , takeAt wl 7  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , takeAt wl 8  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , takeAt wl 9  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , takeAt wl 10 === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , takeAt wl 11 === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
 
-    -- pop entirely
-  , popBy wl 0 2 === newWeightedList [             (3, "nova"), (7, "shard") ]
-  , popBy wl 2 3 === newWeightedList [ (2, "sup"),              (7, "shard") ]
-  , popBy wl 5 7 === newWeightedList [ (2, "sup"), (3, "nova")               ]
+    -- take entirely
+  , takeByAt wl 2 0 === newWeightedList [             (3, "nova"), (7, "shard") ]
+  , takeByAt wl 3 2 === newWeightedList [ (2, "sup"),              (7, "shard") ]
+  , takeByAt wl 7 5 === newWeightedList [ (2, "sup"), (3, "nova")               ]
 
-    -- pop negative
-  , popBy wl 0 3 === newWeightedList [             (3, "nova"), (7, "shard") ]
-  , popBy wl 2 4 === newWeightedList [ (2, "sup"),              (7, "shard") ]
-  , popBy wl 5 8 === newWeightedList [ (2, "sup"), (3, "nova")               ]
+    -- take negative
+  , takeByAt wl 3 0 === newWeightedList [             (3, "nova"), (7, "shard") ]
+  , takeByAt wl 4 2 === newWeightedList [ (2, "sup"),              (7, "shard") ]
+  , takeByAt wl 8 5 === newWeightedList [ (2, "sup"), (3, "nova")               ]
   ]
 
-test_pop_errors :: [Assertion]
-test_pop_errors =
+test_take_errors :: [Assertion]
+test_take_errors =
   [
-    Just (pop __ 0) === Nothing
-  , Just (pop wl 12) === Nothing
-  , Just (popBy wl 12 1) === Nothing
+    Just (takeAt __ 0) === Nothing
+  , Just (takeAt wl 12) === Nothing
+  , Just (takeByAt wl 1 12) === Nothing
   ]
 
 test_prune :: [Assertion]
