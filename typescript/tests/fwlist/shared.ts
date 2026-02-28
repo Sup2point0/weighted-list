@@ -1,14 +1,17 @@
 import { FrozenWeightedList } from "../../weighted-list";
 
 
-export const FWList = FrozenWeightedList;
-
-
+/**
+ * Construct an empty `FrozenWeightedList` for testing.
+ */
 export function el()
 {
   return new FrozenWeightedList();
 }
 
+/**
+ * Construct a `FrozenWeightedList` for testing.
+ */
 export function fwl()
 {
   return new FrozenWeightedList(

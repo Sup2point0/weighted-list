@@ -1,7 +1,7 @@
 import { test, assert } from "vitest";
 
+import { FWList } from "../../weighted-list";
 import { el, fwl } from "./shared";
-import { FrozenWeightedList } from "../../weighted-list";
 
 
 test("at-empty", () =>
@@ -31,7 +31,7 @@ test("at-standard", () =>
 
 test("at-small", () =>
 {
-  const fwl = new FrozenWeightedList([1, "qi"]);
+  const fwl = new FWList([1, "qi"]);
   
   assert.equal( fwl.at(0)!.value, "qi");
   assert.equal( fwl.at(1), undefined);
@@ -39,7 +39,7 @@ test("at-small", () =>
 
 test("at-units", () =>
 {
-  const fwl = new FrozenWeightedList(
+  const fwl = new FWList(
     [1, "sup"],
     [1, "nova"],
     [1, "shard"],
@@ -58,7 +58,7 @@ test("at-units", () =>
 
 test("at-large", () =>
 {
-  const fwl = new FrozenWeightedList(
+  const fwl = new FWList(
     [2, "sup"],
     [3, "nova"],
     [5, "shard"],

@@ -481,4 +481,10 @@ export class FrozenWeightedList<Value>
   }
 }
 
-export default FrozenWeightedList
+export default FrozenWeightedList;
+
+
+/**
+ * Shorthand alias for `FrozenWeightedList`.
+ */
+export const FWList = FrozenWeightedList;

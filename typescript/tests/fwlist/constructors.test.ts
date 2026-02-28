@@ -1,6 +1,7 @@
 import { test, assert } from "vitest";
 
-import { fwl, FWList } from "./shared";
+import { FWList } from "../../weighted-list";
+import { fwl } from "./shared";
 
 
 test("constructors", () =>
