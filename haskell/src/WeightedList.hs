@@ -35,8 +35,7 @@ instance (Eq v, Eq w, Ord w) => Ord (Item v w) where
   item <= item' = weight item <= weight item'
 
 
-{-| CONSTRUCTOR -}
----------------------------------------------------------------------
+-------------------- CONSTRUCTORS --------------------
 
 {-|
 Construct a list of `Item`s from the provided (weight, value) pairs.
@@ -51,53 +50,47 @@ newWeightedList items = map sanitise items
     sanitise (weight', value') = Item { value = value', weight = weight' }
 
 
-{-| ACCESSORS -}
----------------------------------------------------------------------
+wlist = newWeightedList
 
-{- |
-Sum the total weights of all items in a `WeightedList`.
+
+-------------------- ACCESSORS --------------------
+
+{-| Sum the total weights of all items in a `WeightedList`.
 -}
 totalWeights :: (Num w) => WeightedList v w -> w
 totalWeights = foldl' (\t item -> t + weight item) 0
 
-{- |
-Count the total number of items in a `WeightedList`.
+{-| Count the total number of items in a `WeightedList`.
 -}
 totalValues :: WeightedList v w -> Int
 totalValues = length
 
-{- |
-Get a list of the weights of all items in a `WeightedList`.
+{-| Get a list of the weights of all items in a `WeightedList`.
 -}
 weights :: WeightedList v w -> [w]
 weights = map weight
 
-{- |
-Get a list of the values of all items in a `WeightedList`.
+{-| Get a list of the values of all items in a `WeightedList`.
 -}
 values :: WeightedList v w -> [v]
 values = map value
 
-{- |
-Get the raw representation of a `WeightedList` in (weight, value) pairs.
+{-| Get the raw representation of a `WeightedList` in (weight, value) pairs.
 
 This satisfies the axiom `newWeightedList (raw (newWeightedList list)) == newWeightedList list`.
 -}
 raw :: WeightedList v w -> [(w, v)]
 raw = map (\item -> (weight item, value item))
 
-{- |
-Get the raw representation of a `WeightedList` in (value, weight) pairs.
+{-| Get the raw representation of a `WeightedList` in (value, weight) pairs.
 -}
 raw' :: WeightedList v w -> [(v, w)]
 raw' = map (\item -> (value item, weight item))
 
 
-{-| SINGLE METHODS -}
----------------------------------------------------------------------
+-------------------- SINGLE METHODS --------------------
 
-{- |
-Get the item of a `WeightedList` at a weighted index.
+{-| Get the item of a `WeightedList` at a weighted index.
 
 If a negative index is provided, access starts from the end of the list (where the last item is at index `-1`).
  
@@ -111,17 +104,52 @@ get :: forall v w. (Num w, Ord w)
 get [] _ = error "Cannot access an empty WeightedList"
 
 get list i
-    | i < 0     = fromRight (error "Failed to access WeightedList")
-                            (foldr get_r (Left (fromIntegral 0)) list)
-    | otherwise = get' list 0
+  | i < 0     = fromRight (error "Failed to access WeightedList") (foldr get_r (Left 0) list)
+  | otherwise = get' list 0
   where
     get' :: WeightedList v w
          -> w
          -> Item v w
     get' [] _ = error "Index exceeded length of WeightedList"
     get' (item:items) t
-        | t' > i    = item
-        | otherwise = get' items t'
+      | t' > i    = item
+      | otherwise = get' items t'
+      where
+        t' = t + weight item
+    
+    get_r :: Item v w
+          -> Either w (Item v w)
+          -> Either w (Item v w)
+    get_r item (Right out) = Right out
+    get_r item (Left acc)
+        | t' >= (-i) = Right item
+        | otherwise  = Left t'
+      where
+        t' = acc + weight item
+
+
+{-| Try to get the item of a `WeightedList` at a weighted index, returning `Nothing` if the index is out of bounds.
+
+If a negative index is provided, access starts from the end of the list (where the last item is at index `-1`).
+ 
+Note that this has $O(n)$ time complexity.
+-}
+tryGet :: forall v w. (Num w, Ord w)
+       => WeightedList v w
+       -> w
+       -> Maybe (Item v w)
+
+tryGet [] _ = Nothing
+
+tryGet list i
+  | i < 0     = either (const Nothing) Just $ foldr get_r (Left 0) list
+  | otherwise = get' list 0
+  where
+    get' :: (WeightedList v w) -> w -> Maybe (Item v w)
+    get' [] _ = Nothing
+    get' (item:items) t
+      | t' > i    = Just item
+      | otherwise = get' items t'
       where
         t' = t + weight item
     
@@ -138,25 +166,25 @@ get list i
 {-|
 Reduce the weight of the item at a given index by 1. If it becomes 0 as a result, remove the item from the list.
 -}
-pop :: forall v w. (Num w, Ord w)
+takeAt :: forall v w. (Num w, Ord w)
     => WeightedList v w
     -> w
     -> WeightedList v w 
 
-pop list i = popBy list i 1
+takeAt list i = takeByAt list 1 i
 
 {-|
 Reduce the weight of the item at a given index by n. If it is no longer positive as a result, remove the item from the list.
 -}
-popBy :: forall v w. (Num w, Ord w)
+takeByAt :: forall v w. (Num w, Ord w)
       => WeightedList v w
       -> w
       -> w
       -> WeightedList v w
 
-popBy [] _ _ = error "Cannot access an empty WeightedList"
+takeByAt [] _ _ = error "Cannot access an empty WeightedList"
 
-popBy list i n
+takeByAt list n i
     = pop' list 0
   where
     pop' :: WeightedList v w
@@ -164,15 +192,14 @@ popBy list i n
          -> WeightedList v w
     pop' [] t = error "Index exceeded length of WeightedList"
     pop' (item:items) t
-        | t' > i    = if weight item' > 0 then item' : items else items
-        | otherwise = item : pop' items t'
+      | t' > i    = if weight item' > 0 then item' : items else items
+      | otherwise = item : pop' items t'
       where
         t' = t + weight item
         item' = item { weight = weight item - n }
 
 
-{-| SPECIAL METHODS -}
----------------------------------------------------------------------
+-------------------- SPECIAL METHODS --------------------
 
 {-|
 Merge an item into the list. If an instance already exists, that instance’s weight is increased; otherwise, the item is appended to the end.
@@ -188,8 +215,7 @@ merge (cand:rest) item
   where
     cand' = cand { weight = weight cand + weight item }
 
-{-|
-Remove all items with non-positive weight.
+{-| Remove all items with non-positive weight.
 -}
 prune :: (Num w, Ord w)
       => WeightedList v w
@@ -206,8 +232,7 @@ collapse :: (Eq v, Num w)
          -> WeightedList v w
 collapse list = mergeWith [] list
 
-{-|
-Merge 2 `WeightedList`s. Items from the right list are merged with items in the left list (if they share an equal value), otherwise they are appended in order.
+{-| Merge 2 `WeightedList`s. Items from the right list are merged with items in the left list (if they share an equal value), otherwise they are appended in order.
 -}
 mergeWith :: (Eq v, Num w)
           => WeightedList v w
