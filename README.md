@@ -73,7 +73,7 @@ Console.WriteLine(greetings.GetRandomValue());
 
 
 <details>
-  <summary> <strong> TypeScript </strong> (under  )
+  <summary> <strong> TypeScript </strong> (under development)
   </summary>
 
 ```ts
@@ -87,7 +87,7 @@ console.log(greetings.sample_value());
 
 
 <details>
-  <summary> <strong> Haskell </strong> (under  )
+  <summary> <strong> Haskell </strong> (under development)
   </summary>
 
 ```hs
@@ -103,17 +103,14 @@ main = print (selectValue greetings)
 
 
 <details>
-  <summary> <strong> Ruby </strong> (awaiting  )
+  <summary> <strong> Ruby </strong> (awaiting development)
   </summary>
 
 ```rb
-# Ruby (working on it!)
+(working on it!)
 ```
 
 </details>
-
-
-An immutable optimised variant `FrozenWeightedList` is also implemented, which provides $O(\log{n})$ item access.
 
 
 <br>
@@ -121,10 +118,10 @@ An immutable optimised variant `FrozenWeightedList` is also implemented, which p
 
 ## Features
 
-- Weighted randomised selection with constraints such as no-replacement, unique-only
+- Weighted randomised selection with constraints such as no-replacement, multi-take, unique-only
 - Ergonomic interface targeted for each language
-- Utility methods to manipulate values and weights
-- In-place and pure variants of methods for flexibility
+- Utility methods for manipulating values and weights
+- In-place and out-of-place variants of methods
 - Conversions to and from other data types
 
 ### Future
@@ -164,7 +161,7 @@ use weighted_list::{ WeightedList, FrozenWeightedList };
 [npm](https://www.npmjs.com/package/@sup2.0/weighted-list)
 
 ```bash
-npm i @sup2.0/weighted-list
+npm install @sup2.0/weighted-list
 ```
 
 ```ts
