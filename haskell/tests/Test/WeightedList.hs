@@ -5,6 +5,7 @@ import Test.Tasty.HUnit
 import Test.Tasty.ExpectedFailure
 
 import Data.List
+import Data.Text qualified as Text
 import Data.Tuple
 
 import Utils
@@ -21,7 +22,7 @@ test_weighted_list = testGroup "WeightedList"
   , test_collection "properties" test_properties
   , test_collection "index" test_index
   , test_collection "take" test_take
-  , test_collection "merge" test_merge
+  , test_collection "mergeWith" test_mergeWith
   , test_collection "typeclasses" test_typeclasses
   ]
 
@@ -105,32 +106,32 @@ test_take :: [Assertion]
 test_take =
   [
     -- take "sup"
-    takeAt wl 0 === newWeightedList [ (1, "sup"), (3, "nova"), (7, "shard") ]
-  , takeAt wl 1 === newWeightedList [ (1, "sup"), (3, "nova"), (7, "shard") ]
+    takeAt wl 0 === wlist [ (1, "sup"), (3, "nova"), (7, "shard") ]
+  , takeAt wl 1 === wlist [ (1, "sup"), (3, "nova"), (7, "shard") ]
 
     -- take "nova"
-  , takeAt wl 2 === newWeightedList [ (2, "sup"), (2, "nova"), (7, "shard") ]
-  , takeAt wl 3 === newWeightedList [ (2, "sup"), (2, "nova"), (7, "shard") ]
-  , takeAt wl 4 === newWeightedList [ (2, "sup"), (2, "nova"), (7, "shard") ]
+  , takeAt wl 2 === wlist [ (2, "sup"), (2, "nova"), (7, "shard") ]
+  , takeAt wl 3 === wlist [ (2, "sup"), (2, "nova"), (7, "shard") ]
+  , takeAt wl 4 === wlist [ (2, "sup"), (2, "nova"), (7, "shard") ]
 
     -- take "shard"
-  , takeAt wl 5  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
-  , takeAt wl 6  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
-  , takeAt wl 7  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
-  , takeAt wl 8  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
-  , takeAt wl 9  === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
-  , takeAt wl 10 === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
-  , takeAt wl 11 === newWeightedList [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , takeAt wl 5  === wlist [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , takeAt wl 6  === wlist [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , takeAt wl 7  === wlist [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , takeAt wl 8  === wlist [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , takeAt wl 9  === wlist [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , takeAt wl 10 === wlist [ (2, "sup"), (3, "nova"), (6, "shard") ]
+  , takeAt wl 11 === wlist [ (2, "sup"), (3, "nova"), (6, "shard") ]
 
     -- take entirely
-  , takeByAt wl 2 0 === newWeightedList [             (3, "nova"), (7, "shard") ]
-  , takeByAt wl 3 2 === newWeightedList [ (2, "sup"),              (7, "shard") ]
-  , takeByAt wl 7 5 === newWeightedList [ (2, "sup"), (3, "nova")               ]
+  , takeByAt wl 2 0 === wlist [             (3, "nova"), (7, "shard") ]
+  , takeByAt wl 3 2 === wlist [ (2, "sup"),              (7, "shard") ]
+  , takeByAt wl 7 5 === wlist [ (2, "sup"), (3, "nova")               ]
 
     -- take negative
-  , takeByAt wl 3 0 === newWeightedList [             (3, "nova"), (7, "shard") ]
-  , takeByAt wl 4 2 === newWeightedList [ (2, "sup"),              (7, "shard") ]
-  , takeByAt wl 8 5 === newWeightedList [ (2, "sup"), (3, "nova")               ]
+  , takeByAt wl 3 0 === wlist [             (3, "nova"), (7, "shard") ]
+  , takeByAt wl 4 2 === wlist [ (2, "sup"),              (7, "shard") ]
+  , takeByAt wl 8 5 === wlist [ (2, "sup"), (3, "nova")               ]
   ]
 
 test_take_errors :: [Assertion]
@@ -141,49 +142,49 @@ test_take_errors =
   , Just (takeByAt wl 1 12) === Nothing
   ]
 
-test_prune :: [Assertion]
-test_prune =
-  [
-    prune __ === __
-  , prune wl === wl
-  , prune (newWeightedList [ (0, "sup") ]) === __
-  ]
-
-test_collapse :: [Assertion]
-test_collapse =
-  [
-    collapse __ === []
-  , collapse wl === wl
-  , collapse wl ++ wl === newWeightedList [ (4, "sup"), (6, "nova"), (14, "shard") ]
-  , collapse (newWeightedList [ (1, "sup"), (2, "sup"), (3, "sup") ])
-          === newWeightedList [ (3, "sup") ]
-  ]
-
-test_merge :: [Assertion]
-test_merge =
+test_mergeWith :: [Assertion]
+test_mergeWith =
   [
     mergeWith __ __ === []
   , mergeWith wl __ === wl
   , mergeWith __ wl === wl
 
     -- merge 1
-  , mergeWith wl (newWeightedList [ (1, "sup") ])
-              === newWeightedList [ (3, "sup"), (3, "nova"), (7, "shard") ]
+  , mergeWith wl (wlist [ (1, "sup") ])
+              === wlist [ (3, "sup"), (3, "nova"), (7, "shard") ]
 
     -- merge 3
-  , mergeWith wl wl === newWeightedList [ (4, "sup"), (6, "nova"), (14, "shard") ]
+  , mergeWith wl wl === wlist [ (4, "sup"), (6, "nova"), (14, "shard") ]
   
     -- append 1
-  , mergeWith wl (newWeightedList [ (13, "cortex") ])
-              === newWeightedList [ (2, "sup"), (3, "nova"), (7, "shard"), (13, "cortex") ]
+  , mergeWith wl (wlist [ (13, "cortex") ])
+              === wlist [ (2, "sup"), (3, "nova"), (7, "shard"), (13, "cortex") ]
   
     -- append 2
-  , mergeWith wl (newWeightedList [ (13, "cortex"), (20, "origin") ])
-        === wl ++ newWeightedList [ (13, "cortex"), (20, "origin") ]
+  , mergeWith wl (wlist [ (13, "cortex"), (20, "origin") ])
+        === wl ++ wlist [ (13, "cortex"), (20, "origin") ]
   
     -- append 3
-  , mergeWith wl (newWeightedList [ (13, "cortex"), (20, "origin"), (42, "vision") ])
-        === wl ++ newWeightedList [ (13, "cortex"), (20, "origin"), (42, "vision") ]
+  , mergeWith wl (wlist [ (13, "cortex"), (20, "origin"), (42, "vision") ])
+        === wl ++ wlist [ (13, "cortex"), (20, "origin"), (42, "vision") ]
+  ]
+
+test_mergeDuplicates :: [Assertion]
+test_mergeDuplicates =
+  [
+    mergeDuplicates __ === []
+  , mergeDuplicates wl === wl
+  , mergeDuplicates wl ++ wl === wlist [ (4, "sup"), (6, "nova"), (14, "shard") ]
+  , mergeDuplicates (wlist [ (1, "sup"), (2, "sup"), (3, "sup") ])
+          === wlist [ (3, "sup") ]
+  ]
+
+test_prune :: [Assertion]
+test_prune =
+  [
+    prune __ === __
+  , prune wl === wl
+  , prune (wlist [ (0, "sup") ]) === __
   ]
 
 test_typeclasses :: [Assertion]
@@ -191,4 +192,6 @@ test_typeclasses =
   [
     sort wl === wl
   , sort (reverse wl) === wl
+
+  , map (fmap (Text.unpack . Text.toUpper . Text.pack)) wl === wlist [(2, "SUP"), (3, "NOVA"), (7, "SHARD")]
   ]

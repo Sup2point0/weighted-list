@@ -26,7 +26,8 @@ test-suite weighted-list-test
         weighted-list,
         tasty,
         tasty-hunit >=0.9,
-        tasty-expected-failure >=0.12
+        tasty-expected-failure >=0.12,
+        text >= 2.0
 
 benchmark weighted-list-bench
     default-language: GHC2021

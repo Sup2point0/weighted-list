@@ -44,11 +44,13 @@ instance Bifunctor Item where
 {-|
 Construct a list of `Item`s from the provided (weight, value) pairs.
 -}
-newWeightedList :: (Num w) => [(w, v)] -> WeightedList v w
+newWeightedList :: forall v w. (Num w)  -- NOTE: `forall` to enforce `v, w` order
+                => [(w, v)]
+                -> WeightedList v w
 newWeightedList []    = []
 newWeightedList items = map (uncurry Item) items
 
-wlist :: (Num w) => [(w, v)] -> WeightedList v w
+wlist :: forall v w. (Num w) => [(w, v)] -> WeightedList v w
 wlist = newWeightedList
 
 
