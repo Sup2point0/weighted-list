@@ -7,6 +7,8 @@ on:
     - cron: '35 4 4,20 * *'
   
   push:
+    branches:
+      - 'main'
     paths:
       - '**/test-hs.yml'
       - '**.hs'
