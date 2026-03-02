@@ -32,15 +32,13 @@ let descriptors = wlist![
     (1,  "beautiful".to_owned()),
 ];
 
-let words = descriptors.select_random_values()
+let words = descriptors.select_random_values_unique()
     .rng(&mut rand::rng())
     .count(2)
     .call();
 
-if let Some(first) = words[0] && let Some(second) = words[1] {
-    println!("Rust is {} and {}", first, second);
-    // => Rust is awesome and elegant
-}
+println!("Rust is {} and {}", words[0], words[1]);
+// => Rust is awesome and elegant
 ```
 
 </details>
@@ -95,7 +93,7 @@ greetings :: WeightedList String Int
 greetings = newWeightedList [(20, "sup"), (2, "salutations")]
 
 main :: IO ()
-main = print (selectValue greetings)
+main = print (randomValue greetings)
 -- => salutations
 ```
 
@@ -182,6 +180,13 @@ All the code is contained within the [`WeightedList.cs`](c-sharp/weighted-list/w
 
 For a tutorial, see [walkthrough](c-sharp/walkthrough.md).
 
+### Haskell
+
+```hs
+import WeightedList qualified as WL
+import WeightedList (WeightedList)
+```
+
 
 <br>
 
@@ -194,7 +199,7 @@ For a tutorial, see [walkthrough](c-sharp/walkthrough.md).
 | Python     | `>= 3.11` | Awaiting rewrite | None |
 | C#         | `12.0`    | Awaiting maintenance | None | Supports LINQ querying |
 | TypeScript |           | Under development | None | Currently only supports `FrozenWeightedList` |
-| Haskell    | `GHC2021` | Under development | None |
+| Haskell    | `GHC2021` | Under development | `random` |
 | Ruby       |           | Awaiting development |
 
 
@@ -203,7 +208,7 @@ For a tutorial, see [walkthrough](c-sharp/walkthrough.md).
 
 ## Implementation
 
-A `WeightedList` works similar to a regular list/array, except rather than storing raw values, it stores them inside `WeightedItem` objects. The value and weight of each item can be accessed through the `value` and `weight` attributes, respectively.
+A `WeightedList` stores ‘weighted items’ instead of raw values. Each item has a `weight` and `value` attribute.
 
 `WeightedList` using *weighted* indexing. To illustrate with an example:
 
@@ -222,7 +227,9 @@ assert wl[7].value == "shard"
 wl[8]  # IndexError
 ```
 
-In essence, you can think of each item as being repeated a number of times, equal to its weight.
+In essence, you can think of each item as being repeated a number of times equal to its weight. The ‘length’ of the list is the sum of the weights.
+
+Hence, selecting a random value using weighted randomisation is as simple as picking a random index between $0$ and the length of the list!
 
 
 <br>
