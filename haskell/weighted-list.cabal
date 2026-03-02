@@ -30,6 +30,7 @@ test-suite weighted-list-test
         Test.WeightedList.Taking,
         Test.WeightedList.Merging,
         Test.WeightedList.Random,
+        Test.WeightedList.WeightManipulation,
         Test.WeightedList.Typeclasses,
     build-depends:
         base ^>= 4.18.3.0,
