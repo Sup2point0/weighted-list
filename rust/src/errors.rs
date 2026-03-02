@@ -1,3 +1,5 @@
+//! Error types related to [`WeightedList`](crate::WeightedList) operations.
+
 use std::*;
 use std::{
     error::Error,

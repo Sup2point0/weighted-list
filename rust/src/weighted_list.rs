@@ -10,6 +10,7 @@ use rand::prelude::*;
 use rand::seq::{ SliceRandom };
 
 use crate::*;
+use crate::errors::*;
 
 
 /// A shorthand for [`WeightedList`].

@@ -1,6 +1,14 @@
 # Changelog
 
 
+## Next
+
+### New
+- Explicit error types:
+  - `NumCastFailure` for errors casting between `W` and `f64`
+  - `EmptyWeightedList` for methods requiring a nonempty `WeightedList`
+
+
 ## v0.6.1
 
 ### New

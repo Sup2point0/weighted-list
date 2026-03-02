@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use num_traits;
 use num_traits::NumCast;
 
-use crate::*;
+use crate::errors::*;
 
 
 pub fn try_cast<T, R>(n: T) -> Result<R, NumCastFailure>

@@ -39,8 +39,7 @@ pub use weighted_list::{ WeightedList, WList };
 mod traits;
 pub use traits::{ Weight };
 
-mod errors;
-pub use errors::{ EmptyWeightedList, NumCastFailure };
+pub mod errors;
 
 pub(crate) mod util;
 
