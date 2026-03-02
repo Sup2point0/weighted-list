@@ -10,6 +10,8 @@ import Data.Either
 import Data.List
 import Data.Tuple
 
+import System.Random
+
 
 ---------------------------------------------------------------------
 
@@ -258,3 +260,34 @@ prune [] = []
 prune (item:rest)
   | weight item > 0 = item : prune rest
   | otherwise       = prune rest
+
+
+-------------------- SAMPLING METHODS --------------------
+
+_randomIndexTo :: Int -> IO Int
+_randomIndexTo n = do
+  i <- randomIO :: IO Float
+  return $ floor (i * fromIntegral n)
+
+randomItem :: WeightedList v Int -> IO (Item Int v)
+randomItem list = do
+  i <- _randomIndexTo (totalWeights list)
+  return (get list i)
+
+randomValue :: WeightedList v Int -> IO v
+randomValue = fmap value . randomItem
+
+randomItemTo :: Int -> WeightedList v Int -> IO (Item Int v)
+randomItemTo n list = do
+  i <- _randomIndexTo n
+  return (get list i)
+
+randomValueTo :: Int -> WeightedList v Int -> IO v
+randomValueTo n list = fmap value (randomItemTo n list)
+
+randomValues :: Int -> WeightedList v Int -> IO [v]
+randomValues n list = go n list
+  where
+    !l = length list
+    go 0 list = return []
+    go n list = (:) <$> randomValueTo l list <*> go (n-1) list

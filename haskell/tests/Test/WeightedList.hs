@@ -8,10 +8,18 @@ import Data.List
 import Data.Text qualified as Text
 import Data.Tuple
 
+import GHC.IO (unsafePerformIO)
+
 import Utils
 import Test.Syntax
 
 import WeightedList
+
+
+---------------------------------------------------------------------
+
+_TRIALS :: Int
+_TRIALS = 42
 
 
 ---------------------------------------------------------------------
@@ -23,6 +31,8 @@ test_weighted_list = testGroup "WeightedList"
   , test_collection "index" test_index
   , test_collection "take" test_take
   , test_collection "mergeWith" test_mergeWith
+  , test_collection "randomValue" test_randomValue
+  , test_collection "randomValues" test_randomValues
   , test_collection "typeclasses" test_typeclasses
   ]
 
@@ -185,6 +195,19 @@ test_prune =
     prune __ === __
   , prune wl === wl
   , prune (wlist [ (0, "sup") ]) === __
+  ]
+
+test_randomValue :: [Assertion]
+test_randomValue =
+  [
+    True === unsafePerformIO (randomValue wl) `elem` ["sup", "nova", "shard"]
+  ]
+
+test_randomValues :: [Assertion]
+test_randomValues =
+  [
+    True === all (`elem` ["sup", "nova", "shard"]) (unsafePerformIO (randomValues _TRIALS wl))
+  , True === all (`elem` unsafePerformIO (randomValues _TRIALS wl)) ["sup", "nova", "shard"]
   ]
 
 test_typeclasses :: [Assertion]
