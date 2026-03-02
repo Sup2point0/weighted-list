@@ -16,6 +16,11 @@ import Test.Syntax
 import WeightedList
 
 
+import Test.WeightedList.Properties
+import Test.WeightedList.Accessors
+import Test.WeightedList.Indexing
+
+
 ---------------------------------------------------------------------
 
 _TRIALS :: Int
@@ -24,11 +29,12 @@ _TRIALS = 42
 
 ---------------------------------------------------------------------
 
-test_weighted_list :: TestTree
-test_weighted_list = testGroup "WeightedList"
+test_WeightedList :: TestTree
+test_WeightedList = testGroup "WeightedList"
   [ test_collection "constructor" test_constructor
-  , test_collection "properties" test_properties
-  , test_collection "index" test_index
+  , test_properties
+  , test_accessors
+  , test_indexing
   , test_collection "take" test_take
   , test_collection "mergeWith" test_mergeWith
   , test_collection "randomValue" test_randomValue
@@ -36,9 +42,9 @@ test_weighted_list = testGroup "WeightedList"
   , test_collection "typeclasses" test_typeclasses
   ]
 
-test_weighted_list_errors :: TestTree
-test_weighted_list_errors = expectFail $ testGroup "WeightedList Errors"
-  [ test_collection "index" test_index_errors
+test_WeightedList_errors :: TestTree
+test_WeightedList_errors = expectFail $ testGroup "WeightedList Errors"
+  [ test_collection "index-out-of-bounds" test_indexing_errors
   , test_collection "take" test_take_errors
   ]
 
@@ -56,61 +62,6 @@ test_constructor =
            ]
   ]
 
-test_properties :: [Assertion]
-test_properties =
-  [
-    totalValues  __ === 0
-  , totalValues  wl === 3
-  , totalWeights __ === 0
-  , totalWeights wl === 12
-
-  , values  __ === []
-  , values  wl === ["sup", "nova", "shard"]
-  , weights __ === []
-  , weights wl === [2, 3, 7]
-
-  , raw  __ === []
-  , raw  wl === tl
-  , raw' __ === []
-  , raw' wl === map swap tl
-  ]
-
-test_index :: [Assertion]
-test_index =
-  [
-    value (get wl 0)  === "sup"
-  , value (get wl 1)  === "sup"
-  , value (get wl 2)  === "nova"
-  , value (get wl 3)  === "nova"
-  , value (get wl 4)  === "nova"
-  , value (get wl 5)  === "shard"
-  , value (get wl 6)  === "shard"
-  , value (get wl 7)  === "shard"
-  , value (get wl 8)  === "shard"
-  , value (get wl 9)  === "shard"
-  , value (get wl 10) === "shard"
-  , value (get wl 11) === "shard"
-
-  , value (get wl (-1))  === "shard"
-  , value (get wl (-2))  === "shard"
-  , value (get wl (-3))  === "shard"
-  , value (get wl (-4))  === "shard"
-  , value (get wl (-5))  === "shard"
-  , value (get wl (-6))  === "shard"
-  , value (get wl (-7))  === "shard"
-  , value (get wl (-8))  === "nova"
-  , value (get wl (-9))  === "nova"
-  , value (get wl (-10)) === "nova"
-  , value (get wl (-11)) === "sup"
-  , value (get wl (-12)) === "sup"
-  ]
-
-test_index_errors :: [Assertion]
-test_index_errors =
-  [
-    Just (get wl   12 ) === Nothing
-  , Just (get wl (-13)) === Nothing
-  ]
 
 test_take :: [Assertion]
 test_take =
@@ -200,14 +151,13 @@ test_prune =
 test_randomValue :: [Assertion]
 test_randomValue =
   [
-    True === unsafePerformIO (randomValue wl) `elem` ["sup", "nova", "shard"]
+    unsafePerformIO (randomValue wl) `elem` ["sup", "nova", "shard"] === True
   ]
 
 test_randomValues :: [Assertion]
 test_randomValues =
   [
-    True === all (`elem` ["sup", "nova", "shard"]) (unsafePerformIO (randomValues _TRIALS wl))
-  , True === all (`elem` unsafePerformIO (randomValues _TRIALS wl)) ["sup", "nova", "shard"]
+    all (`elem` ["sup", "nova", "shard"]) (unsafePerformIO (randomValues _TRIALS wl)) === True
   ]
 
 test_typeclasses :: [Assertion]

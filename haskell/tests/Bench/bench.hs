@@ -9,5 +9,5 @@ main = defaultMain benchmarks
 
 benchmarks :: [Benchmark]
 benchmarks = 
-  [ bgroup "WeightedList" $ bench_weighted_list
+  [ bgroup "WeightedList" bench_weighted_list
   ]

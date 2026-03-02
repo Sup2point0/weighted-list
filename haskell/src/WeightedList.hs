@@ -65,8 +65,8 @@ totalWeights list = foldl' (\t item -> t + weight item) 0 list
 
 {-| Count the total number of items in a `WeightedList`.
 -}
-totalValues :: WeightedList v w -> Int
-totalValues list = length list
+totalItems :: WeightedList v w -> Int
+totalItems list = length list
 
 {-| Do all items (if any) have a weight of zero?
 -}
