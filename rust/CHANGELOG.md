@@ -1,6 +1,17 @@
 # Changelog
 
 
+## v0.6.1
+
+### New
+- `WeightedList::weighted_sum()` method
+- `WeightedList::normalised_weighted_sum()` method
+
+### Fix
+- `WeightedList::normalised()` no longer requires `&mut self`
+  - This was unintentionally kept when copying from `WeightedList::normalise()`, which does require `&mut self`
+
+
 ## v0.6.0
 
 ### Breaking
