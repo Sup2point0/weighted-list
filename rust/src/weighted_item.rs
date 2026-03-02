@@ -1,4 +1,4 @@
-use crate::root::*;
+use crate::*;
 
 
 /// A shorthand for [`WeightedItem`].

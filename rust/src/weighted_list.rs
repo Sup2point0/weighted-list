@@ -27,9 +27,9 @@ pub type WList<V,W> = WeightedList<V,W>;
 /// ```
 /// # use weighted_list::*;
 /// let wl: WeightedList<String, u32> = wlist![
-///     (2, "sup".to_string()),
-///     (3, "nova".to_string()),
-///     (5, "shard".to_string()),
+///     (2, "sup".to_owned()),
+///     (3, "nova".to_owned()),
+///     (5, "shard".to_owned()),
 /// ];
 /// 
 /// for item in &wl {
@@ -262,11 +262,18 @@ impl<V, W: Weight> Display for WeightedList<V,W>
         W: Display,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result
-    {            
-        write!(f,
-            "WeightedList[{}]",
-            self.data.iter().map(|item| item.to_string()).join(", ")
-        )
+    {
+        write!(f, "WeightedList[")?;
+
+        if !self.data.is_empty() {
+            write!(f, "\n")?;
+        }
+
+        for item in &self.data {
+            writeln!(f, "  {item},")?;
+        }
+
+        write!(f, "]")
     }
 }
 
