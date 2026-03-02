@@ -20,7 +20,7 @@ test_totalWeights :: [Assertion]
 test_totalWeights =
   [
     totalWeights __ === 0
-  , totalWeights wl === 12
+  , totalWeights wl === 10
   ]
 
 test_totalItems :: [Assertion]

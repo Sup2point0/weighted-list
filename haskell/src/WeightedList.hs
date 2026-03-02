@@ -239,17 +239,15 @@ mergeWith :: (Eq v, Num w)
           => WeightedList v w
           -> WeightedList v w
           -> WeightedList v w
-
-mergeWith []   list' = list'
 mergeWith list []    = list
 mergeWith list list' = foldl' merge list list'
 
 {-|
 -}
-mergeDuplicates :: (Eq v, Num w)
-                => WeightedList v w
-                -> WeightedList v w
-mergeDuplicates list = mergeWith [] list
+mergeSelf :: (Eq v, Num w)
+          => WeightedList v w
+          -> WeightedList v w
+mergeSelf list = mergeWith [] list
 
 {-| Remove all items with non-positive weight.
 -}

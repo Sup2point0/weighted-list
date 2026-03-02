@@ -23,7 +23,7 @@ test_weights :: [Assertion]
 test_weights =
   [
     weights __ === []
-  , weights wl === [2, 3, 7]
+  , weights wl === [2, 3, 5]
   ]
 
 test_values :: [Assertion]

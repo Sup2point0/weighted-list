@@ -5,7 +5,7 @@ import WeightedList
 
 __ = wlist @String @Int []
 
-tl = [(2, "sup"), (3, "nova"), (7, "shard")]
+tl = [(2, "sup"), (3, "nova"), (5, "shard")]
 
 wl :: WeightedList String Int
 wl = wlist tl
