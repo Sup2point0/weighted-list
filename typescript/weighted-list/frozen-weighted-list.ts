@@ -171,7 +171,7 @@ export class FrozenWeightedList<Value>
   // == INTERFACES == //
 
   /**
-   * Get the item in the list at `weighted_index`.
+   * Get the item in the list at `weighted_index`, returning `undefined` if the index is out-of-bounds.
    */
   at(weighted_index: Weight): WeightedItem<Value> | undefined
   {
