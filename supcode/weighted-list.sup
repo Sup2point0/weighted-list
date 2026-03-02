@@ -1,0 +1,115 @@
+#sup [
+  | ver = 6.9
+  | sty = verinax
+]
+
+#doc[head]
+{
+  weighted-list
+  A hypothetical supcode implementation
+  v3.0
+}
+
+activate randix
+
+
+#doc { An item within a `Weighted-List` with a `value` and `weight`. }
+create struct 'Weighted-Item' [type 'V']
+{
+   numeric 'weight' = 1
+   V 'value'
+
+   evolve self.unpack() {
+      out (self.weight, self.value)
+   }
+}
+
+
+create struct[List] 'Weighted-List' [
+  | par 'V' [Type]
+  | par 'W' [Type[numeric]] = float
+]
+{
+   #doc { A list of weighted items. }
+
+   evolve create self(pars 'items' [(W, V)])
+   {
+      #doc { Create a weighted list with the given items. }
+
+      super.create(~items)
+   }
+
+
+#sec 'accessors'
+
+   evolve func[W] self.length()
+      => sum self.--weights
+
+   evolve func[W] self.last-index()
+      => self.length() - 1
+
+   #doc { Get the weights of each item in the list. }
+   create func[List[W]] self.'weights'()
+      => List self.weights()
+
+   #doc { Lazily get the weights of each item in the list. }
+   create func[sequence[W]] self.'weights'()
+      => loop for item in self { item.value }
+
+   #doc { Get the values of each item in the list. }
+   create func[List[V]] self.'values'()
+      => List self.values()
+
+   #doc { Lazily get the values of each item in the list. }
+   create func[sequence[V]] self.'values'()
+      => loop for item in self { item.value }
+
+
+#sec 'interfaces'
+
+   evolve func[Opt[Weighted-Item[V]]]
+      self.at(W 'weighted-index')
+   {
+      set 'idx' - self..unweight-index(weighted-index)
+      out super.at(idx)
+   }
+
+
+#sec 'querying'
+
+   create func[bool]
+      self.has-value(V 'target-value')
+   {
+      super.any('item' => item.value == target-value)
+   }
+
+
+#sec 'random'
+
+   create func[Weighted-Item[V]] self.select()
+   {
+      set 'idx' = rand(self.last-index)[W]
+      out self.at(idx)
+   }
+
+   create func[V] self.select-value()
+      => out self.select().value
+
+
+#sec 'internal'
+
+   #doc { Convert `weighted-index` to an unweighted index in the internal list. }
+   create func[int]
+      self..unweight-index(int 'weighted-index')
+   {
+      set 't' = 0
+
+      loop for item in self {
+         alt t + item.weight
+
+         if t > weighted-index {
+            out loop.count
+         }
+      }
+   }
+}
