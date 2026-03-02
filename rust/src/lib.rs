@@ -30,14 +30,19 @@
 //! 
 //! For more detailed guidance on how to use the struct, see [`WeightedList`].
 
-mod root;
-pub use root::{ Weight, NumCastError };
-
 mod weighted_item;
 pub use weighted_item::{ WeightedItem, WItem };
 
 mod weighted_list;
 pub use weighted_list::{ WeightedList, WList };
+
+mod traits;
+pub use traits::{ Weight };
+
+mod errors;
+pub use errors::{ EmptyWeightedList, NumCastFailure };
+
+pub(crate) mod util;
 
 
 #[cfg(feature = "frozen")] mod frozen_weighted_item;

@@ -909,7 +909,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// Compute a weighted sum over the list, using normalised weights.
     /// 
     /// First normalise the weights using [`normalised()`](Self::normalised), then compute [`weighted_sum()`](Self::weighted_sum). Note that this may fail if casting to `f64` fails at any point.
-    pub fn normalised_weighted_sum<T>(&self, value_map: impl FnMut(&V) -> f64) -> Result<T, Box<dyn Error + 'static>>
+    pub fn normalised_weighted_sum<T>(&self, value_map: impl FnMut(&V) -> f64) -> Result<T, NumCastFailure>
         where
             V: Clone,
             T: std::iter::Sum<f64>,
@@ -1084,32 +1084,25 @@ impl<V, W: Weight> WeightedList<V,W>
     ///     Some(wlist![(0.2, "sup"), (0.3, "nova"), (0.5, "shard")])
     /// );
     /// ```
-    pub fn normalised(&self) -> Result<WeightedList<V, f64>, Box<dyn Error + 'static>>
+    pub fn normalised(&self) -> Result<WeightedList<V, f64>, NumCastFailure>
         where V: Clone
     {
-        let total;
+        let l = self.len();
 
-        if let Some(t) = nums::cast::<W, f64>(self.len()) {
-            total = t;
-        } else {
-            return Err(Box::new(NumCastError("Error casting `len()` of `WeightedList` to `f64`")));
-        };
+        let total = util::try_cast::<W, f64>(l)?;
 
         let items = self.data.iter()
             .map(|item| {
-                let weight = nums::cast::<W, f64>(item.weight)?;
-                Some(WeightedItem {
+                let weight = util::try_cast::<W, f64>(item.weight)?;
+
+                Ok(WeightedItem {
                     weight: weight / total,
                     value: item.value.clone()
                 })
             })
-            .collect::<Option<Vec<WeightedItem<V, f64>>>>()
-        ;
+            .collect::<Result<_, _>>();
 
-        match items {
-            Some(data) => Ok(WeightedList { data }),
-            None       => Err(Box::new(NumCastError("Error casting weights of `WeightedItem`s to `f64`")))
-        }
+        items.map(|data| WeightedList { data })
     }
 }
 
@@ -1293,19 +1286,20 @@ impl<V, W: Weight> WeightedList<V,W>
 /// Methods for out-of-place random sampling from a list.
 impl<V, W: Weight> WeightedList<V,W>
 {
-    fn _get_random_weighted_index_up_to_<RNG>(&self, rng: &mut RNG, upper: W) -> Option<W>
+    fn _get_random_weighted_index_up_to_<RNG>(&self,
+        rng: &mut RNG,
+        upper: W,
+    ) -> Result<W, NumCastFailure>
         where RNG: Rng + ?Sized
     {
-        let len:    f64 = nums::cast::<W, f64>(upper)?;
+        let len:    f64 = util::try_cast::<W, f64>(upper)?;
         let scalar: f64 = rng.random();
+        let idx:    f64 = (len * scalar).floor();
 
-        let idx = (len * scalar).floor();
-        let out = nums::cast::<f64, W>(idx)?;
-
-        Some(out)
+        util::try_cast::<f64, W>(idx)
     }
 
-    fn _get_random_weighted_index_<RNG>(&self, rng: &mut RNG) -> Option<W>
+    fn _get_random_weighted_index_<RNG>(&self, rng: &mut RNG) -> Result<W, NumCastFailure>
         where RNG: Rng + ?Sized
     {
         self._get_random_weighted_index_up_to_(rng, self.len())
@@ -1325,11 +1319,10 @@ impl<V, W: Weight> WeightedList<V,W>
     /// //   - Some("nova" ) with 30% probability
     /// //   - Some("shard") with 50% probability
     /// ```
-    pub fn select_random_value<RNG>(&self, rng: &mut RNG) -> Option<&V>
+    pub fn select_random_value<RNG>(&self, rng: &mut RNG) -> Result<&V, Box<dyn Error>>
         where RNG: Rng + ?Sized
     {
-        let out = &self.select_random_item(rng)?.value;
-        Some(out)
+        self.select_random_item(rng).map(|item| &item.value)
     }
 
     /// Select a random item from the list, using weighted randomisation.
@@ -1346,15 +1339,17 @@ impl<V, W: Weight> WeightedList<V,W>
     /// //   - Some(WeightedItem { 3, "nova"  }) with 30% probability
     /// //   - Some(WeightedItem { 5, "shard" }) with 50% probability
     /// ```
-    pub fn select_random_item<RNG>(&self, rng: &mut RNG) -> Option<&WeightedItem<V,W>>
+    pub fn select_random_item<RNG>(&self, rng: &mut RNG) -> Result<&WeightedItem<V,W>, Box<dyn Error>>
         where RNG: Rng + ?Sized
     {
-        if self.data.is_empty() { return None }
+        if self.data.is_empty() {
+            Err(Box::new(EmptyWeightedList { reason: "Cannot select a random item from an empty `WeightedList`" }))?
+        }
 
         let idx = self._get_random_weighted_index_(rng)?;
         let out = &self[idx];
 
-        Some(out)
+        Ok(out)
     }
 }
 
@@ -1373,11 +1368,13 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// wl.take_one_random(&mut rand::rng());
     /// // could give:
-    /// //   - Some(WeightedItem { 1, "sup"   })   with 20% probability
-    /// //   - Some(WeightedItem { 2, "nova"  })  with 30% probability
-    /// //   - Some(WeightedItem { 4, "shard" }) with 50% probability
+    /// //   - Ok(WeightedItem { 1, "sup"   }) with 20% probability
+    /// //   - Ok(WeightedItem { 2, "nova"  }) with 30% probability
+    /// //   - Ok(WeightedItem { 4, "shard" }) with 50% probability
     /// ```
-    pub fn take_one_random<RNG>(&mut self, rng: &mut RNG) -> Option<WeightedItem<V,W>>
+    pub fn take_one_random<RNG>(&mut self,
+        rng: &mut RNG
+    ) -> Result<WeightedItem<V,W>, Box<dyn Error>>
         where RNG: Rng + ?Sized
     {
         self.take_by_random(rng, W::one())
@@ -1393,19 +1390,24 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// wl.take_by_random(&mut rand::rng(), 2);
     /// // could give:
-    /// //   - Some(WeightedItem { 0, "sup"   })   with 20% probability
-    /// //   - Some(WeightedItem { 1, "nova"  })  with 30% probability
-    /// //   - Some(WeightedItem { 3, "shard" }) with 50% probability
+    /// //   - Ok(WeightedItem { 0, "sup"   }) with 20% probability
+    /// //   - Ok(WeightedItem { 1, "nova"  }) with 30% probability
+    /// //   - Ok(WeightedItem { 3, "shard" }) with 50% probability
     /// ```
-    pub fn take_by_random<RNG>(&mut self, rng: &mut RNG, decrement: W) -> Option<WeightedItem<V,W>>
+    pub fn take_by_random<RNG>(&mut self,
+        rng: &mut RNG,
+        decrement: W,
+    ) -> Result<WeightedItem<V,W>, Box<dyn Error>>
         where RNG: Rng + ?Sized
     {
-        if self.data.is_empty() { return None }
+        if self.data.is_empty() {
+            Err(EmptyWeightedList { reason: "Cannot take random values from an empty `WeightedList`" })?
+        }
 
         let idx = self._get_random_weighted_index_(rng)?;
         let out = self.take_by_at(decrement, idx);
 
-        Some(out)
+        Ok(out)
     }
 
     /// Select and remove a random item from the list, using weighted randomisation.
@@ -1418,21 +1420,23 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// wl.take_entire_random(&mut rand::rng());
     /// // could give:
-    /// //   - Some(WeightedItem { 2, "sup"   })   with 20% probability
-    /// //   - Some(WeightedItem { 3, "nova"  })  with 30% probability
-    /// //   - Some(WeightedItem { 5, "shard" }) with 50% probability
+    /// //   - Ok(WeightedItem { 2, "sup"   }) with 20% probability
+    /// //   - Ok(WeightedItem { 3, "nova"  }) with 30% probability
+    /// //   - Ok(WeightedItem { 5, "shard" }) with 50% probability
     /// 
     /// assert!( wl.total_items() == 2 );
     /// ```
-    pub fn take_entire_random<RNG>(&mut self, rng: &mut RNG) -> Option<WeightedItem<V,W>>
+    pub fn take_entire_random<RNG>(&mut self, rng: &mut RNG) -> Result<WeightedItem<V,W>, Box<dyn Error>>
         where RNG: Rng + ?Sized
     {
-        if self.data.is_empty() { return None }
+        if self.data.is_empty() {
+            Err(EmptyWeightedList { reason: "Cannot take random values from an empty `WeightedList`" })?
+        }
 
         let idx = self._get_random_weighted_index_(rng)?;
         let out = self.take_entire_at(idx);
 
-        Some(out)
+        Ok(out)
     }
 }
 
@@ -1514,7 +1518,7 @@ impl<V, W: Weight> WeightedList<V,W>
 
         if replace {
             (0..count)
-                .filter_map(|_| self.select_random_value(rng).cloned())
+                .filter_map(|_| self.select_random_value(rng).ok().cloned())
                 .collect()
         }
         else {
@@ -1531,7 +1535,7 @@ impl<V, W: Weight> WeightedList<V,W>
             for _ in 0..count {
                 if self.is_zero() { break }
 
-                if let Some(item) = pool.take_by_random(rng, decrement) {
+                if let Ok(item) = pool.take_by_random(rng, decrement) {
                     out.push(item.value);
                 }
             }
@@ -1628,8 +1632,8 @@ impl<V, W: Weight> WeightedList<V,W>
     {
         let merge_duplicates = merge_duplicates.unwrap_or(false);
 
-        let mut l = self.len();
         let mut seen_indices = HashSet::<usize>::new();
+        let mut l = self.len();
 
         let mut out = Vec::with_capacity(
             if count > 16 {
@@ -1641,9 +1645,9 @@ impl<V, W: Weight> WeightedList<V,W>
 
         for _ in 0..count
         {
-            if l == W::zero() { break }
+            if l <= W::zero() { break }
 
-            let Some(weighted_index) = self._get_random_weighted_index_up_to_(rng, l) else { continue };
+            let Ok(weighted_index) = self._get_random_weighted_index_up_to_(rng, l) else { continue };
             let Some(idx) = self._unweight_index_skipping_(weighted_index, &seen_indices) else { continue };
             let target = &self.data[idx];
 
@@ -1683,15 +1687,13 @@ impl<V, W: Weight> WeightedList<V,W>
         let take_entire = take_entire.unwrap_or(true);
         let decrement = decrement.unwrap_or(W::one());
 
-        let mut n = 0;
         let mut out = Vec::with_capacity(count);
 
-        loop
+        for _ in 0..count
         {
-            n += 1;
-            if n > count || self.data.is_empty() { break }
+            if self.data.is_empty() { break }
 
-            if let Some(item) = {
+            if let Ok(item) = {
                 if take_entire { self.take_entire_random(rng) }
                 else           { self.take_by_random(rng, decrement) }
             } {
@@ -1731,7 +1733,7 @@ impl<V, W: Weight> WeightedList<V,W>
         {
             if l == W::zero() || self.is_zero() { break }
 
-            let Some(weighted_index) = self._get_random_weighted_index_up_to_(rng, l) else { continue };
+            let Ok(weighted_index) = self._get_random_weighted_index_up_to_(rng, l) else { continue };
             let Some(idx) = self._unweight_index_skipping_(weighted_index, &seen_indices) else { continue };
             let target = &self.data[idx];
 
