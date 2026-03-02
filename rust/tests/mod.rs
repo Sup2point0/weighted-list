@@ -26,6 +26,8 @@ mod wlist {
 
     mod test_list_mut;
 
+    mod test_querying;
+
     mod test_wlist_mut;
 
     mod test_random;

@@ -1,6 +1,6 @@
-//! A list implementation for weighted randomisation.
+//! Data structures for weighted randomisation.
 //! 
-//! This crate provides the [`WeightedList<V,W>`](WeightedList) struct, which stores values each with assigned weights. When randomly selecting items, those with a higher weight are more likely to be chosen.
+//! This crate provides the [`WeightedList<V,W>`](WeightedList) struct, storing [`WeightedItem`]s with a value and weight. When picking items randomly, those with a higher weight are more likely to be chosen.
 //! 
 //! ## Example
 //! 
@@ -31,7 +31,7 @@
 //! For more detailed guidance on how to use the struct, see [`WeightedList`].
 
 mod root;
-pub use root::{ Weight };
+pub use root::{ Weight, NumCastError };
 
 mod weighted_item;
 pub use weighted_item::{ WeightedItem, WItem };

@@ -3,7 +3,7 @@ use std::*;
 use num_traits as nums;
 
 
-/// Any general numerical type, such as `u32`, `usize`, `f64`. The type `W` of item weights in a [`WeightedList<V,W>`](crate::WeightedList) must implement this trait.
+/// Any numerical type, such as `u32`, `usize`, `f64`. The type `W` of item weights in a [`WeightedList<V,W>`](crate::WeightedList) must implement this trait.
 pub trait Weight:
       Copy
     + nums::NumAssign
@@ -22,3 +22,18 @@ impl<Type> Weight for Type where Type:
     + iter::Sum
     + fmt::Debug
 {}
+
+
+/// An error returned when failing to cast one numeric type to another, which may be required for certain [`WeightedList`](crate::WeightedList) operations.
+#[derive(Debug)]
+pub struct NumCastError(pub(crate) &'static str);
+
+impl std::fmt::Display for NumCastError
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result
+    {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl std::error::Error for NumCastError {}

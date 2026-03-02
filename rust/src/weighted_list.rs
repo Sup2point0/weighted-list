@@ -1,4 +1,5 @@
 use std::collections::{ HashSet };
+use std::error::{ Error };
 use std::fmt::{ Debug, Display };
 use std::hash::{ Hash };
 
@@ -853,17 +854,70 @@ impl<V, W: Weight> WeightedList<V,W>
 /// Special [`WeightedList`]-specific methods for querying the list.
 impl<V, W: Weight> WeightedList<V,W>
 {
+    /// Does any item in the list have a weight equal to `weight`?
+    pub fn contains_weight(&self, weight: W) -> bool
+    {
+        self.data.iter().any(|item| item.weight == weight)
+    }
+
     /// Does any item in the list have a value equal to `value`?
     pub fn contains_value(&self, value: &V) -> bool
         where V: PartialEq
     {
         self.data.iter().any(|item| item.value == *value)
     }
-    
-    /// Does any item in the list have a weight equal to `weight`?
-    pub fn contains_weight(&self, weight: W) -> bool
+
+    /// Compute a weighted sum over the list.
+    /// 
+    /// For each item in the list, apply `value_map` to its value, multiply the result by its weight, and return the sum of the results.
+    /// 
+    /// # Usage
+    /// 
+    /// ## Dot Product
+    /// If `V` is already a numeric type, you can think of this method as computing the dot product between the weights vector and value vector:
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// 
+    /// let mut wl = wlist![(2, 100), (3, 10), (5, 1)];
+    /// 
+    /// // 2×100 + 3×10 + 5×1
+    /// let weighted_sum = wl.weighted_sum(|v| *v);
+    /// 
+    /// assert_eq!(235, weighted_sum);
+    /// ```
+    /// 
+    /// ## With a Mapper
+    /// 
+    /// ```
+    /// # use weighted_list::*;
+    /// let mut wl = wlist![(2, "100"), (3, "10"), (5, "1")];
+    /// 
+    /// let weighted_sum = wl.weighted_sum::<u32>(|v| v.parse::<u32>().unwrap());
+    /// 
+    /// assert_eq!(235, weighted_sum);
+    /// ```
+    /// 
+    pub fn weighted_sum<T>(&self, mut value_map: impl FnMut(&V) -> W) -> T
+        where T: std::iter::Sum<W>
     {
-        self.data.iter().any(|item| item.weight == weight)
+        self.data.iter()
+            .map(|item| item.weight * value_map(&item.value))
+            .sum::<T>()
+    }
+
+    /// Compute a weighted sum over the list, using normalised weights.
+    /// 
+    /// First normalise the weights using [`normalised()`](Self::normalised), then compute [`weighted_sum()`](Self::weighted_sum). Note that this may fail if casting to `f64` fails at any point.
+    pub fn normalised_weighted_sum<T>(&self, value_map: impl FnMut(&V) -> f64) -> Result<T, Box<dyn Error + 'static>>
+        where
+            V: Clone,
+            T: std::iter::Sum<f64>,
+    {
+        Ok(
+            self.normalised()?
+                .weighted_sum(value_map)
+        )
     }
 }
 
@@ -1030,7 +1084,7 @@ impl<V, W: Weight> WeightedList<V,W>
     ///     Some(wlist![(0.2, "sup"), (0.3, "nova"), (0.5, "shard")])
     /// );
     /// ```
-    pub fn normalised(&mut self) -> Result<WeightedList<V, f64>, &str>
+    pub fn normalised(&self) -> Result<WeightedList<V, f64>, Box<dyn Error + 'static>>
         where V: Clone
     {
         let total;
@@ -1038,25 +1092,23 @@ impl<V, W: Weight> WeightedList<V,W>
         if let Some(t) = nums::cast::<W, f64>(self.len()) {
             total = t;
         } else {
-            return Err("Error casting total weights to `f64`");
+            return Err(Box::new(NumCastError("Error casting `len()` of `WeightedList` to `f64`")));
         };
 
-        let items =
-            self.data
-                .iter()
-                .map(|item| {
-                    let weight = nums::cast::<W, f64>(item.weight)?;
-                    Some(WeightedItem {
-                        weight: weight / total,
-                        value: item.value.clone()
-                    })
+        let items = self.data.iter()
+            .map(|item| {
+                let weight = nums::cast::<W, f64>(item.weight)?;
+                Some(WeightedItem {
+                    weight: weight / total,
+                    value: item.value.clone()
                 })
-                .collect::<Option<Vec<WeightedItem<V, f64>>>>()
+            })
+            .collect::<Option<Vec<WeightedItem<V, f64>>>>()
         ;
 
         match items {
             Some(data) => Ok(WeightedList { data }),
-            None       => Err("Error casting weights to `f64`")
+            None       => Err(Box::new(NumCastError("Error casting weights of `WeightedItem`s to `f64`")))
         }
     }
 }
@@ -1490,7 +1542,7 @@ impl<V, W: Weight> WeightedList<V,W>
 
     /// Select `count` unique values using weighted randomisation.
     /// 
-    /// Call this method using `bon` builder syntax (see [§ Usage](Self::select_random_values_unique#usage) below).
+    /// Call this method using `bon` builder syntax (see [§ Usage](#usage) below).
     /// 
     /// # Options
     /// 
@@ -1501,7 +1553,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// ```
     /// 
     /// - `count`: How many values to select.
-    /// - `merge_duplicates`: Whether to treat duplicate values as non-unique (see [§ Notes](Self::select_random_values_unique#notes) below for details).
+    /// - `merge_duplicates`: Whether to treat duplicate values as non-unique (see [§ Notes](#notes) below for details).
     /// 
     /// # Usage
     /// 
