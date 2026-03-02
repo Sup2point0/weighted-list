@@ -22,18 +22,3 @@ impl<Type> Weight for Type where Type:
     + iter::Sum
     + fmt::Debug
 {}
-
-
-/// An error returned when failing to cast one numeric type to another, which may be required for certain [`WeightedList`](crate::WeightedList) operations.
-#[derive(Debug)]
-pub struct NumCastError(pub(crate) &'static str);
-
-impl std::fmt::Display for NumCastError
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result
-    {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl std::error::Error for NumCastError {}
