@@ -2,8 +2,7 @@ use std::*;
 
 use itertools::Itertools;
 
-use crate::root::*;
-use crate::frozen_weighted_item::FrozenWeightedItem;
+use crate::*;
 
 
 pub type FWList<V,W> = FrozenWeightedList<V,W>;
