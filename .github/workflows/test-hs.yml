@@ -2,9 +2,6 @@ name: 'Test Haskell'
 
 on:
   workflow_dispatch:
-
-  schedule:
-    - cron: '35 4 4,20 * *'
   
   push:
     branches:

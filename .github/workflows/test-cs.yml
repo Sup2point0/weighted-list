@@ -2,9 +2,6 @@ name: 'Test C#'
 
 on:
   workflow_dispatch:
-
-  schedule:
-    - cron: '25 4 4,20 * *'
   
   push:
     branches:
