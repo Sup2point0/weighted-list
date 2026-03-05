@@ -1,7 +1,9 @@
-use std::collections::{ HashSet };
-use std::error::{ Error };
-use std::fmt::{ Debug, Display };
-use std::hash::{ Hash };
+use std::{
+    collections::{ HashSet },
+    error::{ Error },
+    fmt::{ Debug, Display },
+    hash::{ Hash },
+};
 
 use bon::bon;
 use itertools::Itertools;
@@ -37,7 +39,7 @@ pub type WList<V,W> = WeightedList<V,W>;
 ///     println!("{item}");
 /// }
 /// 
-/// if let Some(result) = wl.select_random_value(&mut rand::rng()) {
+/// if let Ok(result) = wl.select_random_value(&mut rand::rng()) {
 ///     println!("{result}");
 /// }
 /// ```

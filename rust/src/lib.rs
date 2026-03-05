@@ -17,7 +17,7 @@
 //!     println!("{} has weight {}", item.value, item.weight);
 //! }
 //! 
-//! if let Some(result) = wl.select_random_value(&mut rand::rng()) {
+//! if let Ok(result) = wl.select_random_value(&mut rand::rng()) {
 //!     println!("{result}");
 //! }
 //! ```

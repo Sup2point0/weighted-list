@@ -22,7 +22,9 @@ mod wlist {
 
     mod test_traits;
 
-    mod test_index_iter;
+    mod test_index;
+
+    mod test_iter;
 
     mod test_list_mut;
 

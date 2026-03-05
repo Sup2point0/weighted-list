@@ -1,5 +1,4 @@
 mod constructors;
-#[allow(unused_imports)]  // FIXME why?
 pub(crate) use constructors::*;
 
 pub mod stats;
