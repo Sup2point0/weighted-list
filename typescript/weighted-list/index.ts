@@ -1,7 +1,9 @@
 /**
  * Containers for weighted randomisation.
  * 
- * Use the `FrozenWeightedList` class for storing a collection of values with associated weights. If you wish to mutate the collection, use `WeightedList` (under development).
+ * - Use `FrozenWeightedList` for storing a collection of values with associated weights.
+ * - Use `WeightedList` (under development) if you wish to mutate the collection.
+ * - Use `FrozenWeightedLists` to compose multiple separate `FrozenWeightedList`s into one larger pool.
  */
 
 export * from "./shared";

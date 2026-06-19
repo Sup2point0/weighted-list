@@ -334,7 +334,7 @@ export class FrozenWeightedList<Value>
       };
     }
     else if (typeof item[Symbol.iterator] === "function" && typeof item !== "string") {
-      if (item.length != 2) {
+      if (item.length !== 2) {
         throw new TypeError(
           `Expected 2 values in \`FrozenWeightedItem\`, but received ${item.length} values`
         );
@@ -477,12 +477,10 @@ export class FrozenWeightedList<Value>
     if (out !== undefined) return out;
 
     throw new RangeError(
-      `Attempted to access weighted index ${weighted_index}, but \`WeightedList\` has weighted length ${this.length}`
+      `Attempted to access weighted index ${weighted_index}, but \`FrozenWeightedList\` has weighted length ${this.length}`
     );
   }
 }
-
-export default FrozenWeightedList;
 
 
 /**
