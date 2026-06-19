@@ -1,3 +1,4 @@
+export type int = number;
 export type Weight = number;
 
 

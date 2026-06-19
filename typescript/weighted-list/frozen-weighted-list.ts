@@ -1,4 +1,4 @@
-import type { Weight, WeightedItem, FrozenWeightedItem, LikeWeightedItem } from "./shared";
+import type { int, Weight, WeightedItem, FrozenWeightedItem, LikeWeightedItem } from "./shared";
 
 
 /**
@@ -59,26 +59,26 @@ export class FrozenWeightedList<Value>
   }
 
   /** Get an iterator over the items in the list. */
-  *iter_items(): Generator<WeightedItem<Value>>
+  *iter_items(): Generator<Readonly<WeightedItem<Value>>>
   {
     for (let item of this.#data) {
-      yield {
+      yield Object.freeze({
         weight: item.weight,
         value:  item.value
-      };
+      });
     }
   }
 
   /** Get an iterator over the items in the list as `[index, item]` pairs. */
-  *iter_entries(): Generator<[number, WeightedItem<Value>]>
+  *iter_entries(): Generator<[int, Readonly<WeightedItem<Value>>]>
   {
     for (let [i, item] of this.#data.entries()) {
       yield [
         i,
-        {
+        Object.freeze({
           weight: item.weight,
           value:  item.value
-        }
+        })
       ];
     }
   }
@@ -114,20 +114,18 @@ export class FrozenWeightedList<Value>
   }
 
   /**
-   * Get the items in the list.
-   * 
-   * Note this returns shallow copies of the items - altering them will not alter the original list, but altering the values will alter the list.
+   * Get the items in the list as a plain array.
    */
-  items(): WeightedItem<Value>[]
+  items(): Readonly<WeightedItem<Value>>[]
   {
-    return this.#data.map(item => ({
+    return this.#data.map(item => Object.freeze({
       weight: item.weight,
       value:  item.value,
     }));
   }
 
   /** Get the items in the list as `[index, item]` pairs. */
-  entries(): [number, WeightedItem<Value>][]
+  entries(): [int, Readonly<WeightedItem<Value>>][]
   {
     return Array.from(this.items().entries());
   }
@@ -176,15 +174,15 @@ export class FrozenWeightedList<Value>
   /**
    * Get the item in the list at `weighted_index`, returning `undefined` if the index is out-of-bounds.
    */
-  at(weighted_index: Weight): WeightedItem<Value> | undefined
+  at(weighted_index: Weight): Readonly<WeightedItem<Value>> | undefined
   {
     try {
       let item = this.#at(weighted_index);
 
-      return {
+      return Object.freeze({
         weight: item.weight,
         value:  item.value,
-      };
+      });
     }
     catch {
       return undefined;
@@ -229,7 +227,7 @@ export class FrozenWeightedList<Value>
    * Randomly select `count` values from the list, using weighted randomisation.
    */
   *sample_values(
-    count: number,
+    count: int,
     options?: {
       /** Whether to select with replacement. Defaults to `true`. */
       replace: boolean;
@@ -278,14 +276,14 @@ export class FrozenWeightedList<Value>
    * @param count How many values to select. The generator will yield this many values *at most*.
    */
   *sample_values_unique(
-    count: number,
+    count: int,
     options?: {
       /** By default, each item in the list is treated as a 'unique' value. If `merge_duplicates` is set to `true`, duplicate values (values that compare `===`) will be treated as equivalent. */
       merge_duplicates: boolean,
     },
   ): Generator<Value>
   {
-    let seen_indices = new Set<number>();
+    let seen_indices = new Set<int>();
     let l = this.length;
 
     for (let n = 0; n < count; n++)
@@ -361,7 +359,7 @@ export class FrozenWeightedList<Value>
       };
     }
 
-    return this.#check(out);
+    return Object.freeze(this.#check(out));
   }
   
   /** Check if `item` is a valid `FrozenWeightedItem`. */
@@ -419,7 +417,7 @@ export class FrozenWeightedList<Value>
   }
 
   /** Convert a weighted index to its corresponding unweighted index in the list, using linear search, skipping a set of seen (unweighted) indices. */
-  #unweight_index_skipping(weighted_index: Weight, seen_indices: Set<number>): Weight
+  #unweight_index_skipping(weighted_index: Weight, seen_indices: Set<int>): Weight
   {
     let t = 0;
 
