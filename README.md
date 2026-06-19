@@ -26,10 +26,10 @@ List data structures for weighted randomisation, implemented (eventually) in eve
 
 ```rs
 let descriptors = wlist![
-    (10, "cool".to_owned()),
-    (5,  "awesome".to_owned()),
-    (2,  "elegant".to_owned()),
-    (1,  "beautiful".to_owned()),
+    (10, String::from("cool")),
+    ( 5, String::from("awesome")),
+    ( 2, String::from("elegant")),
+    ( 1, String::from("beautiful")),
 ];
 
 let words = descriptors.select_random_values_unique()
@@ -249,27 +249,14 @@ A couple years later, I’ve come back to do the same in C#, this time also addi
 A few more years later, I’m back to do the same in Haskell and Rust (and also finish off the TypeScript and Ruby implementations that I started but never finished). Damn I love this project. Seriously, it never fails to raise so many questions about a language’s mechanics and quirks that I would never encounter otherwise.
 
 ### Is this even useful?
-I mean yeah, a whole several-hundred-lines class to handle one thing is probably overkill... it’s more an exercise and proof-of-concept.
+I mean yeah, a whole several-hundred-lines class to handle one thing is probably overkill. At this point, it’s become more of a tradition for learning a new language.
 
-Regardless, I’ve used my own code[^surprise] in at least 2 major projects ([PENGUIN<sup>↗</sup>](https://github.com/Sup2point0/PENGUIN) and [Algorhythm<sup>↗</sup>](https://Sup2point0/Algorhythm)), so I can definitely say it’s been useful to me!
+Either way, I’ve used my own code[^surprise] in at least 3 major projects ([PENGUIN<sup>↗</sup>](https://github.com/Sup2point0/PENGUIN), [Algorhythm<sup>↗</sup>](https://Sup2point0/Algorhythm), [sup2point0.github.io](https://github.com/Sup2point0/sup2point0.github.io)), so I can definitely say it’s been useful to me!
 
 [^surprise]: To my own surprise, somewhat.
 
-### Why are the source files several hundred lines long?
-1. documentation
-2. line breaks
-3. utility
-
-Particularly documentation. That stuff just *eats* the line count. Also, implementing something as complex as an enumerable container requires a lot of methods, operators, interfaces and delegation. And in C# you've even got overloading to account for as well.
-
 ### How fast is it?
 In all honesty, I don’t know. I’m slowly adding benchmarks to test different approaches.
-
-### Why is your Python code not compliant to PEP 8?
-I have my own particular preferences when it comes to coding in Python, which I explain fully [here<sup>↗</sup>](https://github.com/Sup2point0/Assort/blob/origin/~dev/Python%20Syntax.md).
-
-### Why do you start `{}` on a new line?
-I’m a C# programmer, what can I say :P
 
 ### Why do you use `snake_case` in TypeScript?
 I’m a Python programmer, what can I say :P
