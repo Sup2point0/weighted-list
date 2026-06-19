@@ -1,4 +1,8 @@
-import type { int, Weight, WeightedItem, FrozenWeightedItem, LikeWeightedItem } from "./shared";
+import type {
+  int, Weight,
+  WeightedItem, FrozenWeightedItem, LikeWeightedItem,
+  WeightedCollection,
+} from "./shared";
 
 
 /**
@@ -7,6 +11,7 @@ import type { int, Weight, WeightedItem, FrozenWeightedItem, LikeWeightedItem } 
  * "Immutable" means the items, the order of items, and the weights of items cannot be changed. However, their values can still be changed through obtaining a reference to the value of an item in the list.
  */
 export class FrozenWeightedList<Value>
+  implements WeightedCollection<Value, Readonly<WeightedItem<Value>>>
 {
   #data: FrozenWeightedItem<Value>[];
   #length: Weight;
@@ -169,7 +174,7 @@ export class FrozenWeightedList<Value>
   }
 
 
-  // == INTERFACES == //
+  // == ARRAY METHODS == //
 
   /**
    * Get the item in the list at `weighted_index`, returning `undefined` if the index is out-of-bounds.
