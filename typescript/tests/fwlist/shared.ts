@@ -10,7 +10,7 @@ export function el()
 }
 
 /**
- * Construct a `FrozenWeightedList` for testing.
+ * Construct a non-empty `FrozenWeightedList` for testing.
  */
 export function fwl()
 {
@@ -18,5 +18,15 @@ export function fwl()
     [2, "sup"],
     [3, "nova"],
     [5, "shard"],
+  );
+}
+
+/**
+ * Construct a `FrozenWeightedList` containing POJOs for mutability testing.
+ */
+export function ofwl()
+{
+  return new FrozenWeightedList(
+    [1, { good: true }],
   );
 }

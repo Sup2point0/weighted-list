@@ -1,6 +1,6 @@
 import { test, assert } from "vitest";
 
-import { el, fwl } from "./shared";
+import { el, fwl, ofwl } from "./shared";
 
 
 test("weights", () =>
@@ -19,6 +19,9 @@ test("values", () =>
 
   assert.deepEqual( Array.from(el().iter_values()),  [] );
   assert.deepEqual( Array.from(fwl().iter_values()), fwl().values() );
+
+  let item = ofwl().values()[0];
+  assert.throws(() => { item.good = false; });
 });
 
 test("items", () =>
@@ -31,6 +34,9 @@ test("items", () =>
   ]);
 
   assert.deepEqual( Array.from(fwl().iter_items()), fwl().items() );
+
+  let item = ofwl().items()[0];
+  assert.throws(() => { item.value.good = false; });
 });
 
 test("entries", () =>
@@ -43,6 +49,9 @@ test("entries", () =>
   ]);
   
   assert.deepEqual( Array.from(fwl().iter_entries()), fwl().entries());
+
+  let item = ofwl().entries()[0];
+  assert.throws(() => { item[1].value.good = false; });
 });
 
 test("raw", () =>
@@ -55,6 +64,9 @@ test("raw", () =>
   ]);
 
   assert.deepEqual( Array.from(fwl().iter_raw()), fwl().raw() );
+
+  let item = ofwl().raw()[0];
+  assert.throws(() => { item[1].good = false; });
 });
 
 test("expanded", () =>
@@ -67,4 +79,7 @@ test("expanded", () =>
   ]);
 
   assert.deepEqual( Array.from(fwl().iter_expanded()), fwl().expanded() );
+
+  let item = ofwl().expanded()[0];
+  assert.throws(() => { item.good = false; });
 })

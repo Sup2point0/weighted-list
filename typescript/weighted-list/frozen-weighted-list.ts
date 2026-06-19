@@ -7,8 +7,6 @@ import type {
 
 /**
  * An immutable list of weighted items.
- * 
- * "Immutable" means the items, the order of items, and the weights of items cannot be changed. However, their values can still be changed through obtaining a reference to the value of an item in the list.
  */
 export class FrozenWeightedList<Value>
   implements WeightedCollection<Value, Readonly<WeightedItem<Value>>>
@@ -123,7 +121,7 @@ export class FrozenWeightedList<Value>
    */
   items(): Readonly<WeightedItem<Value>>[]
   {
-    return this.#data.map(item => Object.freeze({
+    return this.#data.map(item => ({
       weight: item.weight,
       value:  item.value,
     }));
@@ -193,10 +191,6 @@ export class FrozenWeightedList<Value>
       return undefined;
     }
   }
-
-
-
-  // == ARRAY METHODS == //
 
   /** (out-of-place) Return this list concatenated with another `FrozenWeightedList`. */
   concat(other: FrozenWeightedList<Value>): FrozenWeightedList<Value>
@@ -335,7 +329,7 @@ export class FrozenWeightedList<Value>
       out = {
         cumulative_weight: cumulative_weight + item.weight,
         weight: item.weight,
-        value: item.value
+        value: Object.freeze(item.value)
       };
     }
     else if (typeof item[Symbol.iterator] === "function" && typeof item !== "string") {
@@ -349,7 +343,7 @@ export class FrozenWeightedList<Value>
         out = {
           cumulative_weight: cumulative_weight + item[0],
           weight: item[0],
-          value: item[1]
+          value: Object.freeze(item[1])
         };
       }
       catch {
@@ -360,7 +354,7 @@ export class FrozenWeightedList<Value>
       out = {
         cumulative_weight: cumulative_weight + 1,
         weight: 1,
-        value: item as Value
+        value: Object.freeze(item) as Value
       };
     }
 
