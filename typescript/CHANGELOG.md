@@ -1,9 +1,15 @@
 # Changelog
 
 
+## v0.1.2
+
+- `FrozenWeightedList`: Enforce stronger immutability with `Object.freeze` and `Readonly<>`
+- `FrozenWeightedList`: Use `int` where appropriate in interface
+
+
 ## v0.1.1
 
-- Fix edge case errors in `FrozenWeightedList.at()` indexing
+- `FrozenWeightedList`: Fix edge case errors in `.at()` indexing
 
 
 ## v0.1.0
