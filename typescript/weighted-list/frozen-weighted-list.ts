@@ -9,6 +9,7 @@ import type { Weight, WeightedItem, FrozenWeightedItem, LikeWeightedItem } from 
 export class FrozenWeightedList<Value>
 {
   #data: FrozenWeightedItem<Value>[];
+  #length: Weight;
 
 
   // == CONSTRUCTORS == //
@@ -34,6 +35,8 @@ export class FrozenWeightedList<Value>
       cumulative_weight = item.cumulative_weight;
       this.#data.push(item);
     }
+
+    this.#length = cumulative_weight;
   }
 
 
@@ -148,13 +151,13 @@ export class FrozenWeightedList<Value>
    * The total weight of all items in the list.
    */
   get length(): Weight {
-    return this.#data.at(-1)?.cumulative_weight ?? 0;
+    return this.#length;
   }
 
   /**
    * The total weight of all items in the list.
    * 
-   * This may be preferred over `.length` when it could be perceived as ambiguous.
+   * This may be preferable over `.length` when it could be perceived as ambiguous.
    */
   get total_weight(): Weight {
     return this.length;
