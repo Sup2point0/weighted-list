@@ -6,13 +6,15 @@ use crate::*;
 #[test] fn contains_weight()
 {
     assert!( wl().contains_weight(2) );
+    assert!( !wl().contains_weight(1) );
     assert!( !el().contains_weight(2) );
 }
 
 #[test] fn contains_value()
 {
     assert!( wl().contains_value(&"sup".to_owned()) );
-    assert!( !el().contains_value(&"sup".to_owned()) );
+    assert!( !wl().contains_value(&"nope".to_owned()) );
+    assert!( !el().contains_value(&"nope".to_owned()) );
 }
 
 #[test] fn weighted_sum()

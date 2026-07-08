@@ -98,6 +98,18 @@ use weighted_list::*;
     assert_eq!( *wl().insert_new_item(11, (1, str!("elysion"))), fourth );
 }
 
+#[test] fn pop()
+{
+    let orig = wl();
+    let orig = orig.items();
+    let mut list = wl();
+
+    assert_eq!( list.pop().unwrap(), *orig[2] );
+    assert_eq!( list.pop().unwrap(), *orig[1] );
+    assert_eq!( list.pop().unwrap(), *orig[0] );
+    assert_eq!( list.pop(), None );
+}
+
 #[test] fn remove_at()
 {
     let orig = wl();
