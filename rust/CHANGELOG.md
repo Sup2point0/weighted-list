@@ -1,12 +1,15 @@
 # Changelog
 
 
-## Next
+## v0.6.2
 
 ### New
 - Explicit error types:
   - `NumCastFailure` for errors casting between `W` and `f64`
   - `EmptyWeightedList` for methods requiring a nonempty `WeightedList`
+
+### Fixes
+- Remove unnecessary error message allocation in `util::try_cast()`
 
 
 ## v0.6.1
@@ -15,7 +18,7 @@
 - `WeightedList::weighted_sum()` method
 - `WeightedList::normalised_weighted_sum()` method
 
-### Fix
+### Fixes
 - `WeightedList::normalised()` no longer requires `&mut self`
   - This was unintentionally kept when copying from `WeightedList::normalise()`, which does require `&mut self`
 

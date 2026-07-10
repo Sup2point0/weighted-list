@@ -12,7 +12,7 @@ pub fn try_cast<T, R>(n: T) -> Result<R, NumCastFailure>
         R: NumCast,
 {
     num_traits::cast::<T, R>(n)
-        .ok_or(
+        .ok_or_else(||
             NumCastFailure {
                 value: format!("{n:?}"),
                 target: std::any::type_name::<R>(),
