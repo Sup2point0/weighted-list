@@ -15,7 +15,9 @@ pub type WItem<V,W> = WeightedItem<V,W>;
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct WeightedItem<V, W: Weight>
 {
-    /// The weight of the item. A positive number. `0` is technically valid, but not advised.
+    /// The weight of the item.
+    /// 
+    /// Must be a positive number. `0` may be safe, but behaviour is not tested, so proceed at your own peril!
     /// 
     /// # Notes
     /// 

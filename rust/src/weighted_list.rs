@@ -929,7 +929,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// First normalise the weights using [`normalised()`](Self::normalised), then compute [`weighted_sum()`](Self::weighted_sum). Note that this may fail if casting to `f64` fails at any point.
     #[must_use]
-    pub fn normalised_weighted_sum<T>(&self, value_map: impl FnMut(&V) -> f64) -> Result<T, NumCastFailure>
+    pub fn normalised_weighted_sum<T>(&self, value_map: impl FnMut(&V) -> f64) -> Result<T, Box<dyn Error>>
         where
             V: Clone,
             T: std::iter::Sum<f64>,
@@ -1106,13 +1106,16 @@ impl<V, W: Weight> WeightedList<V,W>
     /// );
     /// ```
     #[must_use = "This method does not mutate the original list."]
-    pub fn normalised(&self) -> Result<WeightedList<V, f64>, NumCastFailure>
+    pub fn normalised(&self) -> Result<WeightedList<V, f64>, Box<dyn Error>>
         where V: Clone
     {
         let l = self.len();
 
-        // FIXME check for zerodiv
         let total = util::try_cast::<W, f64>(l)?;
+
+        if self.is_zero() {
+            Err(Box::new(EmptyWeightedList { reason: "Cannot normalise an empty `WeightedList`" }))?
+        }
 
         let items = self.data.iter()
             .map(|item| {
@@ -1273,6 +1276,10 @@ impl<V, W: Weight> WeightedList<V,W>
     /// wl.take_by_at(2, 2);
     /// assert_eq!( wl, wlist![(2, "sup"), (5, "shard")]);
     /// ```
+    /// 
+    /// # Notes
+    /// 
+    /// - You can technically *increase* an item's weight by providing a negative increment, but this can get confusing fast.
     pub fn take_by_at(&mut self, decrement: W, weighted_index: W) -> WeightedItem<V,W>
     {
         let idx = self._unweight_index_(weighted_index);

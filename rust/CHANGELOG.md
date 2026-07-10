@@ -1,6 +1,12 @@
 # Changelog
 
 
+## Next
+
+### Fixes
+- Check for division by zero in `WeightedList::normalised()`
+
+
 ## v0.6.2
 
 ### New
