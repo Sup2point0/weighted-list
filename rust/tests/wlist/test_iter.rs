@@ -12,12 +12,25 @@ use weighted_list::*;
         list.into_iter().find(|item| item.weight == 2).unwrap(),
         wit!(2, str!("sup"))
     );
+
+    let list = wl();
+
+    let mut n = 0;
+    for _ in list {
+        n += 1;
+    }
+    assert_eq!( n, 3 );
 }
+
 #[test] fn iter()
 {
     let list = wl();
 
-    for _ in list.iter() {}
+    let mut n = 0;
+    for _ in list.iter() {
+        n += 1;
+    }
+    assert_eq!( n, 3 );
 
     assert_eq!(
         list.iter().find(|item| item.weight == 2).unwrap(),

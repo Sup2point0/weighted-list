@@ -35,6 +35,8 @@ mod wlist {
     mod test_random;
     
     mod test_random_stats;
+
+    mod test_must_use;
 }
 
 

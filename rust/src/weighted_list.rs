@@ -573,6 +573,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// # Notes
     /// - [`self.len()`](Self::len) returning `0` does not guarantee `self.is_empty()`, since items could have zero or negative weights. This method only returns `true` if no items are in the list at all.
+    #[must_use]
     pub fn is_empty(&self) -> bool
     {
         self.data.is_empty()
@@ -595,6 +596,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// # Notes
     /// - Returns `true` if `.is_empty()` is `true`.
+    #[must_use]
     pub fn is_zero(&self) -> bool
     {
         self.is_empty()
@@ -614,6 +616,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// # Notes
     /// - Returns `false` if the list is empty.
     /// - If you only need integer weights, you should probably use an unsigned type like `u32` to ensure weights are never negative.
+    #[must_use]
     pub fn has_negative_weights(&self) -> bool
     {
         self.data.iter().any(|item| item.weight < W::zero())
@@ -629,6 +632,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// Return a clone of the list with items sorted in ascending order of weights.
     /// 
     /// Orderings of items with equivalent weights is (currently) undefined behaviour.
+    #[must_use = "This method does not mutate the original list."]
     pub fn sorted(&self) -> Self
         where V: Eq, W: Ord
     {
@@ -638,6 +642,7 @@ impl<V, W: Weight> WeightedList<V,W>
     }
     
     /// Return a clone of the list with items reversed.
+    #[must_use = "This method does not mutate the original list."]
     pub fn reversed(&self) -> Self
     {
         let mut out = self.clone();
@@ -807,7 +812,6 @@ impl<V, W: Weight> WeightedList<V,W>
     /// assert_eq!(wl, wlist![]);
     /// ```
     pub fn truncate(&mut self, len: W) -> &mut Self
-        where W: Debug
     {
         if len == W::zero() {
             return self.clear();
@@ -867,12 +871,14 @@ impl<V, W: Weight> WeightedList<V,W>
 impl<V, W: Weight> WeightedList<V,W>
 {
     /// Does any item in the list have a weight equal to `weight`?
+    #[must_use]
     pub fn contains_weight(&self, weight: W) -> bool
     {
         self.data.iter().any(|item| item.weight == weight)
     }
 
     /// Does any item in the list have a value equal to `value`?
+    #[must_use]
     pub fn contains_value(&self, value: &V) -> bool
         where V: PartialEq
     {
@@ -910,6 +916,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// assert_eq!(235, weighted_sum);
     /// ```
     /// 
+    #[must_use]
     pub fn weighted_sum<T>(&self, mut value_map: impl FnMut(&V) -> W) -> T
         where T: std::iter::Sum<W>
     {
@@ -921,6 +928,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// Compute a weighted sum over the list, using normalised weights.
     /// 
     /// First normalise the weights using [`normalised()`](Self::normalised), then compute [`weighted_sum()`](Self::weighted_sum). Note that this may fail if casting to `f64` fails at any point.
+    #[must_use]
     pub fn normalised_weighted_sum<T>(&self, value_map: impl FnMut(&V) -> f64) -> Result<T, NumCastFailure>
         where
             V: Clone,
@@ -947,6 +955,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// Return a clone of the list with all items having a non-positive weight removed.
     /// 
     /// Out-of-place version of [`.prune()`](Self::prune).
+    #[must_use = "This method does not mutate the original list."]
     pub fn pruned(&self) -> Self
         where V: Clone
     {
@@ -1096,11 +1105,13 @@ impl<V, W: Weight> WeightedList<V,W>
     ///     Some(wlist![(0.2, "sup"), (0.3, "nova"), (0.5, "shard")])
     /// );
     /// ```
+    #[must_use = "This method does not mutate the original list."]
     pub fn normalised(&self) -> Result<WeightedList<V, f64>, NumCastFailure>
         where V: Clone
     {
         let l = self.len();
 
+        // FIXME check for zerodiv
         let total = util::try_cast::<W, f64>(l)?;
 
         let items = self.data.iter()
@@ -1515,6 +1526,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// - It is not guaranteed that the results will have exactly `count` values.
     ///   - If `count` exceeds the maximum possible number of values that can be returned, excess iterations will be skipped.
     ///   - If selection for an iteration fails, that value is excluded from the output list.
+    /// - If `replace` is `false`, this method clones the entire list. If mutation is acceptable, [`self.take_random_values`](Self::take_random_values) avoids this.
     /// - This method reserves a `Vec<>` with capacity `count` initially, so be careful of passing in extremely large `count`s.
     #[builder]
     pub fn select_random_values<RNG>(&self,
@@ -1794,6 +1806,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// Return a clone with the order of items shuffled.
     /// 
     /// Out-of-place version of [`.shuffle_items()`](Self::shuffle_items).
+    #[must_use = "This method does not mutate the original list."]
     pub fn shuffled_items<RNG>(&self, rng: &mut RNG) -> Self
         where RNG: Rng + ?Sized
     {
@@ -1840,6 +1853,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// Return a clone of the list with (weight, value) pairings shuffled.
     /// 
     /// Out-of-place version of [`.shuffle_weights()`](Self::shuffle_weights).
+    #[must_use = "This method does not mutate the original list."]
     pub fn shuffled_weights<RNG>(&self, rng: &mut RNG) -> Self
         where RNG: Rng + ?Sized
     {

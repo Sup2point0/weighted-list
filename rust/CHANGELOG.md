@@ -8,6 +8,7 @@
   - `NumCastFailure` for errors casting between `W` and `f64`
   - `EmptyWeightedList` for methods requiring a nonempty `WeightedList`
 - `WeightedItem::new()` and `WeightedList::new()` constructors are now `const fn`
+- Mark out-of-place methods with `#[must_use]`
 
 ### Fixes
 - Remove unnecessary error message allocation in `util::try_cast()` (major performance hit)
