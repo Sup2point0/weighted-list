@@ -137,6 +137,8 @@ use weighted_list::*;
     assert_eq!( *wl().truncate(6), wlist![(2, str!("sup")), (3, str!("nova")), (1, str!("shard"))] );
 
     assert_eq!( *wl().truncate(wl().len()), wl() );
+    assert_eq!( *wl().truncate(wl().len() + 1), wl() );
+    assert_eq!( *wl().truncate(wl().len() + 2), wl() );
 }
 
 #[test] fn retain()

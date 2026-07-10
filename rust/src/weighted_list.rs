@@ -827,6 +827,8 @@ impl<V, W: Weight> WeightedList<V,W>
                 n = i + 1;
                 break;
             }
+
+            n += 1;
         }
 
         self.data.truncate(n);
