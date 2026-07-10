@@ -23,7 +23,9 @@ pub type WList<V,W> = WeightedList<V,W>;
 
 /// A homogeneous list of weighted items with values of type `V` and weights of numerical type `W`.
 /// 
-/// Near-identical to `Vec<T>`, but stores [`WeightedItem<V,W>`](WeightedItem) objects instead. You can think of it like a `Vec<WeightedItem<V,W>>`.
+/// Near-identical to `Vec<T>`, but stores [`WeightedItem<V,W>`](WeightedItem) objects instead. You can think of it like a `Vec<WeightedItem<V,W>>` – indeed, much of the API surface should be familiar.
+/// 
+/// **Important**: Item weights *must* be positive (non-negative, non-zero). This is not (currently) enforced to allow compatibility with floating-point types like `f64`.
 /// 
 /// # Usage
 /// 
@@ -80,7 +82,7 @@ pub type WList<V,W> = WeightedList<V,W>;
 ///     .prune()
 ///     .len();
 /// ```
-#[derive(Clone, Hash, PartialEq, Eq, Default, Debug)]
+#[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct WeightedList<V, W: Weight>
 {
     data: Vec<WeightedItem<V,W>>
@@ -248,6 +250,13 @@ impl<V, W: Weight> std::ops::DerefMut for WeightedList<V,W> {
 }
 
 // == TRAIT IMPLEMENTATIONS == //
+impl<V, W: Weight> Default for WeightedList<V,W>
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<V, W: Weight> Extend<WeightedItem<V,W>> for WeightedList<V,W>
 {
     fn extend<T>(&mut self, iter: T)
@@ -1223,7 +1232,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// ```
     pub fn merge_duplicates(&mut self) -> &mut Self
     {
-        let orig = std::mem::replace(self, WeightedList::new());
+        let orig = std::mem::take(self);
         self.merge_with(orig);
         self
     }

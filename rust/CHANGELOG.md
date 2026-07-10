@@ -4,6 +4,7 @@
 ## Next
 
 ### Fixes
+- Manually `impl Default for WeightedList` to remove `V: Default` requirement
 - Check for division by zero in `WeightedList::normalised()`
 
 
