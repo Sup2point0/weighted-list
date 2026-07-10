@@ -1370,11 +1370,17 @@ impl<V, W: Weight> WeightedList<V,W>
     pub fn select_random_item<RNG>(&self, rng: &mut RNG) -> Result<&WeightedItem<V,W>, Box<dyn Error>>
         where RNG: Rng + ?Sized
     {
-        if self.data.is_empty() {
+        self._select_random_item_up_to_(rng, self.len())
+    }
+
+    fn _select_random_item_up_to_<RNG>(&self, rng: &mut RNG, len: W) -> Result<&WeightedItem<V,W>, Box<dyn Error>>
+        where RNG: Rng + ?Sized
+    {
+        if len == W::zero() {
             Err(Box::new(EmptyWeightedList { reason: "Cannot select a random item from an empty `WeightedList`" }))?
         }
 
-        let idx = self._get_random_weighted_index_(rng)?;
+        let idx = self._get_random_weighted_index_up_to_(rng, len)?;
         let out = &self[idx];
 
         Ok(out)
@@ -1547,8 +1553,10 @@ impl<V, W: Weight> WeightedList<V,W>
         let decrement = decrement.unwrap_or(W::one());
 
         if replace {
+            let len = self.len();
+
             (0..count)
-                .filter_map(|_| self.select_random_value(rng).ok().cloned())
+                .filter_map(|_| self._select_random_item_up_to_(rng, len).ok().map(|item| item.value.clone()))
                 .collect()
         }
         else {
