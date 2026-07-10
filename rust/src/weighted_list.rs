@@ -161,12 +161,9 @@ impl<V, W: Weight> FromIterator<(W,V)> for WeightedList<V,W> {
         where I: IntoIterator<Item = (W,V)>
     {
         Self {
-            data:
-                pairs.into_iter()
-                    .map(
-                        |(weight, value)| WeightedItem::new(weight, value)
-                    )
-                    .collect::<Vec<_>>()
+            data: pairs.into_iter()
+                    .map(|(weight, value)| WeightedItem::new(weight, value))
+                    .collect_vec()
         }
     }
 }
@@ -175,13 +172,7 @@ impl<V, W: Weight> FromIterator<WeightedItem<V,W>> for WeightedList<V,W>
     fn from_iter<I>(items: I) -> Self
         where I: IntoIterator<Item = WeightedItem<V,W>>
     {
-        let mut data = vec![];
-
-        for item in items {
-            data.push(item);
-        }
-
-        Self { data }
+        Self { data: items.into_iter().collect_vec() }
     }
 }
 
@@ -262,9 +253,7 @@ impl<V, W: Weight> Extend<WeightedItem<V,W>> for WeightedList<V,W>
     fn extend<T>(&mut self, iter: T)
         where T: IntoIterator<Item = WeightedItem<V,W>>
     {
-        for item in iter {
-            self.push_item(item);
-        }
+        self.data.extend(iter);
     }
 }
 
@@ -1539,6 +1528,7 @@ impl<V, W: Weight> WeightedList<V,W>
     /// 
     /// # Notes
     /// 
+    /// - The returned values are clones.
     /// - It is not guaranteed that the results will have exactly `count` values.
     ///   - If `count` exceeds the maximum possible number of values that can be returned, excess iterations will be skipped.
     ///   - If selection for an iteration fails, that value is excluded from the output list.
