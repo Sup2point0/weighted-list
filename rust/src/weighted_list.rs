@@ -266,7 +266,7 @@ impl<V, W: Weight> Display for WeightedList<V,W>
     {
         write!(f, "WeightedList[")?;
 
-        if !self.data.is_empty() {
+        if !self.is_empty() {
             write!(f, "\n")?;
         }
 
@@ -1333,6 +1333,19 @@ impl<V, W: Weight> WeightedList<V,W>
         self._get_random_weighted_index_up_to_(rng, self.len())
     }
 
+    fn _select_random_item_up_to_<RNG>(&self, rng: &mut RNG, len: W) -> Result<&WeightedItem<V,W>, Box<dyn Error>>
+        where RNG: Rng + ?Sized
+    {
+        if len == W::zero() {
+            Err(Box::new(EmptyWeightedList { reason: "Cannot select a random item from an empty `WeightedList`" }))?
+        }
+
+        let idx = self._get_random_weighted_index_up_to_(rng, len)?;
+        let out = &self[idx];
+
+        Ok(out)
+    }
+
     /// Select a random item from the list and return its value, using weighted randomisation.
     /// 
     /// # Usage
@@ -1371,19 +1384,6 @@ impl<V, W: Weight> WeightedList<V,W>
         where RNG: Rng + ?Sized
     {
         self._select_random_item_up_to_(rng, self.len())
-    }
-
-    fn _select_random_item_up_to_<RNG>(&self, rng: &mut RNG, len: W) -> Result<&WeightedItem<V,W>, Box<dyn Error>>
-        where RNG: Rng + ?Sized
-    {
-        if len == W::zero() {
-            Err(Box::new(EmptyWeightedList { reason: "Cannot select a random item from an empty `WeightedList`" }))?
-        }
-
-        let idx = self._get_random_weighted_index_up_to_(rng, len)?;
-        let out = &self[idx];
-
-        Ok(out)
     }
 }
 
@@ -1434,7 +1434,7 @@ impl<V, W: Weight> WeightedList<V,W>
     ) -> Result<WeightedItem<V,W>, Box<dyn Error>>
         where RNG: Rng + ?Sized
     {
-        if self.data.is_empty() {
+        if self.is_empty() {
             Err(EmptyWeightedList { reason: "Cannot take random values from an empty `WeightedList`" })?
         }
 
@@ -1463,7 +1463,7 @@ impl<V, W: Weight> WeightedList<V,W>
     pub fn take_entire_random<RNG>(&mut self, rng: &mut RNG) -> Result<WeightedItem<V,W>, Box<dyn Error>>
         where RNG: Rng + ?Sized
     {
-        if self.data.is_empty() {
+        if self.is_empty() {
             Err(EmptyWeightedList { reason: "Cannot take random values from an empty `WeightedList`" })?
         }
 
@@ -1556,7 +1556,11 @@ impl<V, W: Weight> WeightedList<V,W>
             let len = self.len();
 
             (0..count)
-                .filter_map(|_| self._select_random_item_up_to_(rng, len).ok().map(|item| item.value.clone()))
+                .filter_map(|_|
+                    self._select_random_item_up_to_(rng, len)
+                        .ok()
+                        .map(|item| item.value.clone())
+                )
                 .collect()
         }
         else {
@@ -1729,7 +1733,7 @@ impl<V, W: Weight> WeightedList<V,W>
 
         for _ in 0..count
         {
-            if self.data.is_empty() { break }
+            if self.is_empty() { break }
 
             if let Ok(item) = {
                 if take_entire { self.take_entire_random(rng) }
@@ -2016,5 +2020,50 @@ impl<V, W: Weight> WeightedList<V,W>
         assert_eq!( list._unweight_index_skipping_(4, &seen), Some(2) );
         assert_eq!( list._unweight_index_skipping_(5, &seen), Some(2) );
         assert_eq!( list._unweight_index_skipping_(6, &seen), Some(2) );
+    }
+
+    #[test] fn _get_random_weighted_index_()
+    {
+        let list = wl();
+        
+        let len = list.len();
+        let mut rng = rand::rng();
+        let mut seen = HashSet::new();
+
+        for _ in 0..100 {
+            let idx = list._get_random_weighted_index_(&mut rng)
+                .expect("can get random index");
+            
+            assert!(idx >= 0);
+            assert!(idx < len);
+            seen.insert(idx);
+        }
+
+        assert!(seen.len() > 0);
+        assert!(seen.len() == len as usize);
+    }
+
+    #[test] fn _get_random_weighted_index_up_to()
+    {
+        let list = wl();
+        
+        let len = list.len();
+        let mut rng = rand::rng();
+
+        for l in 1..len {
+            let mut seen = HashSet::new();
+
+            for _ in 0..100 {
+                let idx = list._get_random_weighted_index_up_to_(&mut rng, l)
+                    .expect("can get random index");
+
+                assert!(idx >= 0);
+                assert!(idx < l);
+                seen.insert(idx);
+            }
+
+            assert!(seen.len() > 0);
+            assert!(seen.len() == l as usize);
+        }
     }
 }
