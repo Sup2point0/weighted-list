@@ -43,12 +43,6 @@ impl<V, W: Weight> WeightedItem<V,W>
     {
         Self { weight, value }
     }
-
-    /// Construct an item from a `(weight, value)` pair.
-    pub fn from((weight, value): (W, V)) -> Self
-    {
-        Self { weight, value }
-    }
 }
 
 /// Construct a [`WeightedItem`] from a `(weight, value)` pair.
@@ -68,6 +62,13 @@ macro_rules! wit {
 }
 
 // == CONVERSIONS == //
+impl<V, W: Weight> From<(W, V)> for WeightedItem<V,W>
+{
+    fn from((weight, value): (W, V)) -> Self {
+        Self { weight, value }
+    }
+}
+
 impl<V, W: Weight> From<WeightedItem<V,W>> for (W, V)
 {
     fn from(item: WeightedItem<V,W>) -> Self {
@@ -76,6 +77,7 @@ impl<V, W: Weight> From<WeightedItem<V,W>> for (W, V)
 }
 
 // == TRAIT IMPLEMENTATIONS == //
+// TODO deprecate
 impl<V, W: Weight> Ord for WeightedItem<V,W>
     where
         V: Eq,
@@ -84,13 +86,12 @@ impl<V, W: Weight> Ord for WeightedItem<V,W>
     fn cmp(&self, other: &Self) -> std::cmp::Ordering
     {
         self.weight.cmp(&other.weight)
-            // .then(self.value.cmp(&other.value))  // TODO FIXME
     }
 }
 
 impl<V, W: Weight> PartialOrd for WeightedItem<V,W>
     where
-        V: Eq,
+        V: PartialEq,
 {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering>
     {

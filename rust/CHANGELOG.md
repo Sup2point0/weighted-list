@@ -10,7 +10,10 @@
 - `WeightedItem::new()` and `WeightedList::new()` constructors are now `const fn`
 
 ### Fixes
-- Remove unnecessary error message allocation in `util::try_cast()`
+- Remove unnecessary error message allocation in `util::try_cast()` (major performance hit)
+- Fix edge case in `WeightedList::truncate()` when `len >= self.total_weights()`
+  - This left the truncation index unchanged from its initial value of `0`, resulting in the entire list being cleared
+- Move `WeightedItem::from((W, V))` to real `impl From<(W, V)>`
 
 
 ## v0.6.1
