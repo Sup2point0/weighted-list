@@ -91,7 +91,7 @@ pub struct WeightedList<V, W: Weight>
 impl<V, W: Weight> WeightedList<V,W>
 {
     /// Construct an empty list.
-    pub fn new() -> Self
+    pub const fn new() -> Self
     {
         Self { data: Vec::new() }
     }

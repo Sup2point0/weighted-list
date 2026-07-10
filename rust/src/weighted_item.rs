@@ -39,7 +39,7 @@ impl<V, W: Weight> WeightedItem<V,W>
     }
 
     /// Construct an item with `value` and `weight`.
-    pub fn new(weight: W, value: V) -> Self
+    pub const fn new(weight: W, value: V) -> Self
     {
         Self { weight, value }
     }
