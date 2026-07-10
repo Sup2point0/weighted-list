@@ -1113,8 +1113,8 @@ impl<V, W: Weight> WeightedList<V,W>
 
         let total = util::try_cast::<W, f64>(l)?;
 
-        if self.is_zero() {
-            Err(Box::new(EmptyWeightedList { reason: "Cannot normalise an empty `WeightedList`" }))?
+        if self.is_zero() && !self.is_empty() {
+            Err(Box::new(EmptyWeightedList { reason: "Cannot normalise an zero `WeightedList`" }))?
         }
 
         let items = self.data.iter()
