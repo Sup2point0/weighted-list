@@ -1,13 +1,13 @@
 [package]
 name = "weighted-list"
-version = "0.6.1"
+version = "0.6.2"
 authors = ["Sup#2.0"]
 edition = "2024"
 
 description = "Data structures for weighted randomisation"
 readme = "README.md"
 repository = "https://github.com/Sup2point0/weighted-list/tree/main/rust"
-documentation = "https://docs.rs/weighted-list/latest/weighted_list/"
+documentation = "https://docs.rs/weighted-list/latest/weighted_list"
 license = "MIT"
 
 exclude = [

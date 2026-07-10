@@ -1,12 +1,31 @@
-import type { WeightedItem, LikeWeightedItem } from "./shared";
+import type {
+  int, Weight,
+  WeightedItem, LikeWeightedItem,
+  WeightedCollection,
+} from "./shared";
 
 
+/**
+ * A mutable list of weighted items.
+ */
 export class WeightedList<Value>
+  implements WeightedCollection<Value, WeightedItem<Value>>
 {
   #data: WeightedItem<Value>[];
 
 
   // == CONSTRUCTORS == //
+
+  /**
+   * Construct a `WeightedList` from the provided items.
+   * 
+   * @example
+   * let wl = new WeightedList(
+   *   [2, "sup"],
+   *   [3, "nova"],
+   *   [5, "shard"],
+   * );
+   */
   constructor(...items: LikeWeightedItem<Value>[])
   {
     this.#data = items.map(WeightedList.#sanitise);
