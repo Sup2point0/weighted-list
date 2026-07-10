@@ -1173,7 +1173,7 @@ impl<V, W: Weight> WeightedList<V,W>
         self.merge_item(WeightedItem::unit(value))
     }
 
-    /// Merge the items of `other` into `self`, leaving `other` empty.
+    /// Merge the items of `other` into `self`, consuming `other`.
     /// 
     /// See [`.merge_item()`](Self::merge_item) for details.
     pub fn merge_with(&mut self, other: WeightedList<V,W>) -> &mut Self
