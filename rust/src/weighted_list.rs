@@ -267,7 +267,7 @@ impl<V, W: Weight> Display for WeightedList<V,W>
         write!(f, "WeightedList[")?;
 
         if !self.is_empty() {
-            write!(f, "\n")?;
+            writeln!(f)?;
         }
 
         for item in &self.data {
@@ -621,34 +621,6 @@ impl<V, W: Weight> WeightedList<V,W>
     }
 }
 
-// == LIST QUERYING == //
-/// Methods specialised from `Vec<>` for querying the list.
-impl<V, W: Weight> WeightedList<V,W>
-    where
-        V: Clone
-{
-    /// Return a clone of the list with items sorted in ascending order of weights.
-    /// 
-    /// Orderings of items with equivalent weights is (currently) undefined behaviour.
-    #[must_use = "This method does not mutate the original list."]
-    pub fn sorted(&self) -> Self
-        where V: Eq, W: Ord
-    {
-        let mut out = self.clone();
-        out.sort();
-        out
-    }
-    
-    /// Return a clone of the list with items reversed.
-    #[must_use = "This method does not mutate the original list."]
-    pub fn reversed(&self) -> Self
-    {
-        let mut out = self.clone();
-        out.reverse();
-        out
-    }
-}
-
 // == LIST MUTATION == //
 /// Methods specialised from `Vec<>` for mutating the list.
 impl<V, W: Weight> WeightedList<V,W>
@@ -749,11 +721,47 @@ impl<V, W: Weight> WeightedList<V,W>
         self
     }
 
-    /// Reverse the order of items in the list (in-place).
+    /// Sort items in ascending order of weight.
+    /// 
+    /// The sort is stable (i.e. does not reorder equal elements).
+    pub fn sort(&mut self) -> &mut Self
+        where W: Ord
+    {
+        self.data.sort_by_key(|item| item.weight);
+        self
+    }
+
+    /// Return a clone of the list with items sorted in ascending order of weight.
+    /// 
+    /// The sort is stable (i.e. does not reorder equal elements).
+    /// 
+    /// Out-of-place version of [`.sort()`](Self::sort).
+    #[must_use = "This method does not mutate the original list."]
+    pub fn sorted(&self) -> Self
+        where V: Eq + Clone, W: Ord
+    {
+        let mut out = self.clone();
+        out.sort();
+        out
+    }
+
+    /// Reverse the order of items in the list.
     pub fn reverse(&mut self) -> &mut Self
     {
         self.data.reverse();
         self
+    }
+
+    /// Return a clone of the list with items reversed.
+    /// 
+    /// Out-of-place version of [`.reverse()`](Self::reverse).
+    #[must_use = "This method does not mutate the original list."]
+    pub fn reversed(&self) -> Self
+        where V: Clone
+    {
+        let mut out = self.clone();
+        out.reverse();
+        out
     }
 
     /// Swap the items at weighted indices `left` and `right`.

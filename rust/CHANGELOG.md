@@ -1,7 +1,12 @@
 # Changelog
 
 
-## Next
+## Next (v0.7.0)
+
+### Breaking
+- `WeightedItem` no longer implements `PartialOrd` and `Ord`
+  - Since this only compared the `weight` of items, it conflicted with `PartialEq` and `Eq`
+  - `::sort()` and `::sorted()` have been rewritten accordingly
 
 ### Fixes
 - Manually `impl Default for WeightedList` to remove `V: Default` requirement

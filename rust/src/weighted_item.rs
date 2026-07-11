@@ -79,28 +79,6 @@ impl<V, W: Weight> From<WeightedItem<V,W>> for (W, V)
 }
 
 // == TRAIT IMPLEMENTATIONS == //
-// TODO deprecate
-impl<V, W: Weight> Ord for WeightedItem<V,W>
-    where
-        V: Eq,
-        W: Ord,
-{
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering
-    {
-        self.weight.cmp(&other.weight)
-    }
-}
-
-impl<V, W: Weight> PartialOrd for WeightedItem<V,W>
-    where
-        V: PartialEq,
-{
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering>
-    {
-        self.weight.partial_cmp(&other.weight)
-    }
-}
-
 impl<V, W: Weight> Default for WeightedItem<V,W>
     where
         V: Default,
