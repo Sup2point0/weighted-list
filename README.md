@@ -11,8 +11,6 @@
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-ts.yml/badge.svg" />
   <img alt="Haskell Tests Status"
     src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-hs.yml/badge.svg" />
-  <!-- <img alt="Ruby Tests Status"
-    src="https://github.com/Sup2point0/weighted-list/actions/workflows/test-rb.yml/badge.svg" /> -->
 
   [walkthrough](walkthrough.md) · [rationale](rationale.md) · [spec](SPEC.md)
 
@@ -95,17 +93,6 @@ greetings = newWeightedList [(20, "sup"), (2, "salutations")]
 main :: IO ()
 main = print (randomValue greetings)
 -- => salutations
-```
-
-</details>
-
-
-<details>
-  <summary> <strong> Ruby </strong> (awaiting development)
-  </summary>
-
-```rb
-(working on it!)
 ```
 
 </details>
@@ -196,11 +183,10 @@ import WeightedList (WeightedList)
 | Language   | Version   | Status | Dependencies | Notes |
 | :--------- | :-------- | :----- | :----------- | :---- |
 | Rust       | `2024`    | Maintaining | `rand`, `num_traits`, `itertools`, `bon` |
-| Python     | `>= 3.11` | Awaiting rewrite | None |
-| C#         | `12.0`    | Awaiting maintenance | None | Supports LINQ querying |
-| TypeScript |           | Under development | None | Currently only supports `FrozenWeightedList` |
+| Python     | `>= 3.11` | Awaiting rewrite | none |
+| C#         | `12.0`    | Awaiting maintenance | none | Supports LINQ querying |
+| TypeScript |           | Under development | none | Currently only supports `FrozenWeightedList` |
 | Haskell    | `GHC2021` | Under development | `random` |
-| Ruby       |           | Awaiting development |
 
 
 <br>
@@ -246,7 +232,7 @@ A couple years later, I’ve come back to do the same in C#, this time also addi
 
 [^translate]: This was not exactly the way I created the project in C#, but the Python implementation certainly laid out a general framework and was influential in some design decisions.
 
-A few more years later, I’m back to do the same in Haskell and Rust (and also finish off the TypeScript and Ruby implementations that I started but never finished). Damn I love this project. Seriously, it never fails to raise so many questions about a language’s mechanics and quirks that I would never encounter otherwise.
+A few more years later, I’m back to do the same in Haskell and Rust (and also finish off the TypeScript implementations that I started but never finished). Damn I love this project. Seriously, it never fails to raise so many questions about a language’s mechanics and quirks that I would never encounter otherwise.
 
 ### Is this even useful?
 I mean yeah, a whole several-hundred-lines class to handle one thing is probably overkill. At this point, it’s become more of a tradition for learning a new language.
