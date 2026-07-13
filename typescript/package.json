@@ -9,14 +9,12 @@
 
   "scripts":
   {
-    "test":    "vitest",
-      "testx": "vitest run",
-      "testu": "vitest --ui"
+    "test":    "vitest run",
+      "testx": "vitest"
   },
 
   "devDependencies":
   {
-    "@vitest/ui": "latest",
     "vite": "latest",
     "vitest": "^4.0.7"
   }
