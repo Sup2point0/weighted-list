@@ -223,13 +223,18 @@ export class FrozenWeightedList<Value>
   }
 
   /**
-   * Randomly select `count` values from the list, using weighted randomisation.
+   * Randomly select up to `count` values from the list, using weighted randomisation.
+   * 
+   * If all values are drawn, the function terminates early. This means, for instance, setting `count = 12` when the `.length` is 10 still produces only 10 values, not 12.
    */
   *sample_values(
+    /** How many values to select. The generator will yield this many values *at most*. */
     count: int,
+
     options?: {
       /** Whether to select with replacement. Defaults to `true`. */
       replace: boolean;
+
       /** (only if `replace: false`) How much to decrement the weight of an item by after it is selected. Defaults to `1`. */
       decrement?: Weight;
     },
@@ -273,10 +278,10 @@ export class FrozenWeightedList<Value>
   }
 
   /**
-   * Randomly select `count` unique values from the list, using weighted randomisation.
-   * @param count How many values to select. The generator will yield this many values *at most*.
+   * Randomly select up to `count` unique values from the list, using weighted randomisation.
    */
   *sample_values_unique(
+    /** How many values to select. The generator will yield this many values *at most*. */
     count: int,
     options?: {
       /** By default, each item in the list is treated as a 'unique' value. If `merge_duplicates` is set to `true`, duplicate values (values that compare `===`) will be treated as equivalent. */

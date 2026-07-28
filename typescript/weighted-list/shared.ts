@@ -1,4 +1,6 @@
 export type int = number;
+
+/** The weight of an item in a `WeightedCollection`. */
 export type Weight = number;
 
 
