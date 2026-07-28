@@ -1,7 +1,7 @@
 # Changelog
 
 
-## Next (v0.1.3)
+## v0.1.3
 
 ### `FrozenWeightedList`
 - Fix incorrect usage of rounding that breaks non-integer weights
