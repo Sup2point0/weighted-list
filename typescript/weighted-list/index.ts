@@ -6,6 +6,6 @@
  * - Use `FrozenWeightedLists` to compose multiple separate `FrozenWeightedList`s into one larger pool.
  */
 
-export * from "./shared";
+export { Weight, WeightedItem, FrozenWeightedItem, LikeWeightedItem, WeightedCollection } from "./shared";
 // export * from "./weighted-list";
-export * from "./frozen-weighted-list";
+export { FrozenWeightedList, FWList } from "./frozen-weighted-list";
