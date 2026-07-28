@@ -251,6 +251,8 @@ export class FrozenWeightedList<Value>
 
       for (let n = 0; n < count; n++)
       {
+        if (l <= 0) break;
+
         let widx = this.#random_weighted_index_up_to(l);
         let  idx = this.#unweight_index_decrementing(widx, weight_decrements);
 

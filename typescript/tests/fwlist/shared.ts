@@ -1,4 +1,5 @@
 import { FrozenWeightedList } from "../../weighted-list";
+import type { int } from "../../weighted-list/shared";
 
 
 /**
@@ -29,4 +30,13 @@ export function ofwl()
   return new FrozenWeightedList(
     [1, { good: true }],
   );
+}
+
+
+/** Run `check` with different natural numbers for testing. */
+export function for_any_natural(check: (n: int) => void)
+{
+  for (let i = 0; i < 7; i++) {
+    check(i);
+  }
 }

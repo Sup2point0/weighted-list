@@ -5,6 +5,7 @@
 
 ### `FrozenWeightedList`
 - Fix incorrect usage of rounding that breaks non-integer weights
+- Fix `RangeError` when `l.sample_values(count, { replace: false })` has `count` > `l.length`
 
 
 ## v0.1.2

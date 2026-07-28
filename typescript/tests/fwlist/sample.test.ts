@@ -1,7 +1,7 @@
 import { describe, test, assert } from "vitest";
 
 import { FWList } from "../../weighted-list";
-import { el, fwl } from "./shared";
+import { el, fwl, for_any_natural } from "./shared";
 
 
 const TRIALS = fwl().length * 2;
@@ -74,64 +74,85 @@ describe("sample-value()", () =>
   });
 });
 
-describe("sample-values", () =>
+describe("sample-values()", () =>
 {
   test("returns value", () =>
   {
-    for (let i = 0; i < TRIALS; i++) {
-      let results = fwl().sample_values(3);
-
-      for (let value of results) {
-        assert.isDefined( value );
-        assert.include( EXPECTED, value );
-      }
-    }
-  });
-});
-
-test("sample-values-without-replacement", () =>
-{
-  for (let i = 0; i < TRIALS; i++) {
-    let results = fwl().sample_values(10, { replace: false });
-
-    let counts: Record<string, number> = { "sup": 0, "nova": 0, "shard": 0 };
+    let results = fwl().sample_values(3);
 
     for (let value of results) {
-      counts[value!]++;
+      assert.isDefined( value );
+      assert.include( EXPECTED, value );
     }
+  });
 
-    assert.equal( counts["sup"],   2 );
-    assert.equal( counts["nova"],  3 );
-    assert.equal( counts["shard"], 5 );
-  }
-});
+  describe("no replace", () =>
+  {
+    test("empty", () =>
+    {
+      for_any_natural(n => {
+        let results = el().sample_values(n, { replace: false });
+        assert.isEmpty( results );
+      });
+    })
 
-test("sample-values-unique", () =>
-{
-  for (let i = 0; i < TRIALS; i++) {
-    let results = fwl().sample_values_unique(10);
-    let sorted = Array.from(results).toSorted((prot, deut) => prot.length - deut.length);
+    test("usual", () =>
+    {
+      let results = fwl().sample_values(10, { replace: false });
 
-    assert.deepEqual( sorted, EXPECTED );
-  }
-  
-  for (let i = 0; i < TRIALS; i++) {
-    let pool = fwl().concat(fwl());
-    // console.log("pool.at(0) =", pool.at(0));
-    let results = pool.sample_values_unique(10);
-    let sorted = Array.from(results).toSorted((prot, deut) => prot.length - deut.length);
+      let counts: Record<string, number> = { "sup": 0, "nova": 0, "shard": 0 };
 
-    assert.deepEqual( sorted, EXPECTED.flatMap(each => [each, each]) );
-  }
-});
+      for (let value of results) {
+        counts[value!]++;
+      }
 
-test("sample-values-unique-merging-duplicates", () =>
-{
-  for (let i = 0; i < TRIALS; i++) {
-    let pool = fwl().concat(fwl());
-    let results = pool.sample_values_unique(10, { merge_duplicates: true });
-    let sorted = Array.from(results).toSorted((prot, deut) => prot.length - deut.length);
+      assert.equal( counts["sup"],   2 );
+      assert.equal( counts["nova"],  3 );
+      assert.equal( counts["shard"], 5 );
+    });
 
-    assert.deepEqual( sorted, EXPECTED );
-  }
-});
+    test("extreme", () =>
+    {
+      let results = fwl().sample_values(11, { replace: false });
+
+      let counts: Record<string, number> = { "sup": 0, "nova": 0, "shard": 0 };
+
+      for (let value of results) {
+        counts[value!]++;
+      }
+
+      assert.equal( counts["sup"],   2 );
+      assert.equal( counts["nova"],  3 );
+      assert.equal( counts["shard"], 5 );
+    });
+  });
+
+  test("unique", () =>
+  {
+    for (let i = 0; i < TRIALS; i++) {
+      let results = fwl().sample_values_unique(10);
+      let sorted = Array.from(results).toSorted((prot, deut) => prot.length - deut.length);
+
+      assert.deepEqual( sorted, EXPECTED );
+    }
+    
+    for (let i = 0; i < TRIALS; i++) {
+      let pool = fwl().concat(fwl());
+      let results = pool.sample_values_unique(10);
+      let sorted = Array.from(results).toSorted((prot, deut) => prot.length - deut.length);
+
+      assert.deepEqual( sorted, EXPECTED.flatMap(each => [each, each]) );
+    }
+  });
+
+  test("unique + merge duplicates", () =>
+  {
+    for (let i = 0; i < TRIALS; i++) {
+      let pool = fwl().concat(fwl());
+      let results = pool.sample_values_unique(10, { merge_duplicates: true });
+      let sorted = Array.from(results).toSorted((prot, deut) => prot.length - deut.length);
+
+      assert.deepEqual( sorted, EXPECTED );
+    }
+  });
+})
