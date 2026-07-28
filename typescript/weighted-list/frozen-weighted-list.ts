@@ -209,7 +209,7 @@ export class FrozenWeightedList<Value>
     if (this.length === 0) return undefined;
 
     let idx = this.#random_weighted_index();
-    let out = this.at(idx)!;
+    let out = this.at(idx);
 
     return out;
   }
@@ -462,7 +462,7 @@ export class FrozenWeightedList<Value>
   /** Get a random weighted index in the list, up to but excluding `length`. */
   #random_weighted_index_up_to(length: Weight): Weight
   {
-    return Math.floor(Math.random() * length);
+    return Math.random() * length;
   }
 
   /** Get the item at `weighted_index` in the list. */

@@ -1,29 +1,92 @@
-import { test, assert } from "vitest";
+import { describe, test, assert } from "vitest";
 
+import { FWList } from "../../weighted-list";
 import { el, fwl } from "./shared";
 
 
-const TRIALS = 20;
+const TRIALS = fwl().length * 2;
 const EXPECTED = ["sup", "nova", "shard"];
 
 
-test("sample-value", () =>
+describe("sample-value()", () =>
 {
-  for (let i = 0; i < TRIALS; i++) {
-    let result = fwl().sample_value();
-    assert.isTrue(EXPECTED.includes(result!));
-  }
+  test("returns value", () =>
+  {
+    for (let i = 0; i < TRIALS; i++) {
+      let result = fwl().sample_value();
+      assert.isDefined( result );
+      assert.isTrue( EXPECTED.includes(result) );
+    }
+  });
+
+  test("samples all values", () =>
+  {
+    let found = new Set();
+
+    for (let i = 0; i < TRIALS; i++) {
+      let result = fwl().sample_value();
+      assert.isDefined(result);
+      found.add(result);
+    }
+
+    assert.equal( found.size, 3 );
+    assert.isTrue( found.has("sup") );
+    assert.isTrue( found.has("nova") );
+    assert.isTrue( found.has("shard") );
+  });
+
+  test("handles non-integer weights", () =>
+  {
+    {
+      let l = new FWList(
+        [0.5, "left"],
+        [0.5, "right"],
+      );
+
+      let found = new Set();
+
+      for (let i = 0; i < TRIALS; i++) {
+        let result = l.sample_value();
+        assert.isDefined(result);
+        found.add(result);
+      }
+
+      assert.deepEqual( found, new Set(["left", "right"]) );
+    }
+    
+    {
+      let l = new FWList(
+        [0.2, "p"],
+        [0.3, "q"],
+        [0.5, "r"],
+      );
+
+      let found = new Set();
+
+      for (let i = 0; i < TRIALS; i++) {
+        let result = l.sample_value();
+        assert.isDefined(result);
+        found.add(result);
+      }
+
+      assert.deepEqual( found, new Set(["p", "q", "r"]) );
+    }
+  });
 });
 
-test("sample-values", () =>
+describe("sample-values", () =>
 {
-  for (let i = 0; i < TRIALS; i++) {
-    let results = fwl().sample_values(3);
+  test("returns value", () =>
+  {
+    for (let i = 0; i < TRIALS; i++) {
+      let results = fwl().sample_values(3);
 
-    for (let value of results) {
-      assert.isTrue(EXPECTED.includes(value!));
+      for (let value of results) {
+        assert.isDefined( value );
+        assert.include( EXPECTED, value );
+      }
     }
-  }
+  });
 });
 
 test("sample-values-without-replacement", () =>
