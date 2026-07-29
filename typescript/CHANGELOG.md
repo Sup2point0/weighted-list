@@ -1,6 +1,11 @@
 # Changelog
 
 
+## v0.1.4
+
+- Fix incorrect export of members from `shared`
+
+
 ## v0.1.3
 
 ### `FrozenWeightedList`
