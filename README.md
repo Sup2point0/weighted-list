@@ -123,7 +123,7 @@ main = print (randomValue greetings)
 > [!Tip]
 > For the full rationale behind this project, see [rationale](rationale.md).
 
-I made this class for *weighted randomisation*, where each element in a collection has a different chance of being selected – the greater an item’s weight, the higher the chance it is selected. This is super common in games for reward systems, displaying messages, etc.
+This library is for *weighted randomisation*, where each element in a collection has a different chance of being selected – the greater an item’s weight, the higher the chance it is selected. This is super common in games for gacha reward systems, displaying random tips, easter eggs, etc.
 
 
 <br>
@@ -232,23 +232,20 @@ A couple years later, I’ve come back to do the same in C#, this time also addi
 
 [^translate]: This was not exactly the way I created the project in C#, but the Python implementation certainly laid out a general framework and was influential in some design decisions.
 
-A few more years later, I’m back to do the same in Haskell and Rust (and also finish off the TypeScript implementations that I started but never finished). Damn I love this project. Seriously, it never fails to raise so many questions about a language’s mechanics and quirks that I would never encounter otherwise.
+A few more years later, I’m back to do the same in Haskell and Rust (and also finish off the TypeScript implementation that I started but never finished). Damn I love this project. Seriously, it never fails to raise so many questions about a language’s mechanics and quirks that I would never encounter otherwise.
 
 ### Is this even useful?
-I mean yeah, a whole several-hundred-lines class to handle one thing is probably overkill. At this point, it’s become more of a tradition for learning a new language.
+I mean yeah, a whole several-hundred-lines class to handle one thing is probably overkill. At this point, it’s more become a tradition for learning a new language.
 
-Either way, I’ve used my own code[^surprise] in at least 3 major projects ([PENGUIN<sup>↗</sup>](https://github.com/Sup2point0/PENGUIN), [Algorhythm<sup>↗</sup>](https://Sup2point0/Algorhythm), [sup2point0.github.io](https://github.com/Sup2point0/sup2point0.github.io)), so I can definitely say it’s been useful to me!
+Either way, I’ve used my own code[^surprise] in many projects, including ([PENGUIN<sup>↗</sup>](https://github.com/Sup2point0/PENGUIN), [sup2point0.github.io](https://github.com/Sup2point0/sup2point0.github.io)), [Awxynth](https://github.com/Sup2point0/awxynth), so I can definitely say it’s been useful to me!
 
-[^surprise]: To my own surprise, somewhat.
+[^surprise]: To my own surprise, somewhat!
 
 ### How fast is it?
 In all honesty, I don’t know. I’m slowly adding benchmarks to test different approaches.
 
 ### Why do you use `snake_case` in TypeScript?
-I’m a Python programmer, what can I say :P
-
-### Why are you okay with `camelCase` in Haskell then?
-I used `snake_case` before, and ngl, in Haskell you kinda need the `camelCase` to keep things readable without parentheses...
+Can’t read `camelCase`.
 
 
 <br>
