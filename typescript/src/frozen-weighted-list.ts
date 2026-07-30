@@ -340,7 +340,7 @@ export class FrozenWeightedList<Value>
     {
       if (l <= 0) break;
       
-      let weighted_index = Math.floor(Math.random() * l);
+      let weighted_index = this.#random_weighted_index_up_to(l);
       let idx = this.#unweight_index_skipping(weighted_index, seen_indices)
       let out = this.#data[idx];
 
