@@ -1,6 +1,6 @@
 import { describe, test, assert } from "vitest";
 
-import { FWList } from "../../weighted-list";
+import { FWList } from "../../src";
 import { el, fwl, for_any_natural } from "./shared";
 
 
@@ -10,8 +10,7 @@ const EXPECTED = ["sup", "nova", "shard"];
 
 describe("sample-value()", () =>
 {
-  test("returns value", () =>
-  {
+  test("returns value", () => {
     for (let i = 0; i < TRIALS; i++) {
       let result = fwl().sample_value();
       assert.isDefined( result );
@@ -19,8 +18,7 @@ describe("sample-value()", () =>
     }
   });
 
-  test("samples all values", () =>
-  {
+  test("samples all values", () => {
     let found = new Set();
 
     for (let i = 0; i < TRIALS; i++) {
@@ -35,8 +33,7 @@ describe("sample-value()", () =>
     assert.isTrue( found.has("shard") );
   });
 
-  test("handles non-integer weights", () =>
-  {
+  test("handles non-integer weights", () => {
     {
       let l = new FWList(
         [0.5, "left"],
@@ -76,28 +73,33 @@ describe("sample-value()", () =>
 
 describe("sample-values()", () =>
 {
-  test("returns value", () =>
+  describe("with replace", () =>
   {
-    let results = fwl().sample_values(3);
+    test("returns value", () => {
+      let results = fwl().sample_values(3);
 
-    for (let value of results) {
-      assert.isDefined( value );
-      assert.include( EXPECTED, value );
-    }
+      for (let value of results) {
+        assert.isDefined( value );
+        assert.include( EXPECTED, value );
+      }
+    });
+
+    test("disallows decrement", () => {
+    // if type error, good - decrement isn't valid without `replace: false`!
+      let results = fwl().sample_values(3, { decrement: 1 });
+    });
   });
 
   describe("no replace", () =>
   {
-    test("empty", () =>
-    {
+    test("empty", () => {
       for_any_natural(n => {
         let results = el().sample_values(n, { replace: false });
         assert.isEmpty( results );
       });
     })
 
-    test("usual", () =>
-    {
+    test("usual", () => {
       let results = fwl().sample_values(10, { replace: false });
 
       let counts: Record<string, number> = { "sup": 0, "nova": 0, "shard": 0 };
@@ -111,8 +113,7 @@ describe("sample-values()", () =>
       assert.equal( counts["shard"], 5 );
     });
 
-    test("extreme", () =>
-    {
+    test("extreme", () => {
       let results = fwl().sample_values(11, { replace: false });
 
       let counts: Record<string, number> = { "sup": 0, "nova": 0, "shard": 0 };
@@ -127,8 +128,7 @@ describe("sample-values()", () =>
     });
   });
 
-  test("unique", () =>
-  {
+  test("unique", () => {
     for (let i = 0; i < TRIALS; i++) {
       let results = fwl().sample_values_unique(10);
       let sorted = Array.from(results).toSorted((prot, deut) => prot.length - deut.length);
@@ -145,8 +145,7 @@ describe("sample-values()", () =>
     }
   });
 
-  test("unique + merge duplicates", () =>
-  {
+  test("unique + merge duplicates", () => {
     for (let i = 0; i < TRIALS; i++) {
       let pool = fwl().concat(fwl());
       let results = pool.sample_values_unique(10, { merge_duplicates: true });

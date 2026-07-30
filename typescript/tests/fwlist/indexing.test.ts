@@ -1,6 +1,6 @@
 import { describe, test, assert } from "vitest";
 
-import { FWList } from "../../weighted-list";
+import { FWList } from "../../src";
 import { el, fwl } from "./shared";
 
 

@@ -1,5 +1,5 @@
-import { FrozenWeightedList } from "../../weighted-list";
-import type { int } from "../../weighted-list/shared";
+import { FrozenWeightedList } from "../../src";
+import type { int } from "../../src/shared";
 
 
 /**
