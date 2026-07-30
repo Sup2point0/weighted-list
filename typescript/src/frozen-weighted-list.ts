@@ -30,6 +30,24 @@ export class FrozenWeightedList<Value>
   constructor(...items: LikeWeightedItem<Value>[])
   {
     this.#data = [];
+    this.#length = 0;
+
+    this.#init(items);
+  }
+
+  /**
+   * Construct a `FrozenWeightedList` from the provided items.
+   */
+  static from<Value>(items: Iterable<LikeWeightedItem<Value>>): FrozenWeightedList<Value>
+  {
+    return new FrozenWeightedList<Value>().#init(items);
+  }
+
+  /**
+   * Initialise the list with `items`, counting up cumulative weights.
+   */
+  #init(items: Iterable<LikeWeightedItem<Value>>): FrozenWeightedList<Value>
+  {
     let cumulative_weight = 0;
 
     for (let each of items) {
@@ -40,6 +58,8 @@ export class FrozenWeightedList<Value>
     }
 
     this.#length = cumulative_weight;
+
+    return this;
   }
 
 

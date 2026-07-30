@@ -4,9 +4,10 @@
 ## Next (v0.2.0)
 
 ### `FrozenWeightedList`
+- New: `from(Iterable<>)` static constructor
 - New: Support `for ... of` iteration with `[Symbol.iterator]()`
-- New: `is_zero()` method
-- `sample_values()` no longer turns `undefined` and instead forwards any indexing errors (not that there should be any)
+- New: `.is_zero()` method
+- `.sample_values()` no longer turns `undefined` and instead forwards any indexing errors (not that there should be any)
 - `.at()` only returns `undefined` on `RangeError`, not any error
 - `.items()` correctly freezes returned objects
 - Fix off-by-1 errors in indexing for sampling without replacement
