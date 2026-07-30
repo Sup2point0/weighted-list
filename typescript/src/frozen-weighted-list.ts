@@ -437,11 +437,11 @@ export class FrozenWeightedList<Value>
       if (seen_indices.has(i)) continue;
 
       t += item.weight;
-      if (t >= weighted_index) return i;
+      if (t > weighted_index) return i;
     }
 
     throw new RangeError(
-      `Attempted to access weighted index ${weighted_index}, skipping indices ${seen_indices}, but went out of bounds`
+      `\`FrozenWeightedList\` - Weighted index out of bounds: ${weighted_index}; total weight: ${this.total_weight}; skipped unweighted indices: ${seen_indices}`
     );
   }
 
@@ -450,19 +450,17 @@ export class FrozenWeightedList<Value>
   {
     let t = 0;
 
-    let w: Weight;
-
     for (let [i, item] of this.#data.entries()) {
-      w = item.weight - weight_decrements[i];
+      let w = item.weight - weight_decrements[i];
 
       if (w <= 0) continue;
 
       t += w;
-      if (t >= weighted_index) return i;
+      if (t > weighted_index) return i;
     }
 
     throw new RangeError(
-      `Attempted to access weighted index ${weighted_index}, with decrements ${weight_decrements}, but went out of bounds`
+      `\`FrozenWeightedList\` - Weighted index out of bounds: ${weighted_index}; total weight: ${this.total_weight}; weight decrements: ${weight_decrements}`
     );
   }
 

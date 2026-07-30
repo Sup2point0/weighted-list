@@ -3,6 +3,10 @@
 
 ## Next (v0.2.0)
 
+### `FrozenWeightedList`
+- Support `for ... of` iteration with `[Symbol.iterator]()`
+- Fix off-by-1 errors in indexing for sampling without replacement
+
 ### `WeightedCollection`
 - Default `Item` to `WeightedItem<Value>`
 
