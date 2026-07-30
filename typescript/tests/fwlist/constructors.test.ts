@@ -6,8 +6,7 @@ import { fwl } from "./shared";
 
 describe("constructor", () =>
 {
-  test("from WeightedItems", () =>
-  {
+  test("from WeightedItems", () => {
     assert.deepEqual( fwl(), new FWList(
       { weight: 2, value: "sup"   },
       { weight: 3, value: "nova"  },
@@ -15,8 +14,7 @@ describe("constructor", () =>
     ));
   });
 
-  test("from FrozenWeightedItems", () =>
-  {
+  test("from FrozenWeightedItems", () => {
     assert.deepEqual( fwl(), new FWList(
       { weight: 2, value: "sup",   cumulative_weight: 0 },
       { weight: 3, value: "nova",  cumulative_weight: 0 },
@@ -24,33 +22,29 @@ describe("constructor", () =>
     ));
   });
 
-  test("incorrect order", () =>
-  {
-    assert.throws(() => new FWList(
-      // if type error, good - weight should come first!
-      ["sup", 2]
-    ));
+  test("incorrect order", () => {
+    assert.throws(() =>
+      // if type-check error, good - weight should come first!
+      new FWList(["sup", 2])
+    );
   });
 
-  test("negative weight", () =>
-  {
-    assert.throws(() => new FWList(
-      [-1, "eto"]
-    ));
+  test("negative weight", () => {
+    assert.throws(() =>
+      new FWList([-1, "eto"])
+    );
   });
 
-  test("NaN weight", () =>
-  {
-    assert.throws(() => new FWList(
-      [NaN, "nan"]
-    ));
+  test("NaN weight", () => {
+    assert.throws(() =>
+      new FWList([NaN, "nan"])
+    );
   });
 
-  test("infinite weight", () =>
-  {
-    assert.throws(() => new FWList(
-      [Infinity, "nan"]
-    ));
+  test("infinite weight", () => {
+    assert.throws(() =>
+      new FWList([Infinity, "nan"])
+    );
   });
 });
 

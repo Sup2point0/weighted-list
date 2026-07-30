@@ -174,12 +174,12 @@ export class FrozenWeightedList<Value>
   }
 
 
+  // == ARRAY METHODS == //
+
   [Symbol.iterator]()
   {
     return this.items()[Symbol.iterator]();
   }
-
-  // == ARRAY METHODS == //
 
   /**
    * Get the item in the list at `weighted_index`, returning `undefined` if the index is out-of-bounds.
@@ -194,8 +194,11 @@ export class FrozenWeightedList<Value>
         value:  item.value,
       });
     }
-    catch {
-      return undefined;
+    catch (e) {
+      if (e instanceof RangeError) {
+        return undefined;
+      }
+      throw e;
     }
   }
 
@@ -232,7 +235,7 @@ export class FrozenWeightedList<Value>
   /**
    * Randomly select up to `count` values from the list, using weighted randomisation.
    * 
-   * If all values are drawn, the function terminates early. This means, for instance, setting `count = 12` when the `.length` is 10 still produces only 10 values, not 12.
+   * If `replace: false` and all values are drawn, the function terminates early. This means, for instance, setting `count: 12` when `.length` is `10` still produces only 10 values, not 12.
    */
   *sample_values(
     /** How many values to select. The generator will yield this many values *at most*. */
@@ -388,14 +391,14 @@ export class FrozenWeightedList<Value>
       );
     }
 
-    if      (item.weight < 0)        this.#err("negative weight", item);
-    else if (isNaN(item.weight))     this.#err("NaN weight", item);
-    else if (!isFinite(item.weight)) this.#err("infinite weight", item);
+    if      (item.weight < 0)        this.#err_invalid("negative weight", item);
+    else if (isNaN(item.weight))     this.#err_invalid("NaN weight", item);
+    else if (!isFinite(item.weight)) this.#err_invalid("infinite weight", item);
 
     return item;
   }
 
-  static #err<Value>(msg: string, item: FrozenWeightedItem<Value>)
+  static #err_invalid<Value>(msg: string, item: FrozenWeightedItem<Value>)
   {
     throw new Error(`Invalid \`FrozenWeightedItem\` ${msg}: ${item}`);
   }
@@ -477,12 +480,6 @@ export class FrozenWeightedList<Value>
     return this.#random_weighted_index_up_to(this.length);
   }
 
-  /** Get a random weighted index in the list, up to but excluding `length`. */
-  #random_weighted_index_up_to(length: Weight): Weight
-  {
-    return Math.random() * length;
-  }
-
   /** Get the item at `weighted_index` in the list. */
   #at(weighted_index: Weight): FrozenWeightedItem<Value>
   {
@@ -496,6 +493,12 @@ export class FrozenWeightedList<Value>
     throw new RangeError(
       `Attempted to access weighted index ${weighted_index}, but \`FrozenWeightedList\` has weighted length ${this.length}`
     );
+  }
+
+  /** Get a random weighted index in the list, up to but excluding `length`. */
+  #random_weighted_index_up_to(length: Weight): Weight
+  {
+    return Math.random() * length;
   }
 }
 
