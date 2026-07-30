@@ -3,6 +3,9 @@
 
 ## Next (v0.2.0)
 
+### `WeightedCollection`
+- Default `Item` to `WeightedItem<Value>`
+
 
 ## v0.1.5
 

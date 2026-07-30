@@ -35,7 +35,7 @@ export type LikeWeightedItem<Value> = (
 /**
  * The standard baseline interface all weighted collections will implement. This allows easily migrating between, for instance, a `WeightedList` and `FrozenWeightedList`.
  */
-export interface WeightedCollection<Value, Item>
+export interface WeightedCollection<Value, Item = WeightedItem<Value>>
 {
   // == ACCESSORS == //
   iter_weights():  Generator<Weight>
