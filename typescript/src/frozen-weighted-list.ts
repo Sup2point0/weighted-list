@@ -173,6 +173,18 @@ export class FrozenWeightedList<Value>
     return this.#data.length;
   }
 
+  /**
+   * Do all items in the list have zero weight?
+   * 
+   * Also returns `true` if the list is empty. A 'zero' list cannot be indexed since zero-weight items do not partake in indexing!
+   */
+  is_zero(): boolean {
+    return (
+      this.#data.length === 0
+      || this.#data.every(item => item.weight === 0)
+    );
+  }
+
 
   // == ARRAY METHODS == //
 
