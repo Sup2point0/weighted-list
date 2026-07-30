@@ -87,11 +87,22 @@ describe("sample-values()", () =>
     test("disallows decrement", () => {
     // if type error, good - decrement isn't valid without `replace: false`!
       let results = fwl().sample_values(3, { decrement: 1 });
+      // TODO
     });
   });
 
   describe("no replace", () =>
   {
+    test("returns value", () => {
+      for_any_natural(n => {
+        let result = fwl().sample_values(n);
+        
+        for (let value of result) {
+          assert.isTrue( EXPECTED.includes(value) );
+        }
+      });
+    });
+
     test("empty", () => {
       for_any_natural(n => {
         let results = el().sample_values(n, { replace: false });
@@ -99,7 +110,7 @@ describe("sample-values()", () =>
       });
     })
 
-    test("usual", () => {
+    test("exhaust", () => {
       let results = fwl().sample_values(10, { replace: false });
 
       let counts: Record<string, number> = { "sup": 0, "nova": 0, "shard": 0 };
@@ -113,7 +124,7 @@ describe("sample-values()", () =>
       assert.equal( counts["shard"], 5 );
     });
 
-    test("extreme", () => {
+    test("excessive", () => {
       let results = fwl().sample_values(11, { replace: false });
 
       let counts: Record<string, number> = { "sup": 0, "nova": 0, "shard": 0 };

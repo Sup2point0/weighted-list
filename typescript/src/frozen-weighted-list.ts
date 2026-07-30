@@ -263,19 +263,20 @@ export class FrozenWeightedList<Value>
       /** (only if `replace: false`) How much to decrement the weight of an item by after it is selected. Defaults to `1`. */
       decrement?: Weight;
     },
-  ): Generator<Value | undefined>
+  ): Generator<Value>
   {
-    options = Object.assign({
-      replace:   true,
-      decrement: 1,
-    }, options);
+    options ??= { replace: true };
 
     if (options.replace) {
+      if (this.is_zero()) return;
+      
       for (let n = 0; n < count; n++) {
-        yield this.sample_value();
+        yield this.sample_value()!;
       }
     }
     else {
+      options.decrement ??= 1;
+
       let l = this.length;
       let weight_decrements = Array(this.total_items).fill(0);
 
@@ -284,17 +285,15 @@ export class FrozenWeightedList<Value>
         if (l <= 0) break;
 
         let widx = this.#random_weighted_index_up_to(l);
-        let  idx = this.#unweight_index_decrementing(widx, weight_decrements);
+        let [idx, target] = this.#at_decrementing(widx, weight_decrements);
 
-        let target = this.#data.at(idx)!;
-
-        if (target.weight < options.decrement!) {
+        if (target.weight < options.decrement) {
           weight_decrements[idx] += target.weight;
           l -= target.weight;
         }
         else {
-          weight_decrements[idx] += options.decrement!;
-          l -= options.decrement!;
+          weight_decrements[idx] += options.decrement;
+          l -= options.decrement;
         }
 
         yield target.value;
@@ -467,18 +466,21 @@ export class FrozenWeightedList<Value>
     );
   }
 
-  /** Convert a weighted index to its corresponding unweighted index in the list, using linear search, applying a map of weight decrements. */
-  #unweight_index_decrementing(weighted_index: Weight, weight_decrements: Weight[]): Weight
+  /** Access the item at `weighted_index`, using linear search and applying a map of `weight_decrements`. */
+  #at_decrementing(
+    weighted_index: Weight,
+    weight_decrements: Weight[],
+  ): [int, FrozenWeightedItem<Value>]
   {
     let t = 0;
 
     for (let [i, item] of this.#data.entries()) {
-      let w = item.weight - weight_decrements[i];
+      let effective_weight = item.weight - weight_decrements[i];
 
-      if (w <= 0) continue;
+      if (effective_weight <= 0) continue;
 
-      t += w;
-      if (t > weighted_index) return i;
+      t += effective_weight;
+      if (t > weighted_index) return [i, item];
     }
 
     throw new RangeError(
