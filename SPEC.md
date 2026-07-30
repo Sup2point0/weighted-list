@@ -6,7 +6,7 @@
 > [!Tip]
 > Quicklink: [Jump to fields reference](#fields)
 
-I don’t know how to write a specification. (Yet.) But this document is just so I can keep track of what I need to tick off when implementing `WeightedList` in a particular programming language.
+Not that formal, just helps me keep track of API surface and edge cases when implementing `WeightedList` across different languages.
 
 
 <br>
@@ -37,7 +37,8 @@ I don’t know how to write a specification. (Yet.) But this document is just so
 ### `WeightedList`
 - A weighted list is an ordered collection of weighted items.
 - Each item has a **weight** and a **value**.
-  - The weight must be a **positive numerical** type (`Weight`).
+  - The weight must be a **numerical** type (`Weight`).
+    - The weight must be non-negative.
     - Behaviour for items with negative weight is undefined.
   - The value can be any type (`Value`).
     - Values do not have to be unique between items.
@@ -73,7 +74,7 @@ I don’t know how to write a specification. (Yet.) But this document is just so
 ## Interfaces
 
 ### Iterable
-- `WeightedList` implements the appropriate iterable/iterator protocol for the implementation language.
+- Implements the appropriate iterable/iterator protocol of the implementation language.
   - This ultimately should mean iteration with a loop or map over the list is possible:
 
 ```py
@@ -86,10 +87,10 @@ for item in WeightedList(...):
 > [!Important]
 > The following equality checks use *value* equality, not *reference* equality. For instance, this refers to `==` as opposed to `is` in Python.
 
-- 2 `WeightedItem`s are equal if:
+- 2 `WeightedItem`s are equal iff:
   - Their values are equal
   - Their weights are equal
-- 2 `WeightedList`s are equal if:
+- 2 `WeightedList`s are equal iff:
   - They contain the same number of items
   - Each pair of items between the lists in order is equal
 
@@ -107,11 +108,13 @@ for item in WeightedList(...):
 > Types and code samples here use a Python-like syntax to demonstrate details across all implementation languages.
 
 - Core fields that are guaranteed to be implemented in all languages are **weighted**.[^weighted]
-  - Language-dependent fields are *italicised*. They may be implemented with multiple individual variants depending on overloading capability.
-- *Time Complexity* indicates the target time complexity of an implementation. Performance may vary across languages.
+- Language-dependent fields are *italicised*.
+  - These may be merged into other fields for languages that support overloading.
+- *Time Complexity* indicates the target time complexity of an implementation.
+  - Performance may vary across languages.
   - $n$ refers to the number of items in the current list.
-  - $m$ refers to the number of items in another iterable.
-- By default, if a method has no need to return a value, it will return the modified `WeightedList` (indicated below as *default*).
+  - $m$ refers to the number of items in the other iterable.
+- By default, if a method has no need to return a value, it will return the modified list (indicated below as *default*).
 
 [^weighted]: Hah, pun intended.
 
