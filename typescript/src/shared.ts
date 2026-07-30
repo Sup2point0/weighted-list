@@ -58,6 +58,8 @@ export interface WeightedCollection<Value, Item = WeightedItem<Value>>
   get total_items():  Weight
 
   // == ARRAY METHODS == //
+  [Symbol.iterator](): Iterator<Item>
+  
   at(weighted_index: Weight): Readonly<WeightedItem<Value>> | undefined
 
   // == SAMPLING == //

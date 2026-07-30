@@ -149,7 +149,9 @@ export class FrozenWeightedList<Value>
   // == PROPERTIES == //
 
   /**
-   * The total weight of all items in the list.
+   * The **total weight** of all items in the list.
+   * 
+   * Important: This is different to `.length` on a regular collection, because `WeightedList`s use weighted indexing.
    */
   get length(): Weight {
     return this.#length;
@@ -171,6 +173,11 @@ export class FrozenWeightedList<Value>
     return this.#data.length;
   }
 
+
+  [Symbol.iterator]()
+  {
+    return this.items()[Symbol.iterator]();
+  }
 
   // == ARRAY METHODS == //
 
