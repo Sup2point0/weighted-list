@@ -237,7 +237,7 @@ export class FrozenWeightedList<Value>
   /** (out-of-place) Return this list concatenated with another `FrozenWeightedList`. */
   concat(other: FrozenWeightedList<Value>): FrozenWeightedList<Value>
   {
-    return new FrozenWeightedList<Value>(...this.#data.concat(other.#data));
+    return FrozenWeightedList.from(this.#data.concat(other.#data));
   }
 
 
@@ -328,7 +328,7 @@ export class FrozenWeightedList<Value>
     /** How many values to select. The generator will yield this many values *at most*. */
     count: int,
     options?: {
-      /** By default, each item in the list is treated as a 'unique' value. If `merge_duplicates` is set to `true`, duplicate values (values that compare `===`) will be treated as equivalent. */
+      /** If `true`, duplicate values that compare `===` will be treated as non-unique. Defaults to `false`. */
       merge_duplicates: boolean,
     },
   ): Generator<Value>
@@ -383,23 +383,21 @@ export class FrozenWeightedList<Value>
         value: Object.freeze(item.value)
       };
     }
-    else if (typeof item[Symbol.iterator] === "function" && typeof item !== "string") {
+    else if (
+      typeof item[Symbol.iterator] === "function"
+      && typeof item !== "string"
+    ) {
       if (item.length !== 2) {
         throw new TypeError(
           `Expected 2 values in \`FrozenWeightedItem\`, but received ${item.length} values`
         );
       }
 
-      try {
-        out = {
-          cumulative_weight: cumulative_weight + item[0],
-          weight: item[0],
-          value: Object.freeze(item[1])
-        };
-      }
-      catch {
-        throw new TypeError("Invalid object format for `FrozenWeightedItem`");
-      }
+      out = {
+        cumulative_weight: cumulative_weight + item[0],
+        weight: item[0],
+        value: Object.freeze(item[1])
+      };
     }
     else {
       out = {
@@ -412,7 +410,7 @@ export class FrozenWeightedList<Value>
     return Object.freeze(this.#check(out));
   }
   
-  /** Check if `item` is a valid `FrozenWeightedItem`. */
+  /** Check if `item` is a valid `FrozenWeightedItem`. If it is, return it. */
   static #check<Value>(item: FrozenWeightedItem<Value>): FrozenWeightedItem<Value>
   {
     if (typeof item.weight !== "number") {

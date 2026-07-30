@@ -57,6 +57,8 @@ export interface WeightedCollection<Value, Item = WeightedItem<Value>>
   get total_weight(): Weight
   get total_items():  Weight
 
+  is_zero(): boolean
+
   // == ARRAY METHODS == //
   [Symbol.iterator](): Iterator<Item>
   
@@ -65,6 +67,6 @@ export interface WeightedCollection<Value, Item = WeightedItem<Value>>
   // == SAMPLING == //
   sample_item(): WeightedItem<Value> | undefined
   sample_value(): Value | undefined
-  sample_values(count: int, options?: object): Generator<Value | undefined>
+  sample_values(count: int, options?: object): Generator<Value>
   sample_values_unique(count: int, options?: object): Generator<Value>
 }
