@@ -3,9 +3,12 @@
 
 ## Next (v0.2.0)
 
+
+## v0.1.5
+
 ### `FrozenWeightedList`
 - Tighten invalid weight checks to error on $\text{NaN}$ and $\infin$ values
-- Fix non-optional `replace` for `sample_values(_, { replace })` to allow `sample_values(_, { decrement })`
+- Restructure type signature for `sample_values(_, options)` to disallow `decrement` when `replace: true`
 
 
 ## v0.1.4
@@ -17,7 +20,7 @@
 
 ### `FrozenWeightedList`
 - Fix incorrect usage of rounding that breaks non-integer weights
-- Fix `RangeError` when `l.sample_values(count, { replace: false })` has `count` > `l.length`
+- Fix `RangeError` when `l.sample_values(count, { replace: false })` has `count > l.length`
 
 
 ## v0.1.2
