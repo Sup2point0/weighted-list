@@ -21,6 +21,7 @@
 
   "devDependencies":
   {
+    "@stdlib/stats-base-dists-binomial-quantile": "0.2.3",
     "typescript": "^7.0",
     "vitest": "^4.0.7"
   }
