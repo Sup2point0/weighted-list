@@ -1,7 +1,7 @@
 # Changelog
 
 
-## Next (v0.2.0)
+## v0.2.0
 
 ### `FrozenWeightedList`
 - New: `from(Iterable<>)` static constructor
