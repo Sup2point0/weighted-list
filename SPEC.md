@@ -1,12 +1,12 @@
 # Specification
 
-> v1.1.1  
-> Last updated: 11 February 2026
+> v1.1.2  
+> Last updated: 30 July 2026
 
 > [!Tip]
 > Quicklink: [Jump to fields reference](#fields)
 
-I don’t know how to write a specification. (Yet.) But this is just so I can keep track of what I need to tick off when implementing `WeightedList` in a particular programming language.
+I don’t know how to write a specification. (Yet.) But this document is just so I can keep track of what I need to tick off when implementing `WeightedList` in a particular programming language.
 
 
 <br>
@@ -14,13 +14,9 @@ I don’t know how to write a specification. (Yet.) But this is just so I can ke
 
 ## Terminology
 
-> [!Note]
-> Most of this spec will use `WeightedList` to simultaneously refer to both `WeightedList` and `FrozenWeightedList` for brevity, since the latter is essentially a subset of the former.
-
 | Term | Definition |
 | :--- | :--------- |
-| *implementation language* | The programming language in which the code is written. |
-| *list* | In the context of this project, this refers to a `WeightedList` or `FrozenWeightedList`. |
+| *list* | In the context of this project, this is a shorthand for either a `WeightedList` or `FrozenWeightedList`. |
 | *item* | A `WeightedItem` or `FrozenWeightedItem` inside a list. |
 | *compatible iterable* | An iterable type that can be converted to a `WeightedList`. This can be: <ul> <li>A sequence of (weight, value) 2-value iterables (e.g. `list[(Weight, Value)]`)</li> <li>A mapping between (unique) values and weights (e.g. `dict[Value, Weight]`)</li> </ul> |
 
@@ -33,9 +29,9 @@ I don’t know how to write a specification. (Yet.) But this is just so I can ke
 - Implement 2 classes:
   - `WeightedList` (mutable)
   - `FrozenWeightedList` (immutable, optimised)
-- Where applicable, these classes should derive from an appropriate built-in iterable type in the implementation language.
-  - For `WeightedList`, this should be a variable-length collection type.
-  - For `FrozenWeightedList`, this may be an optimised fixed-length collection type.
+- These classes should be modelled after the standard built-in ordered collection type in the implementation language (“list”, “array”, “vector”).
+  - For `WeightedList`, this must be a mutable variable-length collection type.
+  - For `FrozenWeightedList`, this should be an immutable fixed-length collection type.
 - Where appropriate, these classes should be generic with type parameters for values and (optionally) weights.
 
 ### `WeightedList`
@@ -98,7 +94,7 @@ for item in WeightedList(...):
   - Each pair of items between the lists in order is equal
 
 ### Indexing
-- The list should be indexable using the implementation language’s standard indexing notation (`list[index]` for most).
+- The list should be indexable using the implementation language’s standard indexing notation (e.g. `list[index]`).
 - Indexing uses *weighted indexing*, which considers item weights rather than their positions relative to each other.
 
 
@@ -124,7 +120,7 @@ for item in WeightedList(...):
 | :---- | :---------- | :------ | :------ | :------- | :-------------- | :---- |
 | **length**           | Total weights of all items. | – | `Weight` | – | $O(n)$ |
 | total weight         | Total weights of all items (alias for `.length`) | – | `Weight` | – | $O(n)$ |
-| **total values**     | Total number of values/items. | – | `int` | – | $O(n)$ |
+| **total items**     | Total number of items. | – | `int` | – | $O(n)$ |
 | is zero              | Do all items (if any) have a weight of zero? | – | `bool` | – | $O(n)$ | Returns `true` for an empty list. |
 | has negative weights | Do any items have a negative weight? | – | `bool` | – | $O(n)$ | Returns `false` for an empty list. |
 
