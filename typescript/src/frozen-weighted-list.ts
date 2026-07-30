@@ -376,18 +376,21 @@ export class FrozenWeightedList<Value>
   {
     if (typeof item.weight !== "number") {
       throw new TypeError(
-        `Expected numeric type for item weight, but received ${item.weight} of type <${typeof item.weight}>.`
-        + (typeof item.value === "number") ? " Perhaps you got the value and weight the wrong way round? (weight always comes first)" : ""
+          `Expected numeric type for item weight, but received ${item.weight} of type <${typeof item.weight}>.`
+        + ((typeof item.value === "number") ? " Perhaps you got the value and weight the wrong way round? (weight always comes first)" : "")
       );
     }
 
-    if (item.weight <= 0) {
-      throw new Error(
-        `Received invalid \`FrozenWeightedItem\`: ${item} - weight must be positive`
-      );
-    }
+    if      (item.weight < 0)        this.#err("negative weight", item);
+    else if (isNaN(item.weight))     this.#err("NaN weight", item);
+    else if (!isFinite(item.weight)) this.#err("infinite weight", item);
 
     return item;
+  }
+
+  static #err<Value>(msg: string, item: FrozenWeightedItem<Value>)
+  {
+    throw new Error(`Invalid \`FrozenWeightedItem\` ${msg}: ${item}`);
   }
 
   /** Convert a weighted index to its corresponding unweighted index in the list, using binary search. */

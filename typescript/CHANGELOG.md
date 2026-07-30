@@ -2,6 +2,7 @@
 ## Next (v0.2.0)
 
 ### `FrozenWeightedList`
+- Tighten invalid weight checks to error on $\text{NaN}$ and $\infin$ values
 - Fix non-optional `replace` for `sample_values(_, { replace })` to allow `sample_values(_, { decrement })`
 
 
