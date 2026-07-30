@@ -1,4 +1,8 @@
 # Changelog
+## Next (v0.2.0)
+
+### `FrozenWeightedList`
+- Fix non-optional `replace` for `sample_values(_, { replace })` to allow `sample_values(_, { decrement })`
 
 
 ## v0.1.4

@@ -233,7 +233,10 @@ export class FrozenWeightedList<Value>
 
     options?: {
       /** Whether to select with replacement. Defaults to `true`. */
-      replace: boolean;
+      replace: true;
+    } | {
+      /** Whether to select with replacement. Defaults to `true`. */
+      replace: false;
 
       /** (only if `replace: false`) How much to decrement the weight of an item by after it is selected. Defaults to `1`. */
       decrement?: Weight;
