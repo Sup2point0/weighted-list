@@ -4,8 +4,9 @@
 ## Next (v0.2.0)
 
 ### `FrozenWeightedList`
-- Support `for ... of` iteration with `[Symbol.iterator]()`
+- `.items()` correctly freezes returned objects
 - Fix off-by-1 errors in indexing for sampling without replacement
+- Improve error messages
 
 ### `WeightedCollection`
 - Default `Item` to `WeightedItem<Value>`

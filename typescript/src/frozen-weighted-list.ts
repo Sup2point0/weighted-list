@@ -121,7 +121,7 @@ export class FrozenWeightedList<Value>
    */
   items(): Readonly<WeightedItem<Value>>[]
   {
-    return this.#data.map(item => ({
+    return this.#data.map(item => Object.freeze({
       weight: item.weight,
       value:  item.value,
     }));
