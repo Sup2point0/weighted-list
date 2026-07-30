@@ -1,6 +1,6 @@
 import { test, assert } from "vitest";
 
-import { WeightedList } from "../weighted-list/weighted-list";
+import { WeightedList } from "../src/weighted-list";
 
 
 const wl = new WeightedList(
