@@ -23,28 +23,34 @@ describe("constructor", () =>
   });
 
   test("incorrect order", () => {
-    assert.throws(() =>
+    assert.throws(() => new FWList(
       // if type-check error, good - weight should come first!
-      new FWList(["sup", 2])
-    );
+      ["sup", 2]
+    ));
   });
 
   test("negative weight", () => {
-    assert.throws(() =>
-      new FWList([-1, "eto"])
-    );
+    assert.throws(() => new FWList(
+      [-1, "eto"]
+    ));
   });
 
   test("NaN weight", () => {
-    assert.throws(() =>
-      new FWList([NaN, "nan"])
-    );
+    assert.throws(() => new FWList(
+      [NaN, "nan"]
+    ));
   });
 
   test("infinite weight", () => {
-    assert.throws(() =>
-      new FWList([Infinity, "nan"])
-    );
+    assert.throws(() => new FWList(
+      [Infinity, "nan"]
+    ));
+  });
+
+  // if type-check errors, good!
+  test("weird formats", () => {
+    assert.throws(() => new FWList([1, 2, 3]));
+    assert.throws(() => new FWList(["weight", "value"]));
   });
 });
 

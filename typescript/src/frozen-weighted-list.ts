@@ -440,7 +440,7 @@ export class FrozenWeightedList<Value>
       };
     }
     else if (Array.isArray(item)) {
-      if (item.length < 2) {
+      if (item.length !== 2) {
         throw new TypeError(
           `Invalid \`FrozenWeightedItem\`: Expected [weight, value], received: ${item}`
         );
@@ -499,7 +499,7 @@ export class FrozenWeightedList<Value>
       let l = 0;
       let r = max - 1;
 
-      for (let i = 0; i < cycles; i++) {
+      while (l <= r) {
         let idx = Math.floor(l + (r - l) / 2);
 
         let cand = this.#data[idx];
