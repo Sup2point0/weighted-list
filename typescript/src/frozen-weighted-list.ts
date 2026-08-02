@@ -7,6 +7,8 @@ import type {
 
 /**
  * An immutable list of weighted items.
+ * 
+ * Compared to a `WeightedList`, a `FrozenWeightedList` cannot have items added, removed or reordered, and the weights and values of items cannot be changed. This means indexing can be optimised from O(*n*) to O(log *n*), which significantly speeds up sampling.
  */
 export class FrozenWeightedList<Value>
   implements WeightedCollection<Value, Readonly<WeightedItem<Value>>>
@@ -141,10 +143,7 @@ export class FrozenWeightedList<Value>
    */
   items(): Readonly<WeightedItem<Value>>[]
   {
-    return this.#data.map(item => Object.freeze({
-      weight: item.weight,
-      value:  item.value,
-    }));
+    return [...this[Symbol.iterator]()];
   }
 
   /** Get the items in the list as `[index, item]` pairs. */
@@ -159,7 +158,17 @@ export class FrozenWeightedList<Value>
     return this.#data.map(item => [item.weight, item.value]);
   }
 
-  /** Get the values in the list, with each value repeated a number of times equal to its weight (rounded up). */
+  /** Get the values in the list, with each value repeated a number of times equal to its weight (rounded up).
+   * 
+   * @example
+   * let fwl = new FrozenWeightedList(
+   *   [1, "single"],
+   *   [2, "double"],
+   * );
+   * 
+   * console.log(fwl.expanded())
+   * // => ["single", "double", "double"]
+   */
   expanded(): Value[]
   {
     return this.#data.flatMap(item => Array(Math.ceil(item.weight)).fill(item.value));
@@ -172,6 +181,15 @@ export class FrozenWeightedList<Value>
    * The **total weight** of all items in the list.
    * 
    * Important: This is different to `.length` on a regular collection, because `WeightedList`s use weighted indexing.
+   * 
+   * @example
+   * let fwl = new FrozenWeightedList(
+   *   [2, "sup"],
+   *   [3, "nova"],
+   *   [5, "shard"],
+   * );
+   * 
+   * fwl.length  // => 10
    */
   get length(): Weight {
     return this.#length;
@@ -180,7 +198,16 @@ export class FrozenWeightedList<Value>
   /**
    * The total weight of all items in the list.
    * 
-   * This may be preferable over `.length` when it could be perceived as ambiguous.
+   * This may be preferable over `.length` to avoid ambiguity.
+   * 
+   * @example
+   * let fwl = new FrozenWeightedList(
+   *   [2, "sup"],
+   *   [3, "nova"],
+   *   [5, "shard"],
+   * );
+   * 
+   * fwl.total_weight  // => 10
    */
   get total_weight(): Weight {
     return this.length;
@@ -188,6 +215,15 @@ export class FrozenWeightedList<Value>
 
   /**
    * The total number of items in the list.
+   * 
+   * @example
+   * let fwl = new FrozenWeightedList(
+   *   [2, "sup"],
+   *   [3, "nova"],
+   *   [5, "shard"],
+   * );
+   * 
+   * fwl.total_items  // => 3
    */
   get total_items(): Weight {
     return this.#data.length;
@@ -197,6 +233,11 @@ export class FrozenWeightedList<Value>
    * Do all items in the list have zero weight?
    * 
    * Also returns `true` if the list is empty. A 'zero' list cannot be indexed since zero-weight items do not partake in indexing!
+   * 
+   * @example
+   * new FrozenWeightedList().is_zero()           // => true
+   * new FrozenWeightedList([0, "qi"]).is_zero()  // => true
+   * new FrozenWeightedList([1, "qi"]).is_zero()  // => false
    */
   is_zero(): boolean {
     return (
@@ -206,11 +247,24 @@ export class FrozenWeightedList<Value>
   }
 
 
+  // == OBJECT METHODS == //
+
+  toString(): string
+  {
+    return `FrozenWeightedList ` + this.#data.toString;
+  }
+
+
   // == ARRAY METHODS == //
 
-  [Symbol.iterator]()
+  *[Symbol.iterator]()
   {
-    return this.items()[Symbol.iterator]();
+    for (let item of this.#data) {
+      yield Object.freeze({
+        weight: item.weight,
+        value:  item.value,
+      })
+    }
   }
 
   /**
@@ -382,30 +436,29 @@ export class FrozenWeightedList<Value>
       out = {
         cumulative_weight: cumulative_weight + item.weight,
         weight: item.weight,
-        value: Object.freeze(item.value)
+        value: item.value
       };
     }
-    else if (
-      typeof item[Symbol.iterator] === "function"
-      && typeof item !== "string"
-    ) {
-      if (item.length !== 2) {
+    else if (Array.isArray(item)) {
+      if (item.length < 2) {
         throw new TypeError(
-          `Expected 2 values in \`FrozenWeightedItem\`, but received ${item.length} values`
+          `Invalid \`FrozenWeightedItem\`: Expected [weight, value], received: ${item}`
         );
       }
 
+      let [weight, value] = item;
+
       out = {
-        cumulative_weight: cumulative_weight + item[0],
-        weight: item[0],
-        value: Object.freeze(item[1])
+        cumulative_weight: cumulative_weight + weight,
+        weight,
+        value,
       };
     }
     else {
       out = {
         cumulative_weight: cumulative_weight + 1,
         weight: 1,
-        value: Object.freeze(item) as Value
+        value: item as Value
       };
     }
 
@@ -417,8 +470,8 @@ export class FrozenWeightedList<Value>
   {
     if (typeof item.weight !== "number") {
       throw new TypeError(
-          `Expected numeric type for item weight, but received ${item.weight} of type <${typeof item.weight}>.`
-        + ((typeof item.value === "number") ? " Perhaps you got the value and weight the wrong way round? (weight always comes first)" : "")
+          `Invalid \`FrozenWeightedList\`: Expected numeric type for weight, received: <${typeof item.weight}>, value: ${item}.`
+        + ((typeof item.value === "number") ? "\nPerhaps you got the value and weight the wrong way round? (weight always comes first)" : "")
       );
     }
 
