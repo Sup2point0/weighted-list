@@ -2,7 +2,7 @@
   "type": "module",
 
   "name": "@sup2.0/weighted-list",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A list implementation for weighted randomisation",
   "author": {"name": "Sup#2.0", "url": "https://github.com/Sup2point0"},
   "license": "MIT",
