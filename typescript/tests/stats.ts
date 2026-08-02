@@ -2,6 +2,7 @@ import { assert } from "vitest";
 import quantile from "@stdlib/stats-base-dists-binomial-quantile";
 
 import { WeightedCollection } from "../src";
+import type { int } from "../src/shared";
 
 
 const TRIALS = 20_000;
@@ -10,10 +11,10 @@ const CRITICAL_PERCENT = 100 - CONFIDENCE_PERCENT;
 const SIGNIFICANCE_LEVEL = CRITICAL_PERCENT / 100 / 2;
 
 
-export function test_binomial<Value>(
-  method: "sample-value" | "sample-values",
+export function test_binomial_for<Value>(
+  method: "sample-value" | "sample-values" | "sample-values-unique",
   list: WeightedCollection<Value>,
-)
+): void
 {
   const total = list.total_weight;
 
