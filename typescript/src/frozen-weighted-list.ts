@@ -225,7 +225,7 @@ export class FrozenWeightedList<Value>
    * 
    * fwl.total_items  // => 3
    */
-  get total_items(): Weight {
+  get total_items(): int {
     return this.#data.length;
   }
 
@@ -488,7 +488,7 @@ export class FrozenWeightedList<Value>
   }
 
   /** Convert a weighted index to its corresponding unweighted index in the list, using binary search. */
-  #binary_unweight_index(weighted_index: Weight): Weight
+  #binary_unweight_index(weighted_index: Weight): int
   {
     let max = this.total_items;
 
@@ -523,7 +523,7 @@ export class FrozenWeightedList<Value>
   }
 
   /** Convert a weighted index to its corresponding unweighted index in the list, using linear search, skipping a set of seen (unweighted) indices. */
-  #unweight_index_skipping(weighted_index: Weight, seen_indices: Set<int>): Weight
+  #unweight_index_skipping(weighted_index: Weight, seen_indices: Set<int>): int
   {
     let t = 0;
 

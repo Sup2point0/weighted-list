@@ -5,6 +5,7 @@
 
 ### `FrozenWeightedList`
 - Short-circuit to improve performance on `sample_values(0, ...)`
+- Fix incorrect usage of `Weight` in type signatures
 
 
 ## v0.2.0
