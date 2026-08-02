@@ -300,7 +300,7 @@ export class FrozenWeightedList<Value>
   /**
    * Randomly select 1 item from the list, using weighted randomisation. Returns `undefined` if the list is empty.
    */
-  sample_item(): WeightedItem<Value> | undefined
+  sample_item(): Readonly<WeightedItem<Value>> | undefined
   {
     if (this.length === 0) return undefined;
 

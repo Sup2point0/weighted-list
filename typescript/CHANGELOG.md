@@ -4,6 +4,7 @@
 ## v0.2.1
 
 ### `FrozenWeightedList`
+- `.sample_item()` now correctly returns a `Readonly<WeightedItem>`
 - Short-circuit to improve performance on `sample_values(0, ...)`
 - Fix incorrect usage of `Weight` in type signatures
 
