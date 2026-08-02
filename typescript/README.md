@@ -23,7 +23,7 @@ This library provides the `WeightedList` (under development) and `FrozenWeighted
 ```ts
 import {
   FrozenWeightedList,
-  FrozenWeightedItem,
+  type FrozenWeightedItem,
 } from "@sup2.0/weighted-list";
 ```
 
@@ -52,7 +52,7 @@ console.log(`You look ${word}`);
 //    (10/18 probability)
 
 // multiple selection
-let words = descriptors.sample_unique_values();
+let words = [...descriptors.sample_values_unique(2)];
 
 console.log(`TypeScript is ${words[0]} and ${words[1]}`);
 // => TypeScript is awesome and fun
