@@ -285,6 +285,8 @@ export class FrozenWeightedList<Value>
     },
   ): Generator<Value>
   {
+    if (count <= 0) return;
+
     options ??= { replace: true };
 
     if (options.replace) {

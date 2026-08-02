@@ -1,6 +1,12 @@
 # Changelog
 
 
+## v0.2.1
+
+### `FrozenWeightedList`
+- Short-circuit to improve performance on `sample_values(0, ...)`
+
+
 ## v0.2.0
 
 ### `FrozenWeightedList`
